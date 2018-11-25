@@ -1,0 +1,21 @@
+Category	CONCEPT	avg cosine	animacy	norm_fam	ln(word_freq)	word length	num_syllable
+a_miscellaneous_nonliving_thing	saddle	0.013683919	n	3.75	3.295836866	6	2
+a_miscellaneous_nonliving_thing	certificate	0.002885397	n	6.95	2.079441542	11	4
+a_musical_instrument	guitar	0.032292052	n	6.15	3.091042453	6	2
+clothing	boots	0.026336414	n	8.1	3.496507561	5	1
+a_fashion_accessory	necklace	0.017397412	n	8	1.609437912	8	2
+a_plant	cucumber	0.047463956	n	7.1	0	8	3
+an_animal	snail	0.029197782	y	5.4	0.693147181	5	1
+clothing	earmuffs	0.020513863	n	5.25	0	8	2
+a_miscellaneous_nonliving_thing	rope	0.020735675	n	6.9	2.944438979	4	1
+a_food	cheese	0.033918669	n	8.25	2.197224577	6	1
+furniture	rocker	0.028992606	n	5.3	1.609437912	6	2
+clothing	gloves	0.013855823	n	8.4	2.772588722	6	1
+a_miscellaneous_nonliving_thing	curtains	0.013927911	n	8.4	3.044522438	8	2
+a_vegetable	radish	0.046099815	n	4.95	2.079441542	6	2
+an_animal	tortoise	0.046356747	y	2.4	1.386294361	8	2
+a_plant	birch	0.020419593	n	5.5	1.098612289	5	1
+a_miscellaneous_nonliving_thing	cigar	0.024341959	n	4.6	2.48490665	5	2
+a_food	bread	0.033040665	n	8.55	3.713572067	5	1
+clothing	dress	0.032426987	n	7.85	4.343805422	5	1
+a_miscellaneous_nonliving_thing	beehive	0.008157116	n	5.1	0	7	2

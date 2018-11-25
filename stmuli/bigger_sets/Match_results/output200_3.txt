@@ -1,0 +1,21 @@
+Category	CONCEPT	avg cosine	animacy	norm_fam	ln(word_freq)	word length	num_syllable
+a_plant	vine	0.034151571	n	5	2.48490665	4	1
+a_tool	tomahawk	0.025613678	n	2.1	0	8	3
+a_plant	onions	0.031768946	n	7.4	2.944438979	6	2
+a_vegetable	yam	0.033558226	n	3.3	0	3	1
+a_building	skyscraper	0.011365989	n	6.45	1.098612289	10	3
+furniture	couch	0.023192237	n	8.05	2.564949357	5	1
+a_tool	brush	0.032789279	n	8.7	1.791759469	5	1
+clothing	blouse	0.023116451	n	7.25	0.693147181	6	1
+a_food	cake	0.017066543	n	7.4	2.772588722	4	1
+a_fruit	cherry	0.047201479	n	6.9	2.079441542	6	2
+a_plant	pine	0.019349353	n	4.85	2.772588722	4	1
+a_miscellaneous_nonliving_thing	brick	0.019591497	n	7.4	3.17805383	5	1
+an_animal	pheasant	0.071937153	y	3.15	1.098612289	8	2
+a_vegetable	cabbage	0.048545287	n	5.6	1.386294361	7	2
+clothing	trousers	0.021532348	n	6.8	2.302585093	8	2
+an_animal	raccoon	0.060426987	y	5.1	0	7	2
+a_miscellaneous_nonliving_thing	helmet	0.017275416	n	6.2	1.098612289	6	2
+clothing	sweater	0.023550832	n	8.45	2.890371758	7	2
+clothing	belt	0.017578558	n	7.95	3.610917913	4	1
+an_appliance	toaster	0.031134935	n	7.8	0	7	2

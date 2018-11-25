@@ -1,0 +1,21 @@
+Category	CONCEPT	avg cosine	animacy	norm_fam	ln(word_freq)	word length	num_syllable
+a_miscellaneous_nonliving_thing	tripod	0.021075786	n	3.45	1.386294361	6	2
+a_machine	typewriter	0.017390018	n	5.3	2.397895273	10	3
+a_miscellaneous_nonliving_thing	banner	0.031794824	n	6.1	2.302585093	6	2
+a_miscellaneous_nonliving_thing	ball	0.028469501	n	8.35	4.812184355	4	1
+a_miscellaneous_nonliving_thing	cushion	0.023693161	n	7.9	2.302585093	7	2
+a_miscellaneous_nonliving_thing	pier	0.033733826	n	5.25	2.197224577	4	1
+a_miscellaneous_nonliving_thing	coin	0.066273567	n	8.85	2.944438979	4	1
+clothing	leotards	0.018251386	n	6.05	0	8	3
+a_building	inn	0.019702403	n	5.55	2.302585093	3	1
+a_miscellaneous_nonliving_thing	razor	0.032190388	n	7.85	2.708050201	5	2
+a_vegetable	pepper	0.018190388	n	7.8	2.564949357	6	2
+clothing	swimsuit	0.015051756	n	7.5	0	8	2
+an_animal	chicken	0.065606285	y	7.95	3.912023005	7	2
+an_animal	turkey	0.051709797	y	5.5	2.302585093	6	2
+an_animal	shrimp	0.076419593	y	5.8	0.693147181	6	1
+a_vegetable	pumpkin	0.03387061	n	6.95	0.693147181	7	2
+a_vehicle	ambulance	0.028171904	n	6.45	1.945910149	9	3
+clothing	coat	0.031212569	n	8.35	3.970291914	4	1
+a_utensil	cup	0.023149723	n	8.2	4.077537444	3	1
+a_miscellaneous_nonliving_thing	crayon	0.013704251	n	7.6	0	6	2

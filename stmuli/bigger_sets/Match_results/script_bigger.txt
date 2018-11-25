@@ -1,0 +1,20 @@
+InputFile	-h	input405_1	input405.txt	output200_1.txt
+InputFile	-h	input405_2	input405.txt	output200_2.txt
+InputFile	-h	input405_3	input405.txt	output200_3.txt
+InputFile	-h	input405_4	input405.txt	output200_4.txt
+InputFile	-h	input405_5	input405.txt	output200_5.txt
+InputFile	-h	input405_6	input405.txt	output200_6.txt
+InputFile	-h	input405_7	input405.txt	output200_7.txt
+InputFile	-h	input405_8	input405.txt	output200_8.txt
+InputFile	-h	input405_9	input405.txt	output200_9.txt
+InputFile	-h	input405_10	input405.txt	output200_10.txt
+
+MatchFields	AllDataSets	2	SetWeight	0.5	UseLength	Length
+MatchFields	AllDataSets	3	SetWeight	0.8	feat_over
+MatchFields	AllDataSets	5	norm_fam
+MatchFields	AllDataSets	6	SetWeight	0.5	ln_freq
+MatchFields	AllDataSets	8	SetWeight	0.5	num_syllable
+
+OutputSize	20
+
+OutputFile	output_200.txt

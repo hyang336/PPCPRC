@@ -1,0 +1,21 @@
+Category	CONCEPT	avg cosine	animacy	norm_fam	ln(word_freq)	word length	num_syllable
+a_vehicle	yacht	0.029524954	n	3.85	1.945910149	5	1
+a_miscellaneous_nonliving_thing	emerald	0.02496488	n	4.05	2.197224577	7	3
+a_fruit	lemon	0.025569316	n	7.15	2.944438979	5	2
+clothing	robe	0.032192237	n	7.4	2.302585093	4	1
+a_miscellaneous_nonliving_thing	closet	0.023608133	n	8.7	2.48490665	6	2
+an_appliance	telephone	0.010253235	n	8.85	4.406719247	9	3
+a_vegetable	potato	0.02810536	n	8.15	3.496507561	6	3
+a_fashion_accessory	buckle	0.057480591	n	7.65	1.945910149	6	2
+an_automobile	taxi	0.019	n	7.35	2.944438979	4	2
+clothing	scarf	0.030528651	n	7.5	1.386294361	5	1
+clothing	veil	0.015277264	n	3.7	2.397895273	4	1
+a_miscellaneous_nonliving_thing	doll	0.006696858	n	7.75	3.091042453	4	1
+a_weapon	harpoon	0.054859519	n	2.1	0	7	2
+a_tool	chisel	0.046959335	n	3.85	1.609437912	6	2
+an_animal	hyena	0.049197782	y	1.75	0	5	3
+a_vehicle	train	0.025194085	n	6.05	4.584967479	5	1
+a_miscellaneous_nonliving_thing	medal	0.021443623	n	5.9	2.397895273	5	2
+clothing	shirt	0.022526802	n	8.8	3.36729583	5	1
+a_tool	drill	0.024569316	n	6	3.610917913	5	1
+a_miscellaneous_nonliving_thing	drapes	0.015602588	n	7.7	0	6	1

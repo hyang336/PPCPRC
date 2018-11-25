@@ -1,0 +1,21 @@
+Category	CONCEPT	avg cosine	animacy	norm_fam	ln(word_freq)	word length	num_syllable
+an_animal	dove	0.057839187	y	3.7	1.609437912	4	1
+a_plant	pineapple	0.029310536	n	6.4	2.197224577	9	3
+a_miscellaneous_nonliving_thing	cigarette	0.016750462	n	5.2	3.610917913	9	3
+a_miscellaneous_nonliving_thing	faucet	0.026014787	n	8.1	0	6	2
+a_miscellaneous_nonliving_thing	sandals	0.012783734	n	7.45	1.609437912	7	2
+an_animal	peacock	0.065863216	y	3.85	1.791759469	7	2
+a_house	apartment	0.017478743	n	7.8	4.584967479	9	3
+a_container	ashtray	0.02003512	n	5.6	0	7	2
+a_miscellaneous_nonliving_thing	cork	0.024983364	n	5.7	2.302585093	4	1
+an_animal	porcupine	0.059730129	y	3.2	0	9	3
+a_miscellaneous_nonliving_thing	rattle	0.017371534	n	5	1.791759469	6	2
+clothing	slippers	0.015996303	n	6.75	2.302585093	8	2
+an_animal	salamander	0.067981516	y	2.45	0.693147181	10	4
+a_vehicle	sailboat	0.027878004	n	4.95	1.386294361	8	2
+an_animal	stork	0.05945841	y	2.5	0	5	1
+a_miscellaneous_nonliving_thing	toilet	0.012593346	n	8.55	2.833213344	6	2
+a_miscellaneous_nonliving_thing	subway	0.018160813	n	5.9	2.079441542	6	2
+an_appliance	stove	0.024770795	n	8.35	2.833213344	5	1
+a_miscellaneous_nonliving_thing	bathtub	0.021312384	n	8.05	1.609437912	7	2
+clothing	mittens	0.013959335	n	6.45	0.693147181	7	2

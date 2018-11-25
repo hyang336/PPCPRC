@@ -1,0 +1,21 @@
+Category	CONCEPT	avg cosine	animacy	norm_fam	ln(word_freq)	word length	num_syllable
+a_musical_instrument	trumpet	0.033182994	n	4.2	1.945910149	7	2
+a_container	bottle	0.021066543	n	8.35	4.510859507	6	2
+a_container	basket	0.027696858	n	6.9	2.944438979	6	2
+a_vegetable	olive	0.056072089	n	5.7	1.791759469	5	2
+a_vegetable	garlic	0.023096118	n	7.85	1.386294361	6	2
+an_animal	chipmunk	0.063347505	y	6	0	8	2
+clothing	pants	0.029463956	n	8.95	2.197224577	5	1
+a_plant	cedar	0.01574122	n	5.5	0	5	2
+furniture	sofa	0.016883549	n	8.4	2.197224577	4	2
+a_miscellaneous_nonliving_thing	garage	0.025597043	n	7.85	3.258096538	6	2
+a_container	sack	0.007097967	n	5.7	2.197224577	4	1
+furniture	lamp	0.008550832	n	8.55	3.17805383	4	1
+an_animal	hawk	0.061292052	y	3.5	2.63905733	4	1
+an_appliance	kettle	0.032090573	n	7.8	1.098612289	6	2
+an_animal	oriole	0.057216266	y	2.4	2.772588722	6	3
+an_animal	starling	0.069327172	y	2.75	0	8	2
+clothing	apron	0.019598891	n	4.75	2.079441542	5	2
+a_house	shell	0.015713494	n	6.2	3.583518938	5	1
+a_shelter	tent	0.004465804	n	6.85	3.401197382	4	1
+a_container	freezer	0.027243993	n	8.35	0.693147181	7	2

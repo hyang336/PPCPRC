@@ -1,0 +1,21 @@
+Category	CONCEPT	avg cosine	animacy	norm_fam	ln(word_freq)	word length	num_syllable
+a_tool	shovel	0.031828096	n	6.45	2.079441542	6	2
+a_musical_instrument	saxophone	0.032524954	n	4.85	1.386294361	9	3
+a_vehicle	trailer	0.021044362	n	6.15	3.135494216	7	2
+a_miscellaneous_nonliving_thing	ruler	0.027521257	n	7.75	2.564949357	5	2
+a_weapon	rock	0.016245841	n	7.85	4.584967479	4	1
+a_container	barrel	0.067780037	n	5.05	3.465735903	6	2
+clothing	vest	0.017109057	n	7	1.609437912	4	1
+a_miscellaneous_nonliving_thing	unicycle	0.005791128	n	2.75	0	8	4
+a_miscellaneous_nonliving_thing	racquet	0.030225508	n	5.75	0	7	2
+a_container	mug	0.024809612	n	8.6	1.098612289	3	1
+a_miscellaneous_nonliving_thing	cellar	0.008848429	n	4.7	3.295836866	6	2
+clothing	jeans	0.01581146	n	8.65	3.17805383	5	1
+a_miscellaneous_nonliving_thing	toy	0.007136784	n	7.7	2.708050201	3	1
+a_tool	corkscrew	0.052110906	n	5.6	1.098612289	9	2
+a_fruit	banana	0.051354898	n	8.1	1.609437912	6	3
+an_animal	toad	0.051530499	y	4.65	1.386294361	4	1
+a_miscellaneous_nonliving_thing	mat	0.014393715	n	6.85	1.945910149	3	1
+a_miscellaneous_nonliving_thing	sink	0.019853974	n	8.5	3.135494216	4	1
+clothing	tie	0.021772643	n	6.9	3.63758616	3	1
+a_vehicle	canoe	0.026768946	n	6.1	2.197224577	5	2
