@@ -22,6 +22,8 @@ right_index=imread(strcat(img_folder,'right_index.JPG'));
 right_mid=imread(strcat(img_folder,'right_middle.JPG'));
 right_ring=imread(strcat(img_folder,'right_ring.JPG'));
 
+handv1=imread(strcat(img_folder,'left_5.JPG'));
+handv2=imread(strcat(img_folder,'right_5.JPG'));
 switch version
     
 %% version 1
@@ -35,7 +37,7 @@ switch version
 %           animate=KbName('3#');
 %           inanimate=KbName('4$');
           try
-           %%
+           %% initialize instructions
             screens=Screen('Screens');
             screenNumber=max(screens);
 
@@ -50,7 +52,7 @@ switch version
             left_index_tex= Screen('MakeTexture', w, left_index);
             right_index_tex= Screen('MakeTexture', w, right_index);
             right_mid_tex= Screen('MakeTexture', w, right_mid);
-            
+            v1tex=Screen('MakeTexture',w,handv1);
 %             %get inter-rrame interval
 %             ifi = Screen('GetFlipInterval', w);
 %             %Interstimulus interval time in seconds and frames
@@ -60,9 +62,9 @@ switch version
             Screen('TextFont',w, 'Courier New');
             Screen('TextSize',w, 64);
             Screen('TextStyle', w, 1+2);
-            %%
+            
             % Read instruction file:
-            fd = fopen('instructions.m');
+            fd = fopen('key_prac_ins.m');
             if fd==-1
                 error('Could not open instructions.m file.');
             end
@@ -72,9 +74,9 @@ switch version
              for k=1:1
                 fgets(fd); 
              end
-            lcount = 2;
+            lcount = 2;%starting line
             tl=fgets(fd);
-            while lcount < 16
+            while lcount < 17%ending line
                 mytext = [mytext tl]; %#ok<*AGROW>
                 tl = fgets(fd);
                 lcount = lcount + 1;
@@ -91,8 +93,12 @@ switch version
 
             Screen('Flip',w);
             KbStrokeWait;
+            
+            Screen('DrawTexture', w, v1tex);
+            Screen('Flip',w);
+            KbStrokeWait;
 
-            %%
+            %% practice procedure
                 %threshold for consecutive correct responses
                 success=0;
             while success < 45
@@ -213,7 +219,8 @@ switch version
 %            animate=KbName('3');
 %            inanimate=KbName('2');
           try
-          screens=Screen('Screens');
+              %% initialize instructions
+            screens=Screen('Screens');
             screenNumber=max(screens);
 
             % Open window with default settings:
@@ -227,6 +234,7 @@ switch version
             right_index_tex= Screen('MakeTexture', w, right_index);
             right_mid_tex= Screen('MakeTexture', w, right_mid);
             right_ring_tex= Screen('MakeTexture', w, right_ring);
+            v2tex=Screen('MakeTexture', w, handv2);
 %             %get inter-rrame interval
 %             ifi = Screen('GetFlipInterval', w);
 %             % Interstimulus interval time in seconds and frames
@@ -236,9 +244,9 @@ switch version
             Screen('TextFont',w, 'Courier New');
             Screen('TextSize',w, 64);
             Screen('TextStyle', w, 1+2);
-            %%
+           
             % Read instruction file:
-            fd = fopen('instructions.m');
+            fd = fopen('key_prac_ins.m');
             if fd==-1
                 error('Could not open instructions.m file.');
             end
@@ -250,7 +258,7 @@ switch version
              end
             lcount = 18;
             tl=fgets(fd);
-            while lcount < 32
+            while lcount < 33
                 mytext = [mytext tl]; %#ok<*AGROW>
                 tl = fgets(fd);
                 lcount = lcount + 1;
@@ -267,8 +275,12 @@ switch version
 
             Screen('Flip',w);
             KbStrokeWait;
+            
+            Screen('DrawTexture', w, v2tex);
+            Screen('Flip',w);
+            KbStrokeWait;
 
-            %%
+            %% practice procedure
                 %threshold for consecutive correct responses
                 success=0;
             while success < 45
