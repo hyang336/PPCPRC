@@ -332,5 +332,5 @@ dummy=1;%according to Trevor the scanner automatically discard the first 4 volum
         
     catch
         Screen('CloseAll');
-        
+        disp(['scan stopped at run ' num2str(run) ' stim ' num2str(stim)])%need to receive a stop trigger from scanner (if possible) earlier in presentation loop
     end
