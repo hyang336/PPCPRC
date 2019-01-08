@@ -70,11 +70,38 @@
 % Screen('CloseAll');
 
 %%
-function data=PTB_test(SSID,version_inp,run)
-data=cell(46,9);%45 trials per run plus headers
-data(1,:)={'ParticipantNum' 'Version' 'Run' 'Trial' 'ExpStartTime' 'Stimuli' 'StimOnsetTime' 'Response' 'RespTime'};
-SSID=num2str(SSID,'%03.f');%pad SSID with zeros and convert to string
-data(2:end,1)={SSID};
-data(2:end,2)={version_inp};
-data(2:end,3)={run};
-end
+% function data=PTB_test(SSID,version_inp,run)
+% data=cell(46,9);%45 trials per run plus headers
+% data(1,:)={'ParticipantNum' 'Version' 'Run' 'Trial' 'ExpStartTime' 'Stimuli' 'StimOnsetTime' 'Response' 'RespTime'};
+% SSID=num2str(SSID,'%03.f');%pad SSID with zeros and convert to string
+% data(2:end,1)={SSID};
+% data(2:end,2)={version_inp};
+% data(2:end,3)={run};
+% end
+
+%% trigger test
+KbName('UnifyKeyNames');
+dummy=2;
+scan_trig='t';
+keynum=KbName(scan_trig);
+        dummy_t=cell(dummy,1);
+        keyCodes(1:256)=0;
+    for i=1:dummy
+            waittrig=1;
+           while waittrig
+            [keyIsDown, dummy_start, keyCodes] = KbCheck;
+            if keyCodes(keynum)==1
+                waittrig=0;
+            end
+           end
+           
+           %need to have these two lines to wait for the key release
+           while KbCheck
+           end
+           
+           fprintf('dummy %d\n',i)
+           dummy_t{i}=dummy_start;%resolution shows in second, but are actually finer (hint:take the difference)
+
+    end
+    exp_start=dummy_t{end};
+    

@@ -6,7 +6,3 @@
 
 
 
-
-
-
-%Then a lifetime exposure judgement task

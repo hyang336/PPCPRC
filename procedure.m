@@ -26,7 +26,7 @@ data(2:end,3)={run};
 winsize = [0 0 799 599];
 bckgcolour = [128 128 128];
 scanner_screen=2; %before running the script, use Screen('Screens') to determine the scanner screen number
-dummy=1;%according to Trevor the scanner automatically discard the first 4 volumes, and send the first trigger at the beginning of the 5th.
+addtrig=2;%according to Trevor the scanner automatically discard the first 4 volumes, and send the first trigger at the beginning of the 5th.
 %in that case we only need to discard one more volume to have a
 %total of 5 dummy scans
 
@@ -225,8 +225,8 @@ dummy=1;%according to Trevor the scanner automatically discard the first 4 volum
     %totel 14 runs, the first 10 runs are study, and the last 4 are
     %test,each run has 45 stimuli
     if run<=10&&run>=1
-          run_stim=study_txt((run-1)*45+2:run*45+1);%get the stimuli for the selected run in study phase
-          run_jit=study_num((run-1)*45+2:run*45+1);%get jittering time
+          run_stim=study_txt((run-1)*45+1:run*45);%get the stimuli for the selected run in study phase
+          run_jit=study_num((run-1)*45+1:run*45);%get jittering time
           %depending on the hand mapping version, show different
           %instructions for study phase
           if mod(hand_v,2)==1
@@ -236,8 +236,8 @@ dummy=1;%according to Trevor the scanner automatically discard the first 4 volum
           end
     else
         if run>=11&&run<=14
-          run_stim=test_txt((run-11)*45+2:(run-10)*45+1); %get the stimuli for the selected run in test phase
-          run_jit=test_num((run-11)*45+2:(run-10)*45+1);%get jittering time
+          run_stim=test_txt((run-11)*45+1:(run-10)*45); %get the stimuli for the selected run in test phase
+          run_jit=test_num((run-11)*45+1:(run-10)*45);%get jittering time
           
           %make stimuli blocks according to test_first
           switch test_first
@@ -295,14 +295,14 @@ dummy=1;%according to Trevor the scanner automatically discard the first 4 volum
         WaitSecs(2.5);
         
         %% wait for the first n volumes as dummy scans
-        dummy_t=cell(dummy,1);
+        dummy_t=cell(addtrig,1);
         keyCodes(1:256)=0;
-    for i=1:dummy
+    for i=1:addtrig
            keyCodes(scan_trig)=0;%gotta reset the scan_trigger since im using it as the condition for while-loop
            while ~keyCodes(scan_trig)
             [keyIsDown, dummy_start, keyCodes] = KbCheck(-1);
            end
-           fprintf('dummy %d\n',i)
+           fprintf('trigger %d\n',i)
            dummy_t{i}=dummy_start;%resolution shows in second, but are actually finer (hint:take the difference)
                    
            %KbCheck will return 1 whenever a key is pressed, the following
@@ -313,14 +313,7 @@ dummy=1;%according to Trevor the scanner automatically discard the first 4 volum
            end
     end
     
-    %wait for the trigger of dummy+1 volume. E.g. if we have 5 dummy scan,
-    %the 6th is the first volume of the real scan, but the trigger is sent
-    %at the beginning of each volume, so after the above for-loop we still
-    %need to wait one more trigger to start presenting stimuli
-    keyCodes(1:256)=0;
-    while ~keyCodes(scan_trig)
-            [~, exp_start, keyCodes] = KbCheck(-1);%exp_start correspond to the beggining of the first real volume
-    end
+    exp_start=dummy_t{end};%last trigger from the above loop signals the beginning of the exp run
     
      
     %% loop through stimuli for the current run
