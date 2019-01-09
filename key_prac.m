@@ -106,7 +106,7 @@ switch version
                curWord=datasample(stim,1);%randomly sample from the 7 options
                curWord=curWord{1};
                 %draw fixation
-                Screen('DrawDots', w, [xCenter; yCenter], 20, [1 0 0 1],[],1,1);
+                DrawFormattedText(w, '+', 'center', 'center');
                 
                 Screen('Flip',w);
                 WaitSecs(2);
@@ -288,7 +288,7 @@ switch version
                curWord=datasample(stim,1);%randomly sample from the 7 options
                curWord=curWord{1};
                 %draw fixation
-                Screen('DrawDots', w, [xCenter; yCenter], 20, [1 0 0 1],[],1,1);
+                DrawFormattedText(w, '+', 'center', 'center');
                 
                 Screen('Flip',w);
                 WaitSecs(2);

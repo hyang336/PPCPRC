@@ -79,29 +79,51 @@
 % data(2:end,3)={run};
 % end
 
-%% trigger test
-KbName('UnifyKeyNames');
-dummy=2;
-scan_trig='t';
-keynum=KbName(scan_trig);
-        dummy_t=cell(dummy,1);
-        keyCodes(1:256)=0;
-    for i=1:dummy
-            waittrig=1;
-           while waittrig
-            [keyIsDown, dummy_start, keyCodes] = KbCheck;
-            if keyCodes(keynum)==1
-                waittrig=0;
-            end
-           end
-           
-           %need to have these two lines to wait for the key release
-           while KbCheck
-           end
-           
-           fprintf('dummy %d\n',i)
-           dummy_t{i}=dummy_start;%resolution shows in second, but are actually finer (hint:take the difference)
-
-    end
-    exp_start=dummy_t{end};
+% %% trigger test
+% KbName('UnifyKeyNames');
+% dummy=2;
+% scan_trig='t';
+% keynum=KbName(scan_trig);
+%         dummy_t=cell(dummy,1);
+%         keyCodes(1:256)=0;
+%     for i=1:dummy
+%             waittrig=1;
+%            while waittrig
+%             [keyIsDown, dummy_start, keyCodes] = KbCheck;
+%             if keyCodes(keynum)==1
+%                 waittrig=0;
+%             end
+%            end
+%            
+%            %need to have these two lines to wait for the key release
+%            while KbCheck
+%            end
+%            
+%            fprintf('dummy %d\n',i)
+%            dummy_t{i}=dummy_start;%resolution shows in second, but are actually finer (hint:take the difference)
+% 
+%     end
+%     exp_start=dummy_t{end};
     
+%% text and scale
+scanner_screen=2;
+KbName('UnifyKeyNames');
+scan_trig=KbName('t');
+ins_done=KbName('3#');
+r5=KbName('5%');
+r4=KbName('4$');
+r3=KbName('3#');
+r2=KbName('2@');
+r1=KbName('1!');
+
+[w,rect]=Screen('OpenWindow', scanner_screen);
+[xCenter, yCenter] = RectCenter(rect);
+%set font size, may need to tweak it on the scanner
+Screen('TextSize',w,60);
+
+DrawFormattedText(w,'word\n\n1  2  3  4  5', 'center', 'center' );%present stimuli
+Screen(w, 'Flip');
+WaitSecs(3);
+Screen('CloseAll');
+
+

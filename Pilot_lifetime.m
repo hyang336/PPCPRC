@@ -1,14 +1,26 @@
-function Pilot_lifetime(SSID,run,behav)
+function data=Pilot_lifetime(SSID,run,behav)
 
 Screen('Preference','SkipSyncTests',1);
 Screen('Preference','VisualDebugLevel',0);
+% screens=Screen('Screens');
+% screenNumber=max(screens);
 scanner_screen=2; %before running the script, use Screen('Screens') to determine the scanner screen number
     
 %% initial setup
     KbName('UnifyKeyNames');
     scan_trig=KbName('t');
+    ins_done=KbName('3#');
+    r5=KbName('5%');
+    r4=KbName('4$');
+    r3=KbName('3#');
+    r2=KbName('2@');
+    r1=KbName('1!');
+    
+    SSID=num2str(SSID,'%03.f');%pad SSID with zeros and convert to string
     pathStim = 'C:/Users/haozi/Desktop/PhD/fMRI_PrC-PPC/stmuli/';
-    cd(pathStim)
+    pathdata='C:/Users/haozi/Desktop/PhD/fMRI_PrC-PPC/data/pilot/';
+    mkdir(pathdata,SSID);
+    
     addtrig=2;%according to Trevor the scanner automatically discard the first 4 volumes, and send the first trigger at the beginning of the 5th.
     %in that case we only need to discard one more volume to have a
     %total of 5 dummy scans. But we will receive 6 triggers before stimulus
@@ -18,21 +30,6 @@ scanner_screen=2; %before running the script, use Screen('Screens') to determine
     %since both version used all 180 stimuli
     [lifetime_num,lifetime_txt,~]=xlsread(strcat(pathStim,'pilot_lifetime'),'Sheet1','A2:J181');%cant read in headers cuz they are also text
         
-    %data output
-    if behav==1
-        data=cell(181,8);
-        data(1,:)={'ParticipantNum' 'Run' 'Trial' 'ExpStartTime' 'Stimuli' 'StimOnsetTime' 'Response' 'RespTime'};
-        SSID=num2str(SSID,'%03.f');%pad SSID with zeros and convert to string
-        data(2:end,1)={SSID};
-        data(2:end,3)={0};%for behavioral pilot the run is always 0
-    else
-        data=cell(45,9);%45 trials per run plus headers
-        data(1,:)={'ParticipantNum' 'Version' 'Run' 'Trial' 'ExpStartTime' 'Stimuli' 'StimOnsetTime' 'Response' 'RespTime'};
-        SSID=num2str(SSID,'%03.f');%pad SSID with zeros and convert to string
-        data(2:end,1)={SSID};
-        data(2:end,3)={run};
-    end
-
 %% run specific setup for stimuli, jitter, and instructions
     if run<=4&&run>=1
       run_stim=lifetime_txt((run-1)*45+1:run*45);%get the stimuli for the selected run in study phase
@@ -41,6 +38,24 @@ scanner_screen=2; %before running the script, use Screen('Screens') to determine
         error('run number out of range [1,4]')
     end
 
+%% data output
+    %data output
+    if behav==1
+        data=cell(181,8);
+        data(1,:)={'ParticipantNum' 'Run' 'Trial' 'ExpStartTime' 'Stimuli' 'StimOnsetTime' 'Response' 'RespTime'};
+        data(2:end,1)={SSID};
+        data(2:end,2)={0};%for behavioral pilot the run is always 0
+        data(2:end,3)={1:180};
+        data(2:end,5)=lifetime_txt;
+    else
+        data=cell(46,8);%45 trials per run plus headers
+        data(1,:)={'ParticipantNum' 'Run' 'Trial' 'ExpStartTime' 'Stimuli' 'StimOnsetTime' 'Response' 'RespTime'};
+        data(2:end,1)={SSID};
+        data(2:end,2)={run};
+        run_trial=[(run-1)*45+1:1:run*45];
+        data(2:end,3)=num2cell(run_trial);
+        data(2:end,5)=run_stim;
+    end
 %% lifetime exposure judgement task procedure
     try
         
@@ -49,54 +64,10 @@ scanner_screen=2; %before running the script, use Screen('Screens') to determine
         % Open window with default settings:
         [w,rect]=Screen('OpenWindow', scanner_screen);
         [xCenter, yCenter] = RectCenter(rect);
-            
-        %COLOURS
-        white = WhiteIndex(window); % pixel value for white
-        black = BlackIndex(window); % pixel value for black
-
-        Screen(window,'FillRect', bckgcolour);
-        HideCursor;
-        WaitSecs(1);
+        %set font size, may need to tweak it on the scanner
+        Screen('TextSize',w,60);
         
-        %draw info
-        info = 'The experiment is going to start in a few seconds';
-        DrawFormattedText(window, info, 'center', 'center', black);
-        Screen(window, 'Flip');
-        WaitSecs(3);
-        
-        %draw first focuing cross
-        DrawFormattedText(window, '+', 'center', 'center', black);
-        Screen(window, 'Flip');
-        WaitSecs(2.5);
-        
-        %% wait for the first n=1 volumes as dummy scans
-        dummy_t=cell(addtrig,1);
-        keyCodes(1:256)=0;
-        keynum=KbName(scan_trig);
-    for i=1:addtrig
-            waittrig=1;
-           while waittrig
-            [keyIsDown, dummy_start, keyCodes] = KbCheck;
-            if keyCodes(keynum)==1
-                waittrig=0;
-            end
-           end
-           
-           %need to have these two lines to wait for the key release
-           while KbCheck
-           end
-           
-           fprintf('trigger %d\n',i)
-           dummy_t{i}=dummy_start;%resolution shows in second, but are actually finer (hint:take the difference)
-
-    end
-    
-    %the last dummy trigger received marks the beginning of the experiment
-    exp_start=dummy_t{end};
-    
-     
-%% loop through stimuli for the current run
-   %depending on the run, show different instructions
+      %depending on the run, show different instructions
       if run==1
             fd = fopen('pilot_lifetime_ins.m');
             if fd==-1
@@ -110,7 +81,7 @@ scanner_screen=2; %before running the script, use Screen('Screens') to determine
              end
             lcount = 2;%starting line
             tl=fgets(fd);
-            while lcount < 11%ending line
+            while lcount < 13%ending line
                 mytext = [mytext tl]; %#ok<*AGROW>
                 tl = fgets(fd);
                 lcount = lcount + 1;
@@ -126,25 +97,124 @@ scanner_screen=2; %before running the script, use Screen('Screens') to determine
             [nx, ny, bbox] = DrawFormattedText(w, mytext,'center','center');
 
             Screen('Flip',w);
-            KbStrokeWait;
+            %cant use KbStrokeWait since scanner trigger will be treated as
+            %a key press
+            waittrig=1;
+            while waittrig
+            [keyIsDown, dummy_start, keyCodes] = KbCheck;
+            if keyCodes(ins_done)==1
+                waittrig=0;
+            end
+           end
       else
-            [nx, ny, bbox] = DrawFormattedText(w, 'Run 2\n Press a key to begin','center','center');%for all runs except the first one, only display a brief msg
+            [nx, ny, bbox] = DrawFormattedText(w, strcat('Run', num2str(run),'\n Press with your right index finger to begin'),'center','center');%for all runs except the first one, only display a brief msg
             Screen('Flip',w);
-            KbStrokeWait;
+            %cant use KbStrokeWait since scanner trigger will be treated as
+            %a key press
+            waittrig=1;
+            while waittrig
+            [keyIsDown, dummy_start, keyCodes] = KbCheck;
+            if keyCodes(ins_done)==1
+                waittrig=0;
+            end
+           end
       end
       
-    %loop through stimuli
-    for stim=1:size(run_stim,1)
+        %draw info
+        info = 'The experiment is going to start in a few seconds';
+        DrawFormattedText(w, info, 'center', 'center');
+        Screen(w, 'Flip');
         
-        hand(hand_v).r5
-    
+%         %draw first focuing cross
+%         DrawFormattedText(w, '+', 'center', 'center');
+%         Screen(w, 'Flip');
+%         
+ 
+        %% wait for the first n=1 volumes as dummy scans
+        dummy_t=cell(addtrig,1);
+        keyCodes(1:256)=0;        
+    for i=1:addtrig
+            waittrig=1;
+           while waittrig
+            [keyIsDown, dummy_start, keyCodes] = KbCheck;
+            if keyCodes(scan_trig)==1
+                waittrig=0;
+            end
+           end
+           
+           %need to have these two lines to wait for the key release
+           while KbCheck
+           end
+           
+           fprintf('trigger %d\n',i)
+           dummy_t{i}=dummy_start;%resolution shows in second, but are actually finer (hint:take the difference)
+
     end
-        
+    
+    %the last dummy trigger received marks the beginning of the experiment
+    exp_start=dummy_t(end);
+    data(2:end,4)=exp_start;
+
+%% loop through stimuli for the current run
+    for stim=1:size(run_stim,1)
+        word=run_stim{stim};
+        %draw first focuing cross
+        DrawFormattedText(w, '+', 'center', 'center');
+        Screen(w, 'Flip');
+        WaitSecs(run_jit(stim));
+        respond=true;
+        onset=GetSecs;%using GetSecs instead of tic toc for high precision
+        while respond==true && GetSecs-onset<2.5 %for now the response window is 2.5 seconds and each trial will terminate when Ss make a resp
+            DrawFormattedText(w,strcat(word,'\n\n1  2  3  4  5'), 'center', 'center' );%present stimuli
+            Screen(w,'Flip');
+            % Check the keyboard.
+                [keyIsDown,secs, keyCode] = KbCheck;
+                
+                if keyCode(r5)
+                       resp='5';
+                       respond=false;
+                elseif keyCode(r4)
+                       resp='4';
+                       respond=false;
+                elseif keyCode(r3)
+                       resp='3';
+                       respond=false;
+                elseif keyCode(r2)
+                       resp='2';
+                       respond=false;
+                elseif keyCode(r1)
+                       resp='1';
+                       respond=false;
+                else
+                    resp=[];
+                end
+                
+        end
+        offset=GetSecs;
+        data{stim+1,7}=resp; %record responses, data has headers
+        data{stim+1,6}=onset;%onset time, currently put before drawformattedtext call
+        data{stim+1,8}=offset-onset;%RT
+   
+    end
+    
+    %save data to subject-specific folder
+    xlswrite(strcat(pathdata,SSID,'/lifetime_run-',num2str(run),'.xlsx'),data);
+    
+    %debriefing
+    if run~=4
+       debrief = 'You have finished one run, please relax and stay ready for the next run';
+    else
+       debrief = 'You have finished the lifetime experience task'; 
+    end
+    DrawFormattedText(w, debrief, 'center', 'center');
+    Screen(w, 'Flip'); 
+    WaitSecs(3);
+    Screen('CloseAll');
+    
     catch
         Screen('CloseAll');
-        disp(['scan stopped at run ' num2str(run) ' stim ' num2str(stim)])%need to receive a stop trigger from scanner (if possible) earlier in presentation loop
+        disp(['scan stopped at run ' num2str(run) ' trial ' num2str(stim)])%need to receive a stop trigger from scanner (if possible) earlier in presentation loop
     end
-
-
+    
 
 end
