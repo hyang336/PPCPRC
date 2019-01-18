@@ -7,7 +7,11 @@
 % Please consider even subtle differences when making these judgements and indicate it in
 % a graded manner. You have 2.5 seconds to make each judgement.
 
-%Do you have any question? 
+% Press with your left middle finger to indicate a '1', with left index finger to indicate
+% a '2', with right index finger to indicate a '3', with right middle finger to indicate a
+% '4', and with right ring finger to indicate a '5'
+
+%Do you have any question?
 
 %When you are ready, press with your right index finger to start
 

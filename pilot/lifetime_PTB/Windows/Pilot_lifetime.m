@@ -83,7 +83,7 @@ scanner_screen=max(screens); %before running the script, use Screen('Screens') t
              end
             lcount = 2;%starting line
             tl=fgets(fd);
-            while lcount < 13%ending line
+            while lcount < 17%ending line
                 mytext = [mytext tl]; %#ok<*AGROW>
                 tl = fgets(fd);
                 lcount = lcount + 1;
