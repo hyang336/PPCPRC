@@ -28,12 +28,12 @@ switch version
     
 %% version 1
     
-    case 1
-          r5=KbName('1!');
-          r4=KbName('2@');
-          r3=KbName('3#');
-          r2=KbName('4$');
-          r1=KbName('5%');
+    case 1 %5 on left
+          r5=KbName('8*');
+          r4=KbName('7&');
+          r3=KbName('6^');
+          r2=KbName('1!');
+          r1=KbName('2@');
 %           animate=KbName('3#');
 %           inanimate=KbName('4$');
           try
@@ -210,12 +210,12 @@ switch version
           
 %% version 2
 
-    case 2
-           r5=KbName('5%');
-           r4=KbName('4$');
-           r3=KbName('3#');
-           r2=KbName('2@');
-           r1=KbName('1!');
+    case 2 % 5 on right
+           r5=KbName('3#');
+           r4=KbName('2@');
+           r3=KbName('1!');
+           r2=KbName('6^');
+           r1=KbName('7&');
 %            animate=KbName('3');
 %            inanimate=KbName('2');
           try

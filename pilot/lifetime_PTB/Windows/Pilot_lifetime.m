@@ -23,7 +23,7 @@ scanner_screen=max(screens); %before running the script, use Screen('Screens') t
     pathdata='D:\pilot\lifetime_PTB\Windows\datapilot\';
     mkdir(pathdata,SSID);
     
-    addtrig=2;%according to Trevor the scanner automatically discard the first 4 volumes, and send the first trigger at the beginning of the 5th.
+    addtrig=5;%according to Trevor the scanner automatically discard the first 4 volumes, and send the first trigger at the beginning of the 5th.
     %in that case we only need to discard one more volume to have a
     %total of 5 dummy scans. But we will receive 6 triggers before stimulus
     %presentation since the trigger was sent at the begining of each run
@@ -103,7 +103,7 @@ scanner_screen=max(screens); %before running the script, use Screen('Screens') t
             %a key press
             waittrig=1;
             while waittrig
-            [keyIsDown, dummy_start, keyCodes] = KbCheck;
+            [keyIsDown, ins_t, keyCodes] = KbCheck;
             if keyCodes(ins_done)==1
                 waittrig=0;
             end
@@ -115,7 +115,7 @@ scanner_screen=max(screens); %before running the script, use Screen('Screens') t
             %a key press
             waittrig=1;
             while waittrig
-            [keyIsDown, dummy_start, keyCodes] = KbCheck;
+            [keyIsDown, ins_t, keyCodes] = KbCheck;
             if keyCodes(ins_done)==1
                 waittrig=0;
             end
@@ -132,7 +132,7 @@ scanner_screen=max(screens); %before running the script, use Screen('Screens') t
 %         Screen(w, 'Flip');
 %         
  
-        %% wait for the first n=1 volumes as dummy scans
+        %% wait for the first n=addtrig-1 volumes as dummy scans
         dummy_t=cell(addtrig,1);
         keyCodes(1:256)=0;        
     for i=1:addtrig
