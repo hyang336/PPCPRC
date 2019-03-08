@@ -1,5 +1,6 @@
 function data=Pilot_lifetime(SSID,run,behav,trial)
 % trial=1 if start from the beginning of a run, otherwise trial=stim+1
+% behav=1 if purely bahavioral (script not complete), otherwise behav=0
  Screen('Preference','SkipSyncTests',1);
  Screen('Preference','VisualDebugLevel',0);
 screens=Screen('Screens');
@@ -83,7 +84,7 @@ scanner_screen=max(screens); %before running the script, use Screen('Screens') t
              end
             lcount = 2;%starting line
             tl=fgets(fd);
-            while lcount < 17%ending line
+            while lcount < 23%ending line
                 mytext = [mytext tl]; %#ok<*AGROW>
                 tl = fgets(fd);
                 lcount = lcount + 1;
@@ -103,7 +104,7 @@ scanner_screen=max(screens); %before running the script, use Screen('Screens') t
             %a key press
             waittrig=1;
             while waittrig
-            [keyIsDown, ins_t, keyCodes] = KbCheck;
+            [keyIsDown, instime, keyCodes] = KbCheck;
             if keyCodes(ins_done)==1
                 waittrig=0;
             end
@@ -115,7 +116,7 @@ scanner_screen=max(screens); %before running the script, use Screen('Screens') t
             %a key press
             waittrig=1;
             while waittrig
-            [keyIsDown, ins_t, keyCodes] = KbCheck;
+            [keyIsDown, instime, keyCodes] = KbCheck;
             if keyCodes(ins_done)==1
                 waittrig=0;
             end
@@ -132,7 +133,7 @@ scanner_screen=max(screens); %before running the script, use Screen('Screens') t
 %         Screen(w, 'Flip');
 %         
  
-        %% wait for the first n=addtrig-1 volumes as dummy scans
+        %% wait for the first n=1 volumes as dummy scans
         dummy_t=cell(addtrig,1);
         keyCodes(1:256)=0;        
     for i=1:addtrig
