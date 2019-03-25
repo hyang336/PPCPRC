@@ -203,9 +203,9 @@ scanner_screen=max(screens); %before running the script, use Screen('Screens') t
         data{stim+1,8}=offset-onset;%RT, the offset line has to occur before the WaitSecs line
         
     end
-    
+    temprun=sprintf('%02d',run);
     %save data to subject-specific folder
-    xlswrite(strcat(pathdata,SSID,'/lifetime_run-',num2str(run),'.xlsx'),data);
+    xlswrite(strcat(pathdata,SSID,'/task-lifetime_run-',temprun,'.xlsx'),data);
     
     %debriefing
     if run~=4

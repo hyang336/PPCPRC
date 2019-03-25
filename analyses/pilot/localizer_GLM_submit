@@ -1,0 +1,23 @@
+#!/bin/bash
+usage(){
+echo "usage: localizer_GLM_submit <project_derivatives> <output_dir> <exp_start volume>"
+}
+project_derivatives=$1
+output_dir=$2
+expstart_vol=$3
+if [ "$#" -eq 3 ]
+then
+	mkdir -p $output_dir/pilot_localizer
+	subs=$(cut -f 1 $project_derivatives/bids_source/participants.tsv|tail -n +2)
+	for sub in $subs
+	do
+	sub_dir="$output_dir/pilot_localizer/$sub"
+	mkdir -p $sub_dir 
+	neurogliaSubmit -j LongSkinny 'matlab -nosplash -nodisplay -r "addpath(genpath('"'/project/6007967/hyang336/fMRI_Prc_PPC/analyses/pilot/'"')); localizer('"'$project_derivatives'"','"'$output_dir'"','"'$sub'"','"$expstart_vol"'); exit;"' 
+	sleep 3
+	done
+else
+usage
+exit 1
+fi
+

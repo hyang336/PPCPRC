@@ -1,0 +1,2 @@
+localizer 8 min runs, should be finished ~7 mins
+lifetime four 6 min runs, should be finished ~00:05:30
