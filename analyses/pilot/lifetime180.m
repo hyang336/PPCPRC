@@ -35,6 +35,15 @@ sub_dir=strcat(output,'/pilot_lifetime180/',sub);
             substr.runexp=spm_vol(strcat(temp_dir,erase(substr.run,'.gz')));
             
             %% 2019-03-25
+            
+            %make the matlabbatch struct outside of the run-loop since it has separate
+            %fields for each run
+            lifetime180_template_job;%initialized matlabbatch template MUST HAVE ALL THE NECESSARY FIELDS
+            
+            %record which condtions each run has, useful for specifying design matrix at
+            %the end
+            runbycond=cell(length(substr.run),6);%maximam 6 condtions that may differ between runs.
+            
             %loop through runs
             for j=1:length(substr.run)
 %% **moved into the run for-loop on 9/17/2018 14:41, did not change behavior**           
@@ -44,19 +53,22 @@ sub_dir=strcat(output,'/pilot_lifetime180/',sub);
                                                 
                 %get design onset, duration, conditions, and confound regressors
                 run=regexp(substr.run{j},'run-\d\d_','match');%find corresponding run number to load the events.tsv
-                runum=str2double(erase(erase(run{1},'run-'),'_'));
-                substr.runevent{j}=load_event_lifetime180(project_derivative,sub,'lifetime',runum);%store the loaded event files in sub.runevent
+                runum=erase(run{1},'_');
+                substr.runevent{j}=load_event_lifetime180(project_derivative,sub,task,runum);%store the loaded event files in sub.runevent; sub-xxx, task-xxx_, run-xx
                
-                %make task-xxx_run-specific dir
-                mkdir(temp_dir,strcat(task{1},erase(run{1},'_')));
-                run_temp=strcat(temp_dir,strcat(task{1},erase(run{1},'_')));
+%                 %make task-xxx_run-specific dir
+%                 mkdir(temp_dir,strcat(task{1},erase(run{1},'_')));
+%                 run_temp=strcat(temp_dir,strcat(task{1},erase(run{1},'_')));
                 
                 %change these to what types of block you have
-                %scrambled=substr.runevent{j}(cellfun(@(x)strcmp(x,'s'),substr.runevent{j}(:,3)),:);
-                face=substr.runevent{j}(cellfun(@(x)strcmp(x,'f'),substr.runevent{j}(:,3)),:);
-                object=substr.runevent{j}(cellfun(@(x)strcmp(x,'o'),substr.runevent{j}(:,3)),:);
-                place=substr.runevent{j}(cellfun(@(x)strcmp(x,'p'),substr.runevent{j}(:,3)),:);
-          
+                lifetime_1=substr.runevent{j}(cellfun(@(x)x==1,substr.runevent{j}(:,3)),:);
+                lifetime_2=substr.runevent{j}(cellfun(@(x)x==2,substr.runevent{j}(:,3)),:);
+                lifetime_3=substr.runevent{j}(cellfun(@(x)x==3,substr.runevent{j}(:,3)),:);
+                lifetime_4=substr.runevent{j}(cellfun(@(x)x==4,substr.runevent{j}(:,3)),:);
+                lifetime_5=substr.runevent{j}(cellfun(@(x)x==5,substr.runevent{j}(:,3)),:);
+                noresp=substr.runevent{j}(cellfun(@(x)isnan(x),substr.runevent{j}(:,3)),:);
+                
+                
                 conf_name=strcat(project_derivative,'/fmriprep/',sub,'/func/',sub,'_',task{1},run{1},'bold_','confounds.tsv');%use task{1} and run{1} since it's iteratively defined
                 substr.runconf{j}=tdfread(conf_name,'tab');
                 
@@ -69,53 +81,89 @@ sub_dir=strcat(output,'/pilot_lifetime180/',sub);
                 prefix={substr.runexp{j}(expstart_vol:end).fname};
                 prefix=prefix';
                 sliceinfo=cellfun(@strcat,prefix,comma,slice,'UniformOutput',false);
+                %% 2019-03-27 
+                %an indicator for which condition is missing in a given run
+                cond={'lifetime_1','lifetime_2','lifetime_3','lifetime_4','lifetime_5','noresp';lifetime_1,lifetime_2,lifetime_3,lifetime_4,lifetime_5,noresp};
+                [~,have_cond]=find(cellfun(@(x)~isempty(x),cond(2,:)));
+                miss_cond=find(cellfun(@(x)isempty(x),cond(2,:)));
+                remove_cond=length(miss_cond);%num of cond to be removed from matlabbatch
+                
+                %record condition order for each run
+                runbycond(j,1:length(have_cond))=cond(1,have_cond);
 
-                %make the matlabbatch struct
-                localizer_template_job;%initialized matlabbatch template MUST HAVE ALL THE NECESSARY FIELDS
+                %specify the run-specific matlabbatch fields, "sess" means run in SPM
+                %need to account for missing conditions also in job_temlate.m
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(end-remove_cond+1:end)=[];%adjust number of conditions in a given run
                 
-                %specify the matlabbatch fields, 4 conditions and 6 confound regressors
-                matlabbatch{1}.spm.stats.fmri_spec.dir = {run_temp};
-                matlabbatch{1}.spm.stats.fmri_spec.timing.units = 'secs';
-                matlabbatch{1}.spm.stats.fmri_spec.timing.RT = 1.6;
-                matlabbatch{1}.spm.stats.fmri_spec.sess.scans = sliceinfo;
-                matlabbatch{1}.spm.stats.fmri_spec.sess.cond(1).name = 'face';
-                matlabbatch{1}.spm.stats.fmri_spec.sess.cond(1).onset = cell2mat(face(:,1));
-                matlabbatch{1}.spm.stats.fmri_spec.sess.cond(1).duration = cell2mat(face(:,2));
-                matlabbatch{1}.spm.stats.fmri_spec.sess.cond(2).name = 'object';
-                matlabbatch{1}.spm.stats.fmri_spec.sess.cond(2).onset = cell2mat(object(:,1));
-                matlabbatch{1}.spm.stats.fmri_spec.sess.cond(2).duration = cell2mat(object(:,2));
-                matlabbatch{1}.spm.stats.fmri_spec.sess.cond(3).name = 'place';
-                matlabbatch{1}.spm.stats.fmri_spec.sess.cond(3).onset = cell2mat(place(:,1));
-                matlabbatch{1}.spm.stats.fmri_spec.sess.cond(3).duration = cell2mat(place(:,2));
-                matlabbatch{1}.spm.stats.fmri_spec.sess.regress(1).name = 'x_move';
-                matlabbatch{1}.spm.stats.fmri_spec.sess.regress(1).val = substr.runconf{j}.X(expstart_vol:end);%need to consider dummy scan
-                matlabbatch{1}.spm.stats.fmri_spec.sess.regress(2).name = 'y_move';
-                matlabbatch{1}.spm.stats.fmri_spec.sess.regress(2).val = substr.runconf{j}.Y(expstart_vol:end);
-                matlabbatch{1}.spm.stats.fmri_spec.sess.regress(3).name = 'z_move';
-                matlabbatch{1}.spm.stats.fmri_spec.sess.regress(3).val = substr.runconf{j}.Z(expstart_vol:end);
-                matlabbatch{1}.spm.stats.fmri_spec.sess.regress(4).name = 'x_rot';
-                matlabbatch{1}.spm.stats.fmri_spec.sess.regress(4).val = substr.runconf{j}.RotX(expstart_vol:end);
-                matlabbatch{1}.spm.stats.fmri_spec.sess.regress(5).name = 'y_rot';
-                matlabbatch{1}.spm.stats.fmri_spec.sess.regress(5).val = substr.runconf{j}.RotY(expstart_vol:end);
-                matlabbatch{1}.spm.stats.fmri_spec.sess.regress(6).name = 'z_rot';
-                matlabbatch{1}.spm.stats.fmri_spec.sess.regress(6).val = substr.runconf{j}.RotZ(expstart_vol:end);
-                matlabbatch{2}.spm.stats.fmri_est.spmmat = {strcat(run_temp,'/SPM.mat')};
-                matlabbatch{3}.spm.stats.con.spmmat = {strcat(run_temp,'/SPM.mat')};
-                matlabbatch{3}.spm.stats.con.consess{1}.tcon.name = 'face > place';
-                matlabbatch{3}.spm.stats.con.consess{1}.tcon.convec = [1 0 -1 0];
-                matlabbatch{3}.spm.stats.con.consess{1}.tcon.sessrep = 'none';
-                matlabbatch{4}.spm.stats.results.spmmat = {strcat(run_temp,'/SPM.mat')};
-                matlabbatch{4}.spm.stats.results.conspec.titlestr = 'face>place';
-                matlabbatch{4}.spm.stats.results.conspec.contrasts = 1;
-                matlabbatch{4}.spm.stats.results.export{2}.tspm.basename = 'face-place';%for details about threshold and correction, see localizer_template_job.m
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).scans = sliceinfo;
                 
-                %initil setup for SPM
-                spm('defaults', 'FMRI');
-                spm_jobman('initcfg');
-                
-                spm_jobman('run',matlabbatch);
+                for k=1:length(have_cond)
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).name = cond{1,have_cond(k)};
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).onset = cell2mat(cond{2,have_cond(k)}(:,1));
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).duration = cell2mat(cond{2,have_cond(k)}(:,2));
+                end
+                %always have 6 motion regressors
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(1).name = 'x_move';
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(1).val = substr.runconf{j}.X(expstart_vol:end);%need to consider dummy scan
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(2).name = 'y_move';
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(2).val = substr.runconf{j}.Y(expstart_vol:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(3).name = 'z_move';
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(3).val = substr.runconf{j}.Z(expstart_vol:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(4).name = 'x_rot';
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(4).val = substr.runconf{j}.RotX(expstart_vol:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(5).name = 'y_rot';
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(5).val = substr.runconf{j}.RotY(expstart_vol:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(6).name = 'z_rot';
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(6).val = substr.runconf{j}.RotZ(expstart_vol:end);
+                               
                 
             end
+                %specify run-agnostic fields
+                matlabbatch{1}.spm.stats.fmri_spec.dir = {temp_dir};%all runs are combined into one
+                matlabbatch{1}.spm.stats.fmri_spec.timing.units = 'secs';
+                matlabbatch{1}.spm.stats.fmri_spec.timing.RT = 1.6;
+                matlabbatch{2}.spm.stats.fmri_est.spmmat = {strcat(temp_dir,'/SPM.mat')};
+                matlabbatch{3}.spm.stats.con.spmmat = {strcat(temp_dir,'/SPM.mat')};
+                matlabbatch{3}.spm.stats.con.consess{1}.tcon.name = 'linear inc lifetime';
+                %use runbycond to construct appropriate contrast vector
+                %linear increase lifetime
+                [lifetime1_runrow,lifetime1_designcol]=find(cellfun(@(x)strcmp(x,'lifetime_1'),runbycond));
+                [lifetime2_runrow,lifetime2_designcol]=find(cellfun(@(x)strcmp(x,'lifetime_2'),runbycond));
+                [lifetime3_runrow,lifetime3_designcol]=find(cellfun(@(x)strcmp(x,'lifetime_3'),runbycond));
+                [lifetime4_runrow,lifetime4_designcol]=find(cellfun(@(x)strcmp(x,'lifetime_4'),runbycond));
+                [lifetime5_runrow,lifetime5_designcol]=find(cellfun(@(x)strcmp(x,'lifetime_5'),runbycond));
+                [noresp_runrow,noresp_designcol]=find(cellfun(@(x)strcmp(x,'noresp'),runbycond));%although not included in the contrast, need to account for all conditions that may differ between runs since they affect column numbers in the design matrix
+                motionzero=zeros(size(runbycond,1),6);%6 motion regressors
+                conmat=nan(size(runbycond));%can't use 0 since noresp is given 0 weight
+                l1ind=sub2ind(size(conmat),lifetime1_runrow,lifetime1_designcol);
+                l2ind=sub2ind(size(conmat),lifetime2_runrow,lifetime2_designcol);
+                l3ind=sub2ind(size(conmat),lifetime3_runrow,lifetime3_designcol);
+                l4ind=sub2ind(size(conmat),lifetime4_runrow,lifetime4_designcol);
+                l5ind=sub2ind(size(conmat),lifetime5_runrow,lifetime5_designcol);
+                nrind=sub2ind(size(conmat),noresp_runrow,noresp_designcol);
+                conmat(l1ind)=-2/length(lifetime1_runrow);
+                conmat(l2ind)=-1/length(lifetime2_runrow);
+                conmat(l3ind)=0;
+                conmat(l4ind)=1/length(lifetime4_runrow);
+                conmat(l5ind)=2/length(lifetime5_runrow);
+                conmat(nrind)=0;
+                
+                conmat=[conmat motionzero];%attach motion regressor weights (i.e. 0)
+                convec=reshape(conmat',1,48);%unroll the matrix into a vector
+                convec=convec(~isnan(convec));                
+                matlabbatch{3}.spm.stats.con.consess{1}.tcon.weights = convec;
+                
+                matlabbatch{4}.spm.stats.results.spmmat = {strcat(temp_dir,'/SPM.mat')};
+                matlabbatch{4}.spm.stats.results.conspec.titlestr = 'linear inc lifetime fwe';
+                matlabbatch{4}.spm.stats.results.conspec.contrasts = 1;
+                matlabbatch{4}.spm.stats.results.export{2}.tspm.basename = 'linear inc lifetime fwe';%for details about threshold and correction, see localizer_template_job.m
+            
+            %initil setup for SPM
+            spm('defaults', 'FMRI');
+            spm_jobman('initcfg');
+            
+            %run after specifying all matlabbatch fields for all runs
+            spm_jobman('run',matlabbatch);
         end 
 
 
