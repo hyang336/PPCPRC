@@ -1,4 +1,4 @@
-function data=Pilot_lifetime(SSID,run,behav,trial)
+function data=Pilot_lifetime(version,SSID,run,behav,trial)
 % trial=1 if start from the beginning of a run, otherwise trial=stim+1
 % behav=1 if purely bahavioral (script not complete), otherwise behav=0
  Screen('Preference','SkipSyncTests',1);
@@ -13,12 +13,20 @@ scanner_screen=max(screens); %before running the script, use Screen('Screens') t
     %configurable
     scan_trig=KbName('5%');
     ins_done=KbName('1!');
-    r5=KbName('3#');
-    r4=KbName('2@');
-    r3=KbName('1!');
-    r2=KbName('6^');
-    r1=KbName('7&');
-    
+    switch version
+        case 2
+        r5=KbName('3#');
+        r4=KbName('2@');
+        r3=KbName('1!');
+        r2=KbName('6^');
+        r1=KbName('7&');
+        case 1
+        r5=KbName('8*');
+        r4=KbName('7&');
+        r3=KbName('6^');
+        r2=KbName('1!');
+        r1=KbName('2@');   
+    end
     SSID=num2str(SSID,'%03.f');%pad SSID with zeros and convert to string
     pathStim = 'D:\pilot\lifetime_PTB\Windows\stimuli\';
     pathdata='D:\pilot\lifetime_PTB\Windows\datapilot\';
@@ -72,7 +80,12 @@ scanner_screen=max(screens); %before running the script, use Screen('Screens') t
         HideCursor;
       %depending on the run, show different instructions
       if run==1
-            fd = fopen('pilot_lifetime_ins.m');
+            switch version
+                case 2
+                    fd = fopen('pilot_lifetime_ins_v2.m');
+                case 1
+                    fd = fopen('pilot_lifetime_ins_v1.m');
+            end
             if fd==-1
                 error('Could not open instructions.m file.');
             end
