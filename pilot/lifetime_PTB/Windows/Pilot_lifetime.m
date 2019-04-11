@@ -12,7 +12,8 @@ scanner_screen=max(screens); %before running the script, use Screen('Screens') t
     %This part is specific for the 3T scanner, the key mapping is NOT
     %configurable
     scan_trig=KbName('5%');
-    ins_done=KbName('1!');
+    ins_done=KbName('2@');
+    flippage=KbName('1!');
     switch version
         case 2
         r5=KbName('3#');
@@ -76,7 +77,7 @@ scanner_screen=max(screens); %before running the script, use Screen('Screens') t
         [w,rect]=Screen('OpenWindow', scanner_screen);
         [xCenter, yCenter] = RectCenter(rect);
         %set font size, may need to tweak it on the scanner
-        Screen('TextSize',w,40);
+        Screen('TextSize',w,60);%changed to bigger font (40 to 60) on 2019-04-11
         HideCursor;
       %depending on the run, show different instructions
       if run==1
@@ -90,27 +91,55 @@ scanner_screen=max(screens); %before running the script, use Screen('Screens') t
                 error('Could not open instructions.m file.');
             end
 
-            mytext = '';
+            page1 = '';
+            page2 = '';
             %skip the first line
              for k=1:1
                 fgets(fd); 
              end
             lcount = 2;%starting line
             tl=fgets(fd);
-            while lcount < 23%ending line
-                mytext = [mytext tl]; %#ok<*AGROW>
+            while lcount <= 13%ending line
+                page1 = [page1 tl]; %#ok<*AGROW>
                 tl = fgets(fd);
                 lcount = lcount + 1;
             end
+            
+            lcount2 = 14;%page2 start
+            tl2=fgets(fd);
+            while lcount2 <= 26%ending line
+                page2 = [page2 tl2]; %#ok<*AGROW>
+                tl2 = fgets(fd);
+                lcount2 = lcount2 + 1;
+            end
+            
             fclose(fd);
-            mytext = [mytext newline];
+            page1 = [page1 newline];
+            page2 = [page2 newline];
 
             % Get rid of '% ' symbols at the start of each line:
-            mytext = strrep(mytext, '% ', '');
-            mytext = strrep(mytext, '%', '');
+            page1 = strrep(page1, '% ', '');
+            page1 = strrep(page1, '%', '');
+            page2 = strrep(page2, '% ', '');
+            page2 = strrep(page2, '%', '');
+           
+            %page1
+            [nx, ny, bbox] = DrawFormattedText(w, page1,'center','center');
 
-            % Now vertically centered:
-            [nx, ny, bbox] = DrawFormattedText(w, mytext,'center','center');
+            Screen('Flip',w);
+            %cant use KbStrokeWait since scanner trigger will be treated as
+            %a key press
+            waittrig=1;
+            while waittrig
+            [keyIsDown, instime, keyCodes] = KbCheck;
+            if keyCodes(flippage)==1
+                waittrig=0;
+            end
+            end
+
+           
+            %page2
+            [nx, ny, bbox] = DrawFormattedText(w, page2,'center','center');
 
             Screen('Flip',w);
             %cant use KbStrokeWait since scanner trigger will be treated as
@@ -121,9 +150,11 @@ scanner_screen=max(screens); %before running the script, use Screen('Screens') t
             if keyCodes(ins_done)==1
                 waittrig=0;
             end
-           end
+            end
+
+           
       else
-            [nx, ny, bbox] = DrawFormattedText(w, strcat('Run', num2str(run),'\n Press with your right index finger to begin'),'center','center');%for all runs except the first one, only display a brief msg
+            [nx, ny, bbox] = DrawFormattedText(w, strcat('Run', num2str(run),'\n Press with your right middle finger to begin'),'center','center');%for all runs except the first one, only display a brief msg
             Screen('Flip',w);
             %cant use KbStrokeWait since scanner trigger will be treated as
             %a key press
@@ -141,6 +172,7 @@ scanner_screen=max(screens); %before running the script, use Screen('Screens') t
         DrawFormattedText(w, info, 'center', 'center');
         Screen(w, 'Flip');
 
+        Screen('TextSize',w,80);%changed to bigger font (40 to 80) for stimuli only! on 2019-04-11
 %         %draw first focuing cross
 %         DrawFormattedText(w, '+', 'center', 'center');
 %         Screen(w, 'Flip');
@@ -178,7 +210,12 @@ scanner_screen=max(screens); %before running the script, use Screen('Screens') t
         DrawFormattedText(w, '+', 'center', 'center');
         Screen(w, 'Flip');
         WaitSecs(run_jit(stim));
-        DrawFormattedText(w,strcat(word,'\n\n1  2  3  4  5'), 'center', 'center' );%present stimuli
+        switch version
+            case 2
+                DrawFormattedText(w,strcat(word,'\n\n1  2  3  4  5'), 'center', 'center' );%present stimuli
+            case 1
+                DrawFormattedText(w,strcat(word,'\n\n5  4  3  2  1'), 'center', 'center' );%present stimuli
+        end
         onset=Screen(w,'Flip');%put presentation outside of KbCheck while-loop to keep presenting after a key is pressed, also use the returned value for RT
         respond=true;
         while respond %this is important for only registering the first key press

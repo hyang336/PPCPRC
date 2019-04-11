@@ -77,7 +77,7 @@ sub_dir=strcat(output,'/pilot_localizer/',sub);
                 %specify the matlabbatch fields, 4 conditions and 6 confound regressors
                 matlabbatch{1}.spm.stats.fmri_spec.dir = {run_temp};
                 matlabbatch{1}.spm.stats.fmri_spec.timing.units = 'secs';
-                matlabbatch{1}.spm.stats.fmri_spec.timing.RT = 1.6;
+                matlabbatch{1}.spm.stats.fmri_spec.timing.RT = 1.6;%remember to change this according to actual TR
                 matlabbatch{1}.spm.stats.fmri_spec.sess.scans = sliceinfo;
                 matlabbatch{1}.spm.stats.fmri_spec.sess.cond(1).name = 'face';
                 matlabbatch{1}.spm.stats.fmri_spec.sess.cond(1).onset = cell2mat(face(:,1));
