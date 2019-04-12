@@ -1,21 +1,17 @@
 #!/bin/bash
 usage(){
-echo "usage: localizer_GLM_submit <project_derivatives> <output_dir> <exp_start volume>"
+echo "usage: localizer_GLM_submit <project_derivatives> <output_dir> <sub> <exp_start volume> <fmriprep_foldername> <TR>"
 }
 project_derivatives=$1
 output_dir=$2
-expstart_vol=$3
-if [ "$#" -eq 3 ]
+sub=$3
+expstart_vol=$4
+fmriprep_fn=$5
+TR=$6
+if [ "$#" -eq 6 ]
 then
 	mkdir -p $output_dir/pilot_localizer
-	subs=$(cut -f 1 $project_derivatives/bids_source/participants.tsv|tail -n +2)
-	for sub in $subs
-	do
-	sub_dir="$output_dir/pilot_localizer/$sub"
-	mkdir -p $sub_dir 
-	neurogliaSubmit -j LongSkinny 'matlab -nosplash -nodisplay -r "addpath(genpath('"'/project/6007967/hyang336/fMRI_Prc_PPC/analyses/pilot/'"')); localizer('"'$project_derivatives'"','"'$output_dir'"','"'$sub'"','"$expstart_vol"'); exit;"' 
-	sleep 3
-	done
+	neurogliaSubmit -j LongSkinny 'matlab -nosplash -nodisplay -r "addpath(genpath('"'/project/6007967/hyang336/matlab/'"')); localizer('"'$project_derivatives'"','"'$output_dir'"','"'$sub'"','"$expstart_vol"','"'$fmriprep_fn'"','"$TR"'); exit;"' 
 else
 usage
 exit 1
