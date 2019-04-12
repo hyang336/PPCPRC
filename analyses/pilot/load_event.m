@@ -55,7 +55,7 @@ eventh=[headers;event];
 %to use dlmwrite or fprintf to output cell
 run=sprintf('%02d',run);
 filetosave=strcat(subject_id,'_task-',task,'_run-',run,'_bold_events.xlsx');
-xlswrite(strcat(project_derivative,'/behavioral/pilot/',filetosave),eventh);
+%xlswrite(strcat(project_derivative,'/behavioral/pilot/',filetosave),eventh);
 
 eventout=event;
 
