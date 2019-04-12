@@ -59,9 +59,8 @@ sub_dir=strcat(output,'/pilot_localizer/',sub);
                 place=substr.runevent{j}(cellfun(@(x)strcmp(x,'p'),substr.runevent{j}(:,3)),:);
           
                 conf_name=strcat(project_derivative,'/',fmriprep_foldername,'/fmriprep/',sub,'/func/',sub,'_',task{1},run{1},'*confound*.tsv');%use task{1} and run{1} since it's iteratively defined. Changed on 2019-04-12 to reflect new naming
-                confstruct=dir(conf_name);
-                conffile=strcat(confstruct.folder,'/',confstruct.name);
-                substr.runconf{j}=tdfread(conffile,'tab');%there should be only one file since search terms are iteratively defined
+                conffile=;
+                substr.runconf{j}=tdfread(conffile{j},'tab');%there should be only one file since it is iter
                 
                 %build the cell structure for loading each TR into matlabbatch
                 slice=(expstart_vol:length(substr.runexp{j}));
@@ -91,17 +90,17 @@ sub_dir=strcat(output,'/pilot_localizer/',sub);
                 matlabbatch{1}.spm.stats.fmri_spec.sess.cond(3).onset = cell2mat(place(:,1));
                 matlabbatch{1}.spm.stats.fmri_spec.sess.cond(3).duration = cell2mat(place(:,2));
                 matlabbatch{1}.spm.stats.fmri_spec.sess.regress(1).name = 'x_move';
-                matlabbatch{1}.spm.stats.fmri_spec.sess.regress(1).val = substr.runconf{j}.trans_x(expstart_vol:end);%need to consider dummy scan
+                matlabbatch{1}.spm.stats.fmri_spec.sess.regress(1).val = substr.runconf{j}.X(expstart_vol:end);%need to consider dummy scan
                 matlabbatch{1}.spm.stats.fmri_spec.sess.regress(2).name = 'y_move';
-                matlabbatch{1}.spm.stats.fmri_spec.sess.regress(2).val = substr.runconf{j}.trans_y(expstart_vol:end);%fucking fmriprep changed its naming for these confounds fields
+                matlabbatch{1}.spm.stats.fmri_spec.sess.regress(2).val = substr.runconf{j}.Y(expstart_vol:end);
                 matlabbatch{1}.spm.stats.fmri_spec.sess.regress(3).name = 'z_move';
-                matlabbatch{1}.spm.stats.fmri_spec.sess.regress(3).val = substr.runconf{j}.trans_z(expstart_vol:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess.regress(3).val = substr.runconf{j}.Z(expstart_vol:end);
                 matlabbatch{1}.spm.stats.fmri_spec.sess.regress(4).name = 'x_rot';
-                matlabbatch{1}.spm.stats.fmri_spec.sess.regress(4).val = substr.runconf{j}.rot_x(expstart_vol:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess.regress(4).val = substr.runconf{j}.RotX(expstart_vol:end);
                 matlabbatch{1}.spm.stats.fmri_spec.sess.regress(5).name = 'y_rot';
-                matlabbatch{1}.spm.stats.fmri_spec.sess.regress(5).val = substr.runconf{j}.rot_y(expstart_vol:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess.regress(5).val = substr.runconf{j}.RotY(expstart_vol:end);
                 matlabbatch{1}.spm.stats.fmri_spec.sess.regress(6).name = 'z_rot';
-                matlabbatch{1}.spm.stats.fmri_spec.sess.regress(6).val = substr.runconf{j}.rot_z(expstart_vol:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess.regress(6).val = substr.runconf{j}.RotZ(expstart_vol:end);
                 matlabbatch{2}.spm.stats.fmri_est.spmmat = {strcat(run_temp,'/SPM.mat')};
                 matlabbatch{3}.spm.stats.con.spmmat = {strcat(run_temp,'/SPM.mat')};
                 matlabbatch{3}.spm.stats.con.consess{1}.tcon.name = 'face > place';
