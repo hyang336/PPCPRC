@@ -1,7 +1,7 @@
 %block design GLM using SPM
 %following Martin et al. 2016, face>scene contrast for identifing PrC(ATFP), with
 %scrambled modeled as baseline
-function localizer(project_derivative,output,sub,expstart_vol)
+function localizer(project_derivative,output,sub,expstart_vol,fmriprep_foldername,TR)
 %(i.e. if there are 4 dummy scans, the experiment starts at the 5th
 %TR/trigger/volume). In this version every participant in every run has to have the same number of
 %dummy scans. 
@@ -23,14 +23,14 @@ sub_dir=strcat(output,'/pilot_localizer/',sub);
         
             %get #runs from each /fmriprep/subject/func/ folder, search for task
             %"localizer" and "run-01" since different localizer runs are all counted as 01
-            runkey=fullfile(strcat(project_derivative,'/fmriprep/',sub,'/func/'),'*localizer*_run-01_bold_space-MNI152NLin2009cAsym_preproc.nii.gz');
+            runkey=fullfile(strcat(project_derivative,'/',fmriprep_foldername,'/fmriprep/',sub,'/func/'),'*localizer*run-01*space-MNI152NLin2009cAsym*preproc*bold.nii.gz');%fmriprep 1.3.2 switched the position of the "bold" tag and the "space" tag, and added "desc-" before "preproc", changed to more liberal expression matching on 2019-04-12
             runfile=dir(runkey);
             substr=struct();
             substr.run=extractfield(runfile,'name');
             substr.id=sub;
             
             %unzip the nii.gz files into the temp directory
-            gunzip(strcat(project_derivative,'/fmriprep/',sub,'/func/',substr.run),temp_dir);
+            gunzip(strcat(project_derivative,'/',fmriprep_foldername,'/fmriprep/',sub,'/func/',substr.run),temp_dir);
             %load the nii files, primarily to get the number of time points
             substr.runexp=spm_vol(strcat(temp_dir,erase(substr.run,'.gz')));
             
@@ -58,7 +58,7 @@ sub_dir=strcat(output,'/pilot_localizer/',sub);
                 object=substr.runevent{j}(cellfun(@(x)strcmp(x,'o'),substr.runevent{j}(:,3)),:);
                 place=substr.runevent{j}(cellfun(@(x)strcmp(x,'p'),substr.runevent{j}(:,3)),:);
           
-                conf_name=strcat(project_derivative,'/fmriprep/',sub,'/func/',sub,'_',task{1},run{1},'bold_','confounds.tsv');%use task{1} and run{1} since it's iteratively defined
+                conf_name=strcat(project_derivative,'/',fmriprep_foldername,'/fmriprep/',sub,'/func/',sub,'_',task{1},run{1},'*confound*.tsv');%use task{1} and run{1} since it's iteratively defined. Changed on 2019-04-12 to reflect new naming
                 substr.runconf{j}=tdfread(conf_name,'tab');
                 
                 %build the cell structure for loading each TR into matlabbatch
@@ -77,7 +77,7 @@ sub_dir=strcat(output,'/pilot_localizer/',sub);
                 %specify the matlabbatch fields, 4 conditions and 6 confound regressors
                 matlabbatch{1}.spm.stats.fmri_spec.dir = {run_temp};
                 matlabbatch{1}.spm.stats.fmri_spec.timing.units = 'secs';
-                matlabbatch{1}.spm.stats.fmri_spec.timing.RT = 1.6;%remember to change this according to actual TR
+                matlabbatch{1}.spm.stats.fmri_spec.timing.RT = TR;
                 matlabbatch{1}.spm.stats.fmri_spec.sess.scans = sliceinfo;
                 matlabbatch{1}.spm.stats.fmri_spec.sess.cond(1).name = 'face';
                 matlabbatch{1}.spm.stats.fmri_spec.sess.cond(1).onset = cell2mat(face(:,1));
