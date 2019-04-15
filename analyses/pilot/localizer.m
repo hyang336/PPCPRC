@@ -35,8 +35,7 @@ sub_dir=strcat(output,'/pilot_localizer/',sub);
             substr.runexp=spm_vol(strcat(temp_dir,erase(substr.run,'.gz')));
             
             
-            %there is only one localizer run, but keep the for-loop in case we have more
-            %runs 
+            %for now runkey only look for run-01 of the localizer runs 
             for j=1:length(substr.run)
 %% **moved into the run for-loop on 9/17/2018 14:41, did not change behavior**           
                 %moved in run-level for-loop on 20190322 to accomodate runs with different

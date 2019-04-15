@@ -121,7 +121,7 @@ sub_dir=strcat(output,'/pilot_lifetime180/',sub);
                 %specify run-agnostic fields
                 matlabbatch{1}.spm.stats.fmri_spec.dir = {temp_dir};%all runs are combined into one
                 matlabbatch{1}.spm.stats.fmri_spec.timing.units = 'secs';
-                matlabbatch{1}.spm.stats.fmri_spec.timing.RT = TR;%remember to change this according to actual TR
+                matlabbatch{1}.spm.stats.fmri_spec.timing.RT = 1.6;%remember to change this according to actual TR
                 matlabbatch{2}.spm.stats.fmri_est.spmmat = {strcat(temp_dir,'/SPM.mat')};
                 matlabbatch{3}.spm.stats.con.spmmat = {strcat(temp_dir,'/SPM.mat')};
                 matlabbatch{3}.spm.stats.con.consess{1}.tcon.name = 'linear inc lifetime';

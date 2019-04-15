@@ -1,0 +1,19 @@
+#!/bin/bash
+usage(){
+echo "usage: lifetime180_GLM_submit <project_derivatives> <output_dir> <sub> <exp_start volume> <fmriprep_foldername> <TR>"
+}
+project_derivatives=$1
+output_dir=$2
+sub=$3
+expstart_vol=$4
+fmriprep_fn=$5
+TR=$6
+if [ "$#" -eq 6 ]
+then
+	mkdir -p $output_dir/pilot_localizer
+	neurogliaSubmit -j LongSkinny 'matlab -nosplash -nodisplay -r "addpath(genpath('"'/project/6007967/hyang336/matlab/'"')); lifetime180('"'$project_derivatives'"','"'$output_dir'"','"'$sub'"','"$expstart_vol"','"'$fmriprep_fn'"','"$TR"'); exit;"' 
+else
+usage
+exit 1
+fi
+
