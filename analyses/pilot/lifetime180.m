@@ -30,7 +30,7 @@ sub_dir=strcat(output,'/pilot_lifetime180/',sub);
             substr.id=sub;
             
             %unzip the nii.gz files into the temp directory
-            gunzip(strcat(project_derivative,'/fmriprep/',sub,'/func/',substr.run),temp_dir);
+            gunzip(strcat(project_derivative,'/',fmriprep_foldername,'/fmriprep/',sub,'/func/',substr.run),temp_dir);
             %load the nii files, primarily to get the number of time points
             substr.runexp=spm_vol(strcat(temp_dir,erase(substr.run,'.gz')));
             
@@ -69,9 +69,11 @@ sub_dir=strcat(output,'/pilot_lifetime180/',sub);
                 noresp=substr.runevent{j}(cellfun(@(x)isnan(x),substr.runevent{j}(:,3)),:);
                 
                 
-                conf_name=strcat(project_derivative,'/fmriprep/',sub,'/func/',sub,'_',task{1},run{1},'bold_','confounds.tsv');%use task{1} and run{1} since it's iteratively defined
-                substr.runconf{j}=tdfread(conf_name,'tab');
-                
+                conf_name=strcat(project_derivative,'/',fmriprep_foldername,'/fmriprep/',sub,'/func/',sub,'_',task{1},run{1},'*confound*.tsv');%use task{1} and run{1} since it's iteratively defined
+                confstruct=dir(conf_name);
+                conffile=strcat(confstruct.folder,'/',confstruct.name);
+                substr.runconf{j}=tdfread(conffile,'tab');
+                            
                 %build the cell structure for loading each TR into matlabbatch
                 slice=(expstart_vol:length(substr.runexp{j}));
                 slice=cellstr(num2str(slice'));
