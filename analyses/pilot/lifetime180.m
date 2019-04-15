@@ -106,17 +106,17 @@ sub_dir=strcat(output,'/pilot_lifetime180/',sub);
                 end
                 %always have 6 motion regressors
                 matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(1).name = 'x_move';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(1).val = substr.runconf{j}.X(expstart_vol:end);%need to consider dummy scan
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(1).val = substr.runconf{j}.trans_x(expstart_vol:end);%need to consider dummy scan
                 matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(2).name = 'y_move';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(2).val = substr.runconf{j}.Y(expstart_vol:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(2).val = substr.runconf{j}.trans_y(expstart_vol:end);
                 matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(3).name = 'z_move';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(3).val = substr.runconf{j}.Z(expstart_vol:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(3).val = substr.runconf{j}.trans_z(expstart_vol:end);
                 matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(4).name = 'x_rot';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(4).val = substr.runconf{j}.RotX(expstart_vol:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(4).val = substr.runconf{j}.rot_x(expstart_vol:end);
                 matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(5).name = 'y_rot';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(5).val = substr.runconf{j}.RotY(expstart_vol:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(5).val = substr.runconf{j}.rot_y(expstart_vol:end);
                 matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(6).name = 'z_rot';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(6).val = substr.runconf{j}.RotZ(expstart_vol:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(6).val = substr.runconf{j}.rot_z(expstart_vol:end);
                                
                 
             end
