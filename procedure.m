@@ -1,3 +1,4 @@
+%% need to update this!!! 2019-04-20
 function procedure(SSID,version_inp,run)
 %16 versions (hand (2) * set_selection (2) * block_order (4)).
 %study phase one run, test phase one run, both triggered by scanner.
@@ -11,9 +12,7 @@ Screen('Preference','VisualDebugLevel',0);
 
 %% initialize constants
 KbName('UnifyKeyNames');
-scan_trig=KbName('t');
-pathStim = 'C:/Users/haozi/Desktop/PhD/fMRI_PrC-PPC/stmuli/';
-cd(pathStim)
+scan_trig=KbName('5%');
 %create data cell, later use xlswrite to export
 data=cell(46,9);%45 trials per run plus headers
 data(1,:)={'ParticipantNum' 'Version' 'Run' 'Trial' 'ExpStartTime' 'Stimuli' 'StimOnsetTime' 'Response' 'RespTime'};
@@ -26,202 +25,39 @@ data(2:end,3)={run};
 winsize = [0 0 799 599];
 bckgcolour = [128 128 128];
 scanner_screen=2; %before running the script, use Screen('Screens') to determine the scanner screen number
-addtrig=2;%according to Trevor the scanner automatically discard the first 4 volumes, and send the first trigger at the beginning of the 5th.
-%in that case we only need to discard one more volume to have a
-%total of 5 dummy scans
+addtrig=5;%exp start at the 5th trigger
 
-%% assuming left to right keys are 1 2 3 4 5, with 3 keys mapped on the left hand for first version and on the right hand for the second version
-%The buttonbox has two setup (see black notebook), always 1 to 5 from left
-%to right. In v1 123 are mapped onto the left box, 45 on the right. In v2
-%12 are mapped onto the left box, 345 on the right
-%define the two versions of key mapping and scale on screen as struct
-   hand(1).r5=KbName('1!');
-   hand(1).r4=KbName('2@');
-   hand(1).r3=KbName('3#');
-   hand(1).r2=KbName('4$');
-   hand(1).r1=KbName('5%');
-   hand(1).animate=KbName('3#');
-   hand(1).inanimate=KbName('4$');
-   hand(1).study_scale='animate         inanimate';
-   hand(1).test_scale='5   4   3   2   1';
-   
-   hand(2).r5=KbName('5%');
-   hand(2).r4=KbName('4$');
-   hand(2).r3=KbName('3#');
-   hand(2).r2=KbName('2@');
-   hand(2).r1=KbName('1!');
-   hand(2).animate=KbName('3#');
-   hand(2).inanimate=KbName('2@');
-   hand(2).study_scale='inanimate         animate';
-   hand(2).test_scale='1   2   3   4   5';
-    %% setup stimuli and key mapping for different versions, see version.mat in stimuli folder for reference
-    switch version_inp    
 
-        case 1
-    %load in stimulus set
-     [study_num,study_txt,~] = xlsread(strcat(pathStim,'genetic_180_rand_jitter_run45'),'v1study_jitter','A2:B451');
-     [test_num,test_txt,~]=xlsread(strcat(pathStim,'genetic_180_rand_jitter_run45'),'v1test_jitter','A2:B181');
-     
-     %key mapping 
-        hand_v=1;
-     %test phase block order
-     test_first='recent';
+%% specify hand mapping, load stimuli and block order according to version number
+[study_stim,test_stim,hand]=version_select(version_inp);
+    study_txt=study_stim(:,1);%stimuli
+    study_num=study_stim(:,2);%jitter
+    test_txt=test_stim(:,1);
+    test_num=test_stim(:,2);
 
-        case 2
-    %load in stimulus set
-     [study_num,study_txt,~] = xlsread(strcat(pathStim,'genetic_180_rand_jitter_run45'),'v1study_jitter','A2:B451');
-     [test_num,test_txt,~]=xlsread(strcat(pathStim,'genetic_180_rand_jitter_run45'),'v1test_jitter','A2:B181');      
-
-     %key mapping 
-        hand_v=2;
-     %test phase block order
-     test_first='recent';       
-        
-        case 3
-     %load in stimulus set
-     [study_num,study_txt,~] = xlsread(strcat(pathStim,'genetic_180_rand_jitter_run45'),'v1study_jitter','E2:F451');
-     [test_num,test_txt,~]=xlsread(strcat(pathStim,'genetic_180_rand_jitter_run45'),'v1test_jitter','A2:B181');      
-
-      %key mapping 
-        hand_v=1;
-     %test phase block order
-     test_first='recent';
-
-        case 4
-     %load in stimulus set
-     [study_num,study_txt,~] = xlsread(strcat(pathStim,'genetic_180_rand_jitter_run45'),'v1study_jitter','E2:F451');
-     [test_num,test_txt,~]=xlsread(strcat(pathStim,'genetic_180_rand_jitter_run45'),'v1test_jitter','A2:B181');      
-
-     %key mapping 
-        hand_v=2;
-     %test phase block order
-     test_first='recent';
-     
-        case 5
-     %load in stimulus set
-     [study_num,study_txt,~] = xlsread(strcat(pathStim,'genetic_180_rand_jitter_run45'),'v1study_jitter','I2:J451');
-     [test_num,test_txt,~]=xlsread(strcat(pathStim,'genetic_180_rand_jitter_run45'),'v1test_jitter','E2:F181');      
-
-      %key mapping 
-        hand_v=1;
-     %test phase block order
-     test_first='lifetime';
-
-        case 6
-            %load in stimulus set
-     [study_num,study_txt,~] = xlsread(strcat(pathStim,'genetic_180_rand_jitter_run45'),'v1study_jitter','I2:J451');
-     [test_num,test_txt,~]=xlsread(strcat(pathStim,'genetic_180_rand_jitter_run45'),'v1test_jitter','E2:F181');      
-
-      %key mapping 
-        hand_v=2;
-     %test phase block order
-     test_first='lifetime';
-     
-        case 7
-            %load in stimulus set
-     [study_num,study_txt,~] = xlsread(strcat(pathStim,'genetic_180_rand_jitter_run45'),'v1study_jitter','M2:N451');
-     [test_num,test_txt,~]=xlsread(strcat(pathStim,'genetic_180_rand_jitter_run45'),'v1test_jitter','E2:F181');      
-
-      %key mapping 
-         hand_v=1;
-     %test phase block order
-     test_first='lifetime';
-
-        case 8
-            %load in stimulus set
-     [study_num,study_txt,~] = xlsread(strcat(pathStim,'genetic_180_rand_jitter_run45'),'v1study_jitter','M2:N451');
-     [test_num,test_txt,~]=xlsread(strcat(pathStim,'genetic_180_rand_jitter_run45'),'v1test_jitter','E2:F181');      
-
-     %key mapping 
-        hand_v=2;
-     %test phase block order
-     test_first='lifetime';
-     
-        case 9
-            %load in stimulus set
-     [study_num,study_txt,~] = xlsread(strcat(pathStim,'genetic_180_rand_jitter_run45'),'v2study_jitter','A2:B451');
-     [test_num,test_txt,~]=xlsread(strcat(pathStim,'genetic_180_rand_jitter_run45'),'v2test_jitter','A2:B181');      
-
-      %key mapping 
-        hand_v=1;
-     %test phase block order
-     test_first='recent';
-
-        case 10
-            %load in stimulus set
-     [study_num,study_txt,~] = xlsread(strcat(pathStim,'genetic_180_rand_jitter_run45'),'v2study_jitter','A2:B451');
-     [test_num,test_txt,~]=xlsread(strcat(pathStim,'genetic_180_rand_jitter_run45'),'v2test_jitter','A2:B181');      
-
-     %key mapping 
-        hand_v=2;
-     %test phase block order
-     test_first='recent';
-     
-        case 11
-            %load in stimulus set
-     [study_num,study_txt,~] = xlsread(strcat(pathStim,'genetic_180_rand_jitter_run45'),'v2study_jitter','E2:F451');
-     [test_num,test_txt,~]=xlsread(strcat(pathStim,'genetic_180_rand_jitter_run45'),'v2test_jitter','A2:B181');      
-
-      %key mapping 
-        hand_v=1;
-     %test phase block order
-     test_first='recent';
-
-        case 12
-            %load in stimulus set
-     [study_num,study_txt,~] = xlsread(strcat(pathStim,'genetic_180_rand_jitter_run45'),'v2study_jitter','E2:F451');
-     [test_num,test_txt,~]=xlsread(strcat(pathStim,'genetic_180_rand_jitter_run45'),'v2test_jitter','A2:B181');      
-
-     %key mapping 
-        hand_v=2;
-     %test phase block order
-     test_first='recent';
-     
-        case 13
-            %load in stimulus set
-     [study_num,study_txt,~] = xlsread(strcat(pathStim,'genetic_180_rand_jitter_run45'),'v2study_jitter','I2:J451');
-     [test_num,test_txt,~]=xlsread(strcat(pathStim,'genetic_180_rand_jitter_run45'),'v2test_jitter','E2:F181');      
-
-      %key mapping 
-        hand_v=1;
-     %test phase block order
-     test_first='lifetime';
-
-        case 14
-            %load in stimulus set
-     [study_num,study_txt,~] = xlsread(strcat(pathStim,'genetic_180_rand_jitter_run45'),'v2study_jitter','I2:J451');
-     [test_num,test_txt,~]=xlsread(strcat(pathStim,'genetic_180_rand_jitter_run45'),'v2test_jitter','E2:F181');      
-
-      %key mapping 
-        hand_v=2;
-     %test phase block order
-     test_first='lifetime';
-     
-        case 15
-            %load in stimulus set
-     [study_num,study_txt,~] = xlsread(strcat(pathStim,'genetic_180_rand_jitter_run45'),'v2study_jitter','M2:M451');
-     [test_num,test_txt,~]=xlsread(strcat(pathStim,'genetic_180_rand_jitter_run45'),'v2test_jitter','E2:F181');      
-
-      %key mapping 
-         hand_v=1;
-     %test phase block order
-     test_first='lifetime';
-
-        case 16
-            %load in stimulus set
-     [study_num,study_txt,~] = xlsread(strcat(pathStim,'genetic_180_rand_jitter_run45'),'v2study_jitter','M2:N451');
-     [test_num,test_txt,~]=xlsread(strcat(pathStim,'genetic_180_rand_jitter_run45'),'v2test_jitter','E2:F181');      
-     
-     %key mapping 
-        hand_v=2;
-     %test phase block order
-     test_first='lifetime';
-     
-        otherwise
-            error('version out of range [1, 16]')
-    end
     
-    %% run specific setup for stimuli, jitter, and instructions
+    
+    
+    
+    
+% call sub-procedures, need to have an indicator for the operator to start the scan. Also
+% return the trial number of the last-run trial. If anything returns an error, we can call
+% the function directly in command window to continue.
+%% call function handling study phase presentation, loop over runs with break in between
+
+%% call function handling practice, one long run (~10 min). If subject cannot complete the task within that time, rerun it.
+
+%% call function handling test phase presentation, loop over runs with break in between
+
+
+%% call function handling post-scan test, instruct participants to get out of scanner (lock keys during that), remap keys
+
+
+
+
+
+
+%% run specific setup for stimuli, jitter, and instructions
     %totel 14 runs, the first 10 runs are study, and the last 4 are
     %test,each run has 45 stimuli
     if run<=10&&run>=1
