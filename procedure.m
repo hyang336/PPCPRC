@@ -41,16 +41,16 @@ addtrig=5;%exp start at the 5th trigger
     
     
 % call sub-procedures, need to have an indicator for the operator to start the scan. Also
-% return the trial number of the last-run trial. If anything returns an error, we can call
-% the function directly in command window to continue.
-%% call function handling study phase presentation, loop over runs with break in between
+% return the trial number of the last-run trial. If anything returns an error, we can pass
+% in those to continue. Also wait for experimenter inputs between stages.
+%% stage 1: call function handling study phase presentation, loop over runs with break in between
 
-%% call function handling practice, one long run (~10 min). If subject cannot complete the task within that time, rerun it.
+%% stage 2: call function handling practice, one long run (~15 min). If subject cannot complete the task within that time, the rest is not scanned.
 
-%% call function handling test phase presentation, loop over runs with break in between
+%% stage 3: call function handling test phase presentation, loop over runs with break in between
 
 
-%% call function handling post-scan test, instruct participants to get out of scanner (lock keys during that), remap keys
+%% stage 4: call function handling post-scan test, instruct participants to get out of scanner (lock keys during that), remap keys
 
 
 
