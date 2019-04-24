@@ -1,4 +1,4 @@
-function data=Pilot_lifetime(version,SSID,run,behav,trial)
+function data=Pilot_lifetime_KbQ_test(version,SSID,run,behav,trial)
 % trial=1 if start from the beginning of a run, otherwise trial=stim+1
 % behav=1 if purely bahavioral (script not complete), otherwise behav=0
  Screen('Preference','SkipSyncTests',1);
@@ -8,26 +8,37 @@ screens=Screen('Screens');
 scanner_screen=max(screens); %before running the script, use Screen('Screens') to determine the scanner screen number
     
 %% initial setup
+    ListenChar(0);%disable GetChar, which is in conflict with KbQueue
     KbName('UnifyKeyNames');
     %This part is specific for the 3T scanner, the key mapping is NOT
     %configurable
     scan_trig=KbName('5%');
     ins_done=KbName('2@');
     flippage=KbName('1!');
+    experimenter=KbName('e');
     switch version
         case 2
-        r5=KbName('3#');
-        r4=KbName('2@');
-        r3=KbName('1!');
-        r2=KbName('6^');
-        r1=KbName('7&');
+        r5='3#';
+        r4='2@';
+        r3='1!';
+        r2='6^';
+        r1='7&';
         case 1
-        r5=KbName('8*');
-        r4=KbName('7&');
-        r3=KbName('6^');
-        r2=KbName('1!');
-        r1=KbName('2@');   
+        r5='8*';
+        r4='7&';
+        r3='6^';
+        r2='1!';
+        r1='2@';   
     end
+    %make the keylist to listen to for the KbQueue, including all the
+    %subject response keys, and the experimenter
+    %continue key "e". Note that this means the scanner
+    %trigger is not stored in the queue to avoid
+    %overflow, which means this queue should only be
+    %used after the dummy scans are done.
+    keylist=zeros(1,256);
+    keylist(1,[r1 r2 r3 r4 r5 experimenter])=1;
+    
     SSID=num2str(SSID,'%03.f');%pad SSID with zeros and convert to string
     pathStim = 'D:\pilot\lifetime_PTB\Windows\stimuli\';
     pathdata='D:\pilot\lifetime_PTB\Windows\datapilot\';
@@ -202,14 +213,20 @@ scanner_screen=max(screens); %before running the script, use Screen('Screens') t
     %the last dummy trigger received marks the beginning of the experiment
     exp_start=dummy_t(end);
     data(2:end,4)=exp_start;
-
+    
+    %draw first focuing cross for 3 seconds
+        DrawFormattedText(w, '+', 'center', 'center');
+        Screen(w, 'Flip');
+        WaitSecs(3);
+        
+        %create and start KbQueue, flush each run (in
+        %the for-loop)
+        KbQueueCreate;
+        KbQueueStart;
 %% loop through stimuli for the current run
     for stim=trial:size(run_stim,1)
         word=run_stim{stim};
-        %draw first focuing cross
-        DrawFormattedText(w, '+', 'center', 'center');
-        Screen(w, 'Flip');
-        WaitSecs(run_jit(stim));
+        
         switch version
             case 2
                 DrawFormattedText(w,strcat(word,'\n\n1  2  3  4  5'), 'center', 'center' );%present stimuli
@@ -217,40 +234,40 @@ scanner_screen=max(screens); %before running the script, use Screen('Screens') t
                 DrawFormattedText(w,strcat(word,'\n\n5  4  3  2  1'), 'center', 'center' );%present stimuli
         end
         onset=Screen(w,'Flip');%put presentation outside of KbCheck while-loop to keep presenting after a key is pressed, also use the returned value for RT
-        respond=true;
-        while respond %this is important for only registering the first key press (of the 5 keys)
-            
-            % Check the keyboard.
-                [keyIsDown,secs, keyCode] = KbCheck;
-
-                if keyCode(r5)
+        KbQueueFlush;%flush keyboard buffer to start response collection for the current trial after stimuulus onset
+        WaitSecs('UntilTime',onset+1.5);%VERY IMPORTANT, wait until 1.5 seconds has passed since the onset of the image
+        %draw focuing cross during jitter
+        DrawFormattedText(w, '+', 'center', 'center');
+        Screen(w, 'Flip');
+        WaitSecs(run_jit(stim));
+        
+        %check response
+        [pressed, firstPress]=KbQueueCheck;
+    if pressed %if key was pressed do the following
+        firstPress(find(firstPress==0))=NaN; %little trick to get rid of 0s
+        [endtime Index]=min(firstPress); % gets the RT of the first key-press and its ID
+        thekeys=KbName(Index); %converts KeyID to keyname
+                if thekeys==r5
                        resp='5';
-                       respond=false;
-                elseif keyCode(r4)
+                elseif thekeys==r4
                        resp='4';
-                       respond=false;
-                elseif keyCode(r3)
+                elseif thekeys==r3
                        resp='3';
-                       respond=false;
-                elseif keyCode(r2)
+                elseif thekeys==r2
                        resp='2';
-                       respond=false;
-                elseif keyCode(r1)
+                elseif thekeys==r1
                        resp='1';
-                       respond=false;
                 else
-                    resp=[];
+                    resp=[];%pressing any other key results in noresp
                 end
-                if secs-onset>2.5%response window
-                    respond=false;
-                    resp=[];
-                end
-        end
-        offset=GetSecs;%time after a response is made,used for RT calculation
-        WaitSecs('UntilTime',onset+2.5);%VERY IMPORTANT, wait until 2.5 seconds has passed since the onset of the image, this number has to agree with the response window, to keep stimulus on the screen after a key is pressed
+    else
+        resp=[];%nor pressing any key results in noresp
+    end      
+        %offset=GetSecs;%time after a response is made,used for RT calculation
+        
         data{stim+1,7}=resp; %record responses, data has headers
         data{stim+1,6}=onset;%onset time, currently put before drawformattedtext call
-        data{stim+1,8}=offset-onset;%RT, the offset line has to occur before the WaitSecs line
+        data{stim+1,8}=endtime-onset;%RT, the offset line has to occur before the WaitSecs line
         
     end
     temprun=sprintf('%02d',run);

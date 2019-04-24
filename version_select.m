@@ -17,7 +17,7 @@ function [study_stim,test_stim,hand]=version_select(version)
          tab='v2';
  end
  
- switch block_order
+ switch block_order %need to add the stimulus folder to path or move the stimulus sheet to the current directory
      case 'inc'
         [~,~,study_stim]=xlsread('genetic_180_rand_jitter_run45.xlsx',strcat(tab,'study_jitter'), 'A2:C451');
         [~,~,test_stim]=xlsread('genetic_180_rand_jitter_run45.xlsx',strcat(tab,'test_jitter'), 'A2:D181');

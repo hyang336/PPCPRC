@@ -17,8 +17,8 @@ addpath(genpath('C:\Users\haozi\Desktop\PhD\fMRI_PrC-PPC\'));
 KbName('UnifyKeyNames');
 scan_trig=KbName('5%');
 %create data cell, later use xlswrite to export
-data=cell(811,12);%630 trials in scanner, and 180 trials post-scan, plus headers
-data(1,:)={'ParticipantNum' 'Version' 'Run' 'Trial' 'ExpStartTime' 'Stimuli' 'objective_freq' 'norm_fam' 'task' 'StimOnsetTime' 'Response' 'RespTime'};
+data=cell(46,9);%45 trials per run plus headers
+data(1,:)={'ParticipantNum' 'Version' 'Run' 'Trial' 'ExpStartTime' 'Stimuli' 'counter' 'task' 'StimOnsetTime' 'Response' 'RespTime'};
 SSID=num2str(SSID,'%03.f');%pad SSID with zeros and convert to string
 data(2:end,1)={SSID};
 data(2:end,2)={version_inp};
