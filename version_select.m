@@ -19,17 +19,17 @@ function [study_stim,test_stim,hand]=version_select(version)
  
  switch block_order %need to add the stimulus folder to path or move the stimulus sheet to the current directory
      case 'inc'
-        [~,~,study_stim]=xlsread('genetic_180_rand_jitter_run45.xlsx',strcat(tab,'study_jitter'), 'A2:C451');
-        [~,~,test_stim]=xlsread('genetic_180_rand_jitter_run45.xlsx',strcat(tab,'test_jitter'), 'A2:D181');
+        [~,~,study_stim]=xlsread('genetic_180_rand_jitter_run9045.xlsx',strcat(tab,'study_jitter'), 'A2:E451');
+        [~,~,test_stim]=xlsread('genetic_180_rand_jitter_run9045.xlsx',strcat(tab,'test_jitter'), 'A2:F181');
      case 'dec'
-        [~,~,study_stim]=xlsread('genetic_180_rand_jitter_run45.xlsx',strcat(tab,'study_jitter'), 'E2:G451');
-        [~,~,test_stim]=xlsread('genetic_180_rand_jitter_run45.xlsx',strcat(tab,'test_jitter'), 'E2:H181');         
+        [~,~,study_stim]=xlsread('genetic_180_rand_jitter_run9045.xlsx',strcat(tab,'study_jitter'), 'G2:K451');
+        [~,~,test_stim]=xlsread('genetic_180_rand_jitter_run9045.xlsx',strcat(tab,'test_jitter'), 'G2:L181');         
      case 'odd_first'
-        [~,~,study_stim]=xlsread('genetic_180_rand_jitter_run45.xlsx',strcat(tab,'study_jitter'), 'I2:K451');
-        [~,~,test_stim]=xlsread('genetic_180_rand_jitter_run45.xlsx',strcat(tab,'test_jitter'), 'A2:D181');          
+        [~,~,study_stim]=xlsread('genetic_180_rand_jitter_run9045.xlsx',strcat(tab,'study_jitter'), 'M2:Q451');
+        [~,~,test_stim]=xlsread('genetic_180_rand_jitter_run9045.xlsx',strcat(tab,'test_jitter'), 'A2:F181');          
      case 'even_first'
-        [~,~,study_stim]=xlsread('genetic_180_rand_jitter_run45.xlsx',strcat(tab,'study_jitter'), 'M2:O451');
-        [~,~,test_stim]=xlsread('genetic_180_rand_jitter_run45.xlsx',strcat(tab,'test_jitter'), 'E2:H181');          
+        [~,~,study_stim]=xlsread('genetic_180_rand_jitter_run9045.xlsx',strcat(tab,'study_jitter'), 'S2:W451');
+        [~,~,test_stim]=xlsread('genetic_180_rand_jitter_run9045.xlsx',strcat(tab,'test_jitter'), 'G2:L181');          
  end
  
  switch hand_map

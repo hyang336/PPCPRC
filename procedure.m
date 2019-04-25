@@ -33,8 +33,8 @@ addtrig=5;%exp start at the 5th trigger
 [study_stim,test_stim,hand]=version_select(version_inp);
     study_txt=study_stim(:,1);%stimuli
     study_num=study_stim(:,2);%jitter
-    test_txt=test_stim(:,1);
-    test_num=test_stim(:,2);
+    test_txt=test_stim(:,1);%stimuli
+    test_num=test_stim(:,2);%jitter
 
 %% set up screen    
     [w,rect]=Screen('OpenWindow', scanner_screen);

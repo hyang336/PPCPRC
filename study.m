@@ -2,6 +2,11 @@
 %handling. Note that depending on where the error happens, the trial when the error occurs
 %may or may not be presented to the participants, for now this detail is not treated
 %differently.
+
+%% the block number listed in the loaded stimuli does not match total number of runs 
+%% since we reduced 10 runs to 5 runs (double the trial count in each run), but the block number was not changed
+%% since the main function of it was to counter balance the order of presentation between subjects
+%% the output from this function should list the correct run number
 function [resp_sofar,lastrun,lasttrial] = study(PTBwindow,stimuli,hand,run, trial)
     output=cell(450,7);%initialize data output; headers are handled in the main procedure script
     a=0;

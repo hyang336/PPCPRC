@@ -9,6 +9,8 @@ function seq=truncexp_jitter_sample(min,max,mean,samples)
 
 %with mean=1.5, after truncating at [2.5 10], the after-truncation mean is
 %about 4
+
+%with mean=0.5, after truncatiing at [1 4], the after-truncation mean is about 1.5
 y=makedist('Exponential','mu',mean);
 t = truncate(y,min,max);
 r = random(t,[samples,1]);
