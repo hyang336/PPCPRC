@@ -38,20 +38,48 @@ addtrig=5;%exp start at the 5th trigger
 
 %% set up screen    
     [w,rect]=Screen('OpenWindow', scanner_screen);
+
     
-    
-    
+% %     %code for instruction screen testing below
+% %     [nx, ny, bbox] = DrawFormattedText(w, page1,'center','center');
+% %     Screen('Flip',w);
+% %     waittrig=1;
+% %     while waittrig
+% %     [keyIsDown, instime, keyCodes] = KbCheck;
+% %     if keyCodes(flippage)==1
+% %         waittrig=0;
+% %     end
+% %     end
+% %     %page2
+% %     [nx, ny, bbox] = DrawFormattedText(w, page2,'center','center');
+% %     Screen('Flip',w);
+% %     %cant use KbStrokeWait since scanner trigger will be treated as
+% %     %a key press
+% %     waittrig=1;
+% %     while waittrig
+% %     [keyIsDown, instime, keyCodes] = KbCheck;
+% %     if keyCodes(ins_done)==1
+% %         waittrig=0;
+% %     end
+% %     end
+% %     WaitSecs(3);
+% %     Screen('CloseAll');
+
+
+
 % call sub-procedures and pass in PTB window, stimuli, and hand mapping, return responses.
 % need to have an indicator for the operator to start the scan. Also return the trial
 % number of the last-run trial. If anything returns an error, we can pass in those to
-% continue. Also wait for experimenter inputs between stages.
+% continue. Also wait for experimenter inputs between phases.
 %% stage 1: call function handling study phase presentation, loop over runs with break in between
 
 %% stage 2: call function handling practice, one long run (~15 min). If subject cannot complete the task within that time, the rest is not scanned.
 
 %% stage 3: call function handling test phase presentation, loop over runs with break in between
 
-
+%% post-process scanning data, use ExpStartTime to assign runs. The "run" field was used to select stimuli to present so it had to fall within a certain range, but now it needs to reflect the actual run number, which can be outside of that range if error occured and a run was broken into multiple runs. However, any run would have the same ExpStartTime.
+    ppdata=data;%copy the unprocessed data just in case
+    
 %% stage 4: call function handling post-scan test, instruct participants to get out of scanner (lock keys during that), remap keys
 
 
@@ -59,6 +87,7 @@ addtrig=5;%exp start at the 5th trigger
 
 
 
+%% obsolete code for salvage below
 %% run specific setup for stimuli, jitter, and instructions
     %totel 14 runs, the first 10 runs are study, and the last 4 are
     %test,each run has 45 stimuli
