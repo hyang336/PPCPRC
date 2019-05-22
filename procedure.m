@@ -1,10 +1,39 @@
 %% need to update this!!! 2019-04-20
-function [data,errors]=procedure(SSID,version_inp,project_dir)
+function procedure(SSID,version_inp,project_dir,pathdata,varargin)
 %16 versions (hand (2) * set_selection (2) * block_order (4)).
 %study phase one run, test phase one run, both triggered by scanner.
 %pseudorandomization done for each Ss individually.
 %study phase has spacing constraint for repetitions
 %test phase presentation is simple shuffling, since there is no repetition.
+
+%% input parser
+
+%study phase has 5 runs of 90 trials, key_practice has one
+%run of however many trials (max 10 mins will be scanned),
+%test phase has 4 runs of 45 trials, post_scan has one run
+%of 180 trials.
+p = inputParser;
+
+%default start from the beginning of the study phase and run
+%through all phases
+defaultPhase = 'study';
+validPhase={'study','key_prac','test','post_scan'};
+checkPhase=@(x) any(validatestring(x,validPhase));
+defaultRun = 1;
+checkRun=@(x) isinteger(int8(x))&&(x>0)&&(x<6);
+defaultTrial=1;
+checkTrial=@(x) isinteger(int8(x))&&(x>0)&&(x<91);
+
+addRequired(p,'SSID');
+addRequired(p,'version_inp');
+addRequired(p,'project_dir');
+addRequired(p,'pathdata');
+addParameter(p,'phase',defaultPhase,checkPhase);
+addParameter(p,'run',defaultRun,checkRun);
+addParameter(p,'trial',defaultTrial,checkTrial);
+
+%parse
+parse(p,SSID,version_inp,project_dir,pathdata,varargin{:});
 
 %% surpress the screen sync error on Windows, will like result in wildly inaccurate timing of stimulus onsets
 Screen('Preference','SkipSyncTests',1);
@@ -16,12 +45,14 @@ addpath(genpath(project_dir));
 %% initialize constants
 KbName('UnifyKeyNames');
 scan_trig=KbName('5%');
+experimenter_pass=KbName('e');
 %create data cell, later use xlswrite to export
 data=cell(811,12);%630 trials in scanner, and 180 trials post-scan, plus headers
 data(1,:)={'ParticipantNum' 'Version' 'Run' 'Trial' 'ExpStartTime' 'Stimuli' 'objective_freq' 'norm_fam' 'task' 'StimOnsetTime' 'Response' 'RespTime'};
 SSID=num2str(SSID,'%03.f');%pad SSID with zeros and convert to string
 data(2:end,1)={SSID};
 data(2:end,2)={version_inp};
+mkdir(pathdata,SSID);
 
 screens=Screen('Screens');
 scanner_screen=max(screens);%before running the script, use Screen('Screens') to determine the scanner screen number
@@ -39,7 +70,7 @@ addtrig=5;%exp start at the 5th trigger
 %% set up screen 
 try
     [w,rect]=Screen('OpenWindow', scanner_screen);
-
+    y_mid=(rect(2)+rect(4))/2;%get the y mid point of the screen for presentation use
     
 % %     %code for instruction screen testing below
 % %     [nx, ny, bbox] = DrawFormattedText(w, page1,'center','center');
@@ -72,131 +103,51 @@ try
 % need to have an indicator for the operator to start the scan. Also return the trial
 % number of the last-run trial. If anything returns an error, we can pass in those to
 % continue. Also wait for experimenter inputs between phases.
-%% stage 1: call function handling study phase presentation, loop over runs with break in between
-[resp_sofar,lastrun,lasttrial] = study(addtrig,w,study_txt,study_num,hand,1,2);
-data=resp_sofar;%test line
-disp(['last study run:' lastrun]);
-disp(['last study trial:' lasttrial]);
-%% stage 2: call function handling practice, one long run (~15 min). If subject cannot complete the task within that time, the rest is not scanned.
 
-%% stage 3: call function handling test phase presentation, loop over runs with break in between
-
-%% post-process scanning data, use ExpStartTime to assign runs. The "run" field was used to select stimuli to present so it had to fall within a certain range, but now it needs to reflect the actual run number, which can be outside of that range if error occured and a run was broken into multiple runs. However, any run would have the same ExpStartTime.
-    ppdata=data;%copy the unprocessed data just in case
+if strcmp(p.Results.phase,'study')
+%stage 1: call function handling study phase presentation, loop over runs with break in between
+    resp_sofar = study(addtrig,w,y_mid,study_txt,study_num,hand,p.Results.run,p.Results.trial);
+    %find none empty trials
+    [trial_row,~]=find(~cellfun('isempty',resp_sofar(1:end,8)));%search the onset column (8)
+    data(trial_row+1,3:12)=resp_sofar(trial_row,1:10);%test line
     
-%% stage 4: call function handling post-scan test, instruct participants to get out of scanner (lock keys during that), remap keys
+%stage 2: call function handling practice, one long run (~15 min). If subject cannot complete the task within that time, the rest is not scanned.
+
+%stage 3: call function handling test phase presentation, loop over runs with break in between
+
+%stage 4: post-process scanning data, use ExpStartTime to assign runs. The "run" field was used to select stimuli to present so it had to fall within a certain range, but now it needs to reflect the actual run number, which can be outside of that range if error occured and a run was broken into multiple runs. However, any run would have the same ExpStartTime.
+    scandata=data;%copy the unprocessed data just in case
+    
+%stage 5: call function handling post-scan test, instruct participants to get out of scanner (lock keys during that), remap keys
 
 
+elseif strcmp(p.Results.phase,'key_prac')
+%stage 2:
 
+%stage 3:
 
+%stage 4:
 
+%stage 5:
 
-%% obsolete code for salvage below
-% %% run specific setup for stimuli, jitter, and instructions
-%     %totel 14 runs, the first 10 runs are study, and the last 4 are
-%     %test,each run has 45 stimuli
-%     if run<=10&&run>=1
-%           run_stim=study_txt((run-1)*45+1:run*45);%get the stimuli for the selected run in study phase
-%           run_jit=study_num((run-1)*45+1:run*45);%get jittering time
-%           %depending on the hand mapping version, show different
-%           %instructions for study phase
-%           if mod(hand_v,2)==1
-%             
-%           else
-%               
-%           end
-%     else
-%         if run>=11&&run<=14
-%           run_stim=test_txt((run-11)*45+1:(run-10)*45); %get the stimuli for the selected run in test phase
-%           run_jit=test_num((run-11)*45+1:(run-10)*45);%get jittering time
-%           
-%           %make stimuli blocks according to test_first
-%           switch test_first
-%               case 'recent'
-%               
-%               case 'lifetime'
-%                   
-%               otherwise
-%                   error('test phase block order error')
-%           end
-%           %depending on the hand mapping version, show different
-%           %instructions for test phase
-%           if mod(hand_v,2)==1
-%             
-%           else
-%               
-%           end
-%         else
-%           error('run number out of range [1,14]')
-%         end
-%     end
-%     
-%     
-%     %% presenting using a screen, enclosed in a try-catch block so it doesn't freeze on error
-%     try
-%         
-%         %screens=Screen('Screens');%check connected screens, 0 is ALL screens on Windows
-%         %use the scanner moniter 
-%         window = Screen(scanner_screen,'OpenWindow',bckgcolour,winsize); %timing will be inevitably off on Windows after 8, mainly due to the highly varying and above-threshold std from the test calls of screen('Flip').
-% 
-%         %COLOURS
-%         white = WhiteIndex(window); % pixel value for white
-%         black = BlackIndex(window); % pixel value for black
-% 
-%         %not sure what is offscreenwindow and why we need it, by HY
-%         %open offscreen window
-% %         offwindow1= Screen('OpenOffscreenWindow',scanner_screen);
-% %         offwindow2 = Screen('OpenOffscreenWindow',scanner_screen);
-% %         Screen(offwindow1,'FillRect',bckgcolour);
-% %         Screen(offwindow2,'FillRect',bckgcolour);
-% 
-%         Screen(window,'FillRect', bckgcolour);
-%         HideCursor;
-%         WaitSecs(1);
-%         
-%         %draw info
-%         info = 'The experiment is going to start in a few seconds';
-%         DrawFormattedText(window, info, 'center', 'center', black);
-%         Screen(window, 'Flip');
-%         WaitSecs(3);
-%         
-%         %draw first focuing cross
-%         DrawFormattedText(window, '+', 'center', 'center', black);
-%         Screen(window, 'Flip');
-%         WaitSecs(2.5);
-%         
-%         %% wait for the first n volumes as dummy scans
-%         dummy_t=cell(addtrig,1);
-%         keyCodes(1:256)=0;
-%     for i=1:addtrig
-%            keyCodes(scan_trig)=0;%gotta reset the scan_trigger since im using it as the condition for while-loop
-%            while ~keyCodes(scan_trig)
-%             [keyIsDown, dummy_start, keyCodes] = KbCheck(-1);
-%            end
-%            fprintf('trigger %d\n',i)
-%            dummy_t{i}=dummy_start;%resolution shows in second, but are actually finer (hint:take the difference)
-%                    
-%            %KbCheck will return 1 whenever a key is pressed, the following
-%            %loop seems to hault the for loop until the key is released.
-%            %helpful in preventing one key pressing being registered as
-%            %multiple press
-%            while KbCheck(-1)
-%            end
-%     end
-%     
-%     exp_start=dummy_t{end};%last trigger from the above loop signals the beginning of the exp run
-%     
-%      
-%     %% loop through stimuli for the current run
-%     for stim=1:size(run_stim,1)
-%         
-%         hand(hand_v).r5
-%     
-%     end
-%         
-    catch
+elseif strcmp(p.Results.phase,'test')
+%stage 3:
+
+%stage 4:
+
+%stage 5:
+
+elseif strcmp(p.Results.phase,'post_scan')
+%stage 5:
+
+end
+
+xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_alldata.xlsx'),data);
+Screen('CloseAll');
+catch ME
         Screen('CloseAll');
-        data=resp_sofar;%test line
-%         disp(['scan stopped at run ' num2str(run) ' stim ' num2str(stim)])%need to receive a stop trigger from scanner (if possible) earlier in presentation loop
+        xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_alldata.xlsx'),data);
+        disp(ME);
+        return
 end
 end

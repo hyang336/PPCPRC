@@ -7,7 +7,7 @@
 %% since we reduced 10 runs to 5 runs (double the trial count in each run), but the block number was not changed
 %% since the main function of it was to counter balance the order of presentation between subjects
 %% the output from this function should list the correct run number
-function [resp_sofar,lastrun,lasttrial] = study(addtrig,PTBwindow,stimuli,jitter,hand,run,trial)%run is in the range of [1,5], trial is in [1,90]
+function resp_sofar = study(addtrig,PTBwindow,y_center,stimuli,jitter,hand,run,trial)%run is in the range of [1,5], trial is in [1,90]
     output=cell(450,10);%initialize data output; headers are handled in the main procedure script (all but participant_ID and version [3 12])
     %some of the columns in the output will be empty (e.g.
     %norm_fam, frequency, run-number which is dependent on how many different exp_start afterwards,etc.), that's because this
@@ -70,7 +70,7 @@ function [resp_sofar,lastrun,lasttrial] = study(addtrig,PTBwindow,stimuli,jitter
         Screen('TextSize',PTBwindow,80);%use font size 80 for stimuli
         
         %draw first focuing cross for 3 seconds
-        DrawFormattedText(PTBwindow, '+', 'center', 'center');
+        DrawFormattedText(PTBwindow, '+', 'center', y_center);
         Screen(PTBwindow, 'Flip');
         WaitSecs(3);
 
@@ -84,13 +84,13 @@ function [resp_sofar,lastrun,lasttrial] = study(addtrig,PTBwindow,stimuli,jitter
             for j=trial:90 
                     word=run_stim{j};       
 
-                    DrawFormattedText(PTBwindow,strcat(word,strcat('\n',hand.study_scale)), 'center', 'center' );%present stimuli
+                    DrawFormattedText(PTBwindow,strcat(word,strcat('\n\n\n',hand.study_scale)), 'center', y_center );%present stimuli
 
                     onset=Screen(PTBwindow,'Flip');%put presentation outside of KbCheck while-loop to keep presenting after a key is pressed, also use the returned value for RT
                     KbQueueFlush;%flush keyboard buffer to start response collection for the current trial after stimuulus onset
                     WaitSecs('UntilTime',onset+1.5);%VERY IMPORTANT, wait until 1.5 seconds has passed since the onset of the image
                     %draw focuing cross during jitter
-                    DrawFormattedText(PTBwindow, '+', 'center', 'center');
+                    DrawFormattedText(PTBwindow, '+', 'center', y_center);
                     Screen(PTBwindow, 'Flip');
                     WaitSecs(run_jit{j});
 
@@ -125,13 +125,13 @@ function [resp_sofar,lastrun,lasttrial] = study(addtrig,PTBwindow,stimuli,jitter
             for j=1:90 %for all followin runs, start from the first trial
                     word=run_stim{j};
         
-                    DrawFormattedText(PTBwindow,strcat(word,strcat('\n',hand.study_scale)), 'center', 'center' );%present stimuli
+                    DrawFormattedText(PTBwindow,strcat(word,strcat('\n\n\n',hand.study_scale)), 'center', y_center );%present stimuli
 
                     onset=Screen(PTBwindow,'Flip');%put presentation outside of KbCheck while-loop to keep presenting after a key is pressed, also use the returned value for RT
                     KbQueueFlush;%flush keyboard buffer to start response collection for the current trial after stimuulus onset
                     WaitSecs('UntilTime',onset+1.5);%VERY IMPORTANT, wait until 1.5 seconds has passed since the onset of the image
                     %draw focuing cross during jitter
-                    DrawFormattedText(PTBwindow, '+', 'center', 'center');
+                    DrawFormattedText(PTBwindow, '+', 'center', y_center);
                     Screen(PTBwindow, 'Flip');
                     WaitSecs(run_jit{j});
 
@@ -190,14 +190,14 @@ function [resp_sofar,lastrun,lasttrial] = study(addtrig,PTBwindow,stimuli,jitter
     end
     
 %% gather the output for all the runs so far
-        lastrun=i;
-        lasttrial=j;
+%         lastrun=i;
+%         lasttrial=j;
         resp_sofar=output;
     catch ME
         %need to copy it here as well otherwise if error occurred in loops these variables
         %won't get returned
-        lastrun=i;
-        lasttrial=j;
+%         lastrun=i;
+%         lasttrial=j;
         resp_sofar=output;
         Screen('CloseAll');
         disp(ME)
