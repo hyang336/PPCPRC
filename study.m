@@ -7,7 +7,7 @@
 %% since we reduced 10 runs to 5 runs (double the trial count in each run), but the block number was not changed
 %% since the main function of it was to counter balance the order of presentation between subjects
 %% the output from this function should list the correct run number
-function resp_sofar = study(addtrig,PTBwindow,y_center,stimuli,jitter,hand,run,trial)%run is in the range of [1,5], trial is in [1,90]
+function [resp_sofar,errors] = study(pathdata,SSID,addtrig,PTBwindow,y_center,stimuli,jitter,hand,run,trial)%run is in the range of [1,5], trial is in [1,90]
     output=cell(450,10);%initialize data output; headers are handled in the main procedure script (all but participant_ID and version [3 12])
     %some of the columns in the output will be empty (e.g.
     %norm_fam, frequency, run-number which is dependent on how many different exp_start afterwards,etc.), that's because this
@@ -18,8 +18,8 @@ function resp_sofar = study(addtrig,PTBwindow,y_center,stimuli,jitter,hand,run,t
     scan_trig=KbName('5%');
     ins_done=KbName('2@');
     experimenter_pass=KbName('e');
+    pausekey=KbName('p');
 
-    
 %% loop through runs and trials, special treatment on first run    
     try
     for i=run:5 % 5 runs of 90 trials
@@ -94,9 +94,28 @@ function resp_sofar = study(addtrig,PTBwindow,y_center,stimuli,jitter,hand,run,t
                     Screen(PTBwindow, 'Flip');
                     WaitSecs(run_jit{j});
 
-                    %check response
+                    %check response after presentation
                     [pressed, firstPress]=KbQueueCheck;
                 if pressed %if key was pressed do the following
+                    %if the first key press is by the
+                    %subject then we record the response,
+                    %otherwise we don't
+                    if firstPress(pausekey)
+                        waitcont=1;
+                        DrawFormattedText(PTBwindow,'experiment paused, please wait', 'center', 'center' );
+                        Screen(PTBwindow, 'Flip');
+                        %save partial data
+                       save(strcat(pathdata,'/',SSID,'/',SSID,'_run-',num2str(i),'_trial-',num2str(j),'data.mat'),'output');
+                    while waitcont%check if the pause key has been pressed
+                        [~, ~, keyCodes] = KbCheck;
+                        if keyCodes(experimenter_pass)%if continue key has been pressed
+                            waitcont=0;
+                        end
+                    end                       
+                       %need to have these two lines to wait for the key release
+                       while KbCheck
+                       end 
+                    end
                     firstPress(find(firstPress==0))=NaN; %little trick to get rid of 0s
                     [endtime Index]=min(firstPress); % gets the RT of the first key-press and its ID
 %                     thekeys=KbName(Index); %converts KeyID to keyname
@@ -135,9 +154,28 @@ function resp_sofar = study(addtrig,PTBwindow,y_center,stimuli,jitter,hand,run,t
                     Screen(PTBwindow, 'Flip');
                     WaitSecs(run_jit{j});
 
-                    %check response
+                    %check response after presentation
                     [pressed, firstPress]=KbQueueCheck;
                 if pressed %if key was pressed do the following
+                    %if the first key press is by the
+                    %subject then we record the response,
+                    %otherwise we don't
+                    if firstPress(pausekey)
+                        waitcont=1;
+                        DrawFormattedText(PTBwindow,'experiment paused, please wait', 'center', 'center' );
+                        Screen(PTBwindow, 'Flip');
+                        %save partial data
+                       save(strcat(pathdata,'/',SSID,'/',SSID,'_run-',num2str(i),'_trial-',num2str(j),'data.mat'),'output');
+                    while waitcont%check if the pause key has been pressed
+                        [~, ~, keyCodes] = KbCheck;
+                        if keyCodes(experimenter_pass)%if continue key has been pressed
+                            waitcont=0;
+                        end
+                    end
+                      %need to have these two lines to wait for the key release
+                       while KbCheck
+                       end 
+                    end
                     firstPress(find(firstPress==0))=NaN; %little trick to get rid of 0s
                     [endtime Index]=min(firstPress); % gets the RT of the first key-press and its ID
 %                     thekeys=KbName(Index); %converts KeyID to keyname
@@ -160,7 +198,7 @@ function resp_sofar = study(addtrig,PTBwindow,y_center,stimuli,jitter,hand,run,t
                     output{(i-1)*90+j,8}=onset;%onset time, currently put before drawformattedtext call
                     output{(i-1)*90+j,4}=word;%the stimulus of this trial
                     output{(i-1)*90+j,2}=j;% the trial count of the current run            
-            end
+                end
         end
         
         %run-level debrief
@@ -193,6 +231,7 @@ function resp_sofar = study(addtrig,PTBwindow,y_center,stimuli,jitter,hand,run,t
 %         lastrun=i;
 %         lasttrial=j;
         resp_sofar=output;
+        errors='none';
     catch ME
         %need to copy it here as well otherwise if error occurred in loops these variables
         %won't get returned
@@ -200,6 +239,6 @@ function resp_sofar = study(addtrig,PTBwindow,y_center,stimuli,jitter,hand,run,t
 %         lasttrial=j;
         resp_sofar=output;
         Screen('CloseAll');
-        disp(ME)
+        errors=ME;
     end
 end

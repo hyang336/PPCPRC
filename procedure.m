@@ -1,5 +1,5 @@
 %% need to update this!!! 2019-04-20
-function procedure(SSID,version_inp,project_dir,pathdata,varargin)
+function [output,errors]=procedure(SSID,version_inp,project_dir,pathdata,varargin)
 %16 versions (hand (2) * set_selection (2) * block_order (4)).
 %study phase one run, test phase one run, both triggered by scanner.
 %pseudorandomization done for each Ss individually.
@@ -106,10 +106,23 @@ try
 
 if strcmp(p.Results.phase,'study')
 %stage 1: call function handling study phase presentation, loop over runs with break in between
-    resp_sofar = study(addtrig,w,y_mid,study_txt,study_num,hand,p.Results.run,p.Results.trial);
+    [resp_sofar,study_error] = study(pathdata,SSID,addtrig,w,y_mid,study_txt,study_num,hand,p.Results.run,p.Results.trial);
     %find none empty trials
     [trial_row,~]=find(~cellfun('isempty',resp_sofar(1:end,8)));%search the onset column (8)
     data(trial_row+1,3:12)=resp_sofar(trial_row,1:10);%test line
+    %if an error occured in the study phase, terminate the
+    %function and return the error, study_error won't be
+    %catched on this level, so I have to manually return the
+    %function
+    if ~strcmp(study_error,'none')
+        errors=study_error;
+        return
+    else
+        errors='none';
+    end
+    
+    %wait for experimenter input (continue or terminate)
+    
     
 %stage 2: call function handling practice, one long run (~15 min). If subject cannot complete the task within that time, the rest is not scanned.
 
@@ -144,10 +157,12 @@ end
 
 xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_alldata.xlsx'),data);
 Screen('CloseAll');
+output=data;
+
 catch ME
         Screen('CloseAll');
         xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_alldata.xlsx'),data);
-        disp(ME);
-        return
+        output=data;
+        errors=ME;
 end
 end
