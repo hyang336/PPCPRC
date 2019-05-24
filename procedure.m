@@ -44,8 +44,10 @@ addpath(genpath(project_dir));
 
 %% initialize constants
 KbName('UnifyKeyNames');
-scan_trig=KbName('5%');
+% scan_trig=KbName('5%');
 experimenter_pass=KbName('e');
+termkey=KbName('t');
+
 %create data cell, later use xlswrite to export
 data=cell(811,12);%630 trials in scanner, and 180 trials post-scan, plus headers
 data(1,:)={'ParticipantNum' 'Version' 'Run' 'Trial' 'ExpStartTime' 'Stimuli' 'objective_freq' 'norm_fam' 'task' 'StimOnsetTime' 'Response' 'RespTime'};
@@ -59,7 +61,6 @@ scanner_screen=max(screens);%before running the script, use Screen('Screens') to
 
 addtrig=5;%exp start at the 5th trigger
 
-
 %% specify hand mapping, load stimuli and block order according to version number
 [study_stim,test_stim,hand]=version_select(version_inp);
     study_txt=study_stim(:,1);%stimuli
@@ -71,57 +72,48 @@ addtrig=5;%exp start at the 5th trigger
 try
     [w,rect]=Screen('OpenWindow', scanner_screen);
     y_mid=(rect(2)+rect(4))/2;%get the y mid point of the screen for presentation use
-    
-% %     %code for instruction screen testing below
-% %     [nx, ny, bbox] = DrawFormattedText(w, page1,'center','center');
-% %     Screen('Flip',w);
-% %     waittrig=1;
-% %     while waittrig
-% %     [keyIsDown, instime, keyCodes] = KbCheck;
-% %     if keyCodes(flippage)==1
-% %         waittrig=0;
-% %     end
-% %     end
-% %     %page2
-% %     [nx, ny, bbox] = DrawFormattedText(w, page2,'center','center');
-% %     Screen('Flip',w);
-% %     %cant use KbStrokeWait since scanner trigger will be treated as
-% %     %a key press
-% %     waittrig=1;
-% %     while waittrig
-% %     [keyIsDown, instime, keyCodes] = KbCheck;
-% %     if keyCodes(ins_done)==1
-% %         waittrig=0;
-% %     end
-% %     end
-% %     WaitSecs(3);
-% %     Screen('CloseAll');
-
-
 
 % call sub-procedures and pass in PTB window, stimuli, and hand mapping, return responses.
-% need to have an indicator for the operator to start the scan. Also return the trial
-% number of the last-run trial. If anything returns an error, we can pass in those to
-% continue. Also wait for experimenter inputs between phases.
-
 if strcmp(p.Results.phase,'study')
 %stage 1: call function handling study phase presentation, loop over runs with break in between
-    [resp_sofar,study_error] = study(pathdata,SSID,addtrig,w,y_mid,study_txt,study_num,hand,p.Results.run,p.Results.trial);
+    [resp_sofar,study_error,terminated] = study(pathdata,SSID,addtrig,w,y_mid,study_txt,study_num,hand,p.Results.run,p.Results.trial);
     %find none empty trials
     [trial_row,~]=find(~cellfun('isempty',resp_sofar(1:end,8)));%search the onset column (8)
-    data(trial_row+1,3:12)=resp_sofar(trial_row,1:10);%test line
+    data(trial_row+1,3:12)=resp_sofar(trial_row,1:10);%fill in the data
+    
     %if an error occured in the study phase, terminate the
     %function and return the error, study_error won't be
     %catched on this level, so I have to manually return the
     %function
     if ~strcmp(study_error,'none')
         errors=study_error;
+        output=data;
         return
     else
         errors='none';
     end
     
-    %wait for experimenter input (continue or terminate)
+    %if the study phase was terminated by the experimenter half run,
+    %re-engage the study phase function from the next trial to have a new run
+    while strcmp(terminated,'yes')
+        if mod(max(trial_row),90)==0%if terminated at the last trial of a run,since trial_row can only go from 1 to 450
+            terminated='none';%skip the while loop
+            continue
+        end
+        lastrun=round(max(trial_row)/90);%find the maximum run number
+        lasttrial=mod(max(trial_row),90);%find the maximum trial number, if terminated at the last trial, this will cause the presentation to start from the first trial since mod(A*90,90)=0, A is an integer
+        [resp_sofar,study_error,terminated] = study(pathdata,SSID,addtrig,w,y_mid,study_txt,study_num,hand,lastrun,lasttrial+1);
+        [trial_row,~]=find(~cellfun('isempty',resp_sofar(1:end,8)));%search the onset column (8)
+        data(trial_row+1,3:12)=resp_sofar(trial_row,1:10);%fill in the data
+        if ~strcmp(study_error,'none')
+            errors=study_error;
+            return
+        else
+            errors='none';
+        end
+    end
+    
+    %wait for experimenter input (continue to next phase or terminate and save)
     
     
 %stage 2: call function handling practice, one long run (~15 min). If subject cannot complete the task within that time, the rest is not scanned.
@@ -155,13 +147,16 @@ elseif strcmp(p.Results.phase,'post_scan')
 
 end
 
-xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_alldata.xlsx'),data);
+%overall data from the current execution of this function
+xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_phase-',p.Results.phase,'_run-',num2str(p.Results.run),'_trial-',num2str(p.Results.trial),'_data.xlsx'),data);
 Screen('CloseAll');
 output=data;
 
 catch ME
         Screen('CloseAll');
-        xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_alldata.xlsx'),data);
+        
+        %overall data from the current execution of this function
+        xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_phase-',p.Results.phase,'_run-',num2str(p.Results.run),'_trial-',num2str(p.Results.trial),'_data.xlsx'),data);
         output=data;
         errors=ME;
 end

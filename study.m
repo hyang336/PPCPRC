@@ -7,7 +7,7 @@
 %% since we reduced 10 runs to 5 runs (double the trial count in each run), but the block number was not changed
 %% since the main function of it was to counter balance the order of presentation between subjects
 %% the output from this function should list the correct run number
-function [resp_sofar,errors] = study(pathdata,SSID,addtrig,PTBwindow,y_center,stimuli,jitter,hand,run,trial)%run is in the range of [1,5], trial is in [1,90]
+function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,y_center,stimuli,jitter,hand,run,trial)%run is in the range of [1,5], trial is in [1,90]
     output=cell(450,10);%initialize data output; headers are handled in the main procedure script (all but participant_ID and version [3 12])
     %some of the columns in the output will be empty (e.g.
     %norm_fam, frequency, run-number which is dependent on how many different exp_start afterwards,etc.), that's because this
@@ -19,7 +19,11 @@ function [resp_sofar,errors] = study(pathdata,SSID,addtrig,PTBwindow,y_center,st
     ins_done=KbName('2@');
     experimenter_pass=KbName('e');
     pausekey=KbName('p');
-
+    termkey=KbName('t');
+    
+    %flow control
+    errors='none';%for debugging, return errors in this function
+    terminated='none';%for situations where a scanning run has to be terminated and restarted (i.e. change of exp_start and wait for trigger).
 %% loop through runs and trials, special treatment on first run    
     try
     for i=run:5 % 5 runs of 90 trials
@@ -93,51 +97,66 @@ function [resp_sofar,errors] = study(pathdata,SSID,addtrig,PTBwindow,y_center,st
                     DrawFormattedText(PTBwindow, '+', 'center', y_center);
                     Screen(PTBwindow, 'Flip');
                     WaitSecs(run_jit{j});
-
+                    
+                    output{(i-1)*90+j,8}=onset;%onset time
+                    output{(i-1)*90+j,4}=word;%the stimulus of this trial
+                    output{(i-1)*90+j,2}=j;% the trial count of the current run
+                    
                     %check response after presentation
                     [pressed, firstPress]=KbQueueCheck;
+                    
                 if pressed %if key was pressed do the following
-                    %if the first key press is by the
-                    %subject then we record the response,
-                    %otherwise we don't
-                    if firstPress(pausekey)
+                     firstPress(find(firstPress==0))=NaN; %little trick to get rid of 0s
+                     [endtime Index]=sort(firstPress); % sort the RT of the first key-presses and their ID (the index are with respect to the firstPress)                 
+                            
+                     %if the first key press is "animate" or if the first key press is experimenter pause and the second key press is "animate"
+                            if Index(1)==hand.animate
+                                   resp='animate';
+                                   output{(i-1)*90+j,10}=endtime(1)-onset;%RT
+                            elseif Index(1)==pausekey&&Index(2)==hand.animate
+                                   resp='animate';
+                                   output{(i-1)*90+j,10}=endtime(2)-onset;%RT
+                            elseif Index(1)==hand.inanimate
+                                   resp='inanimate';
+                                   output{(i-1)*90+j,10}=endtime(1)-onset;%RT
+                            elseif Index(1)==pausekey&&Index(2)==hand.inanimate
+                                   resp='inanimate';
+                                   output{(i-1)*90+j,10}=endtime(2)-onset;%RT
+                            else
+                                resp=[];%pressing any key other than pause key before valid response keys results in noresp
+                                output{(i-1)*90+j,10}=NaN;%pressing any other key also results in no RT
+                            end
+                     output{(i-1)*90+j,9}=resp; %record responses before pause
+                     
+                    %put the pause and termination check
+                    %after we record the response of the
+                    %current trial
+                    if ~isnan(firstPress(pausekey))
                         waitcont=1;
                         DrawFormattedText(PTBwindow,'experiment paused, please wait', 'center', 'center' );
                         Screen(PTBwindow, 'Flip');
                         %save partial data
                        save(strcat(pathdata,'/',SSID,'/',SSID,'_run-',num2str(i),'_trial-',num2str(j),'data.mat'),'output');
-                    while waitcont%check if the pause key has been pressed
-                        [~, ~, keyCodes] = KbCheck;
-                        if keyCodes(experimenter_pass)%if continue key has been pressed
-                            waitcont=0;
-                        end
-                    end                       
-                       %need to have these two lines to wait for the key release
+                        while waitcont%check if the pause key has been pressed
+                            [~, ~, keyCodes] = KbCheck;
+                            if keyCodes(experimenter_pass)%if continue key has been pressed
+                                waitcont=0;
+                            elseif keyCodes(termkey)
+                                terminated='yes';
+                                resp_sofar=output;
+                                return
+                            end
+                        end                       
+                           %need to have these two lines to wait for the key release
                        while KbCheck
                        end 
-                    end
-                    firstPress(find(firstPress==0))=NaN; %little trick to get rid of 0s
-                    [endtime Index]=min(firstPress); % gets the RT of the first key-press and its ID
-%                     thekeys=KbName(Index); %converts KeyID to keyname
-                            if Index==hand.animate
-                                   resp='animate';
-                                   output{(i-1)*90+j,10}=endtime-onset;%RT, the offset line has to occur before the WaitSecs line
-                            elseif Index==hand.inanimate
-                                   resp='inanimate';
-                                   output{(i-1)*90+j,10}=endtime-onset;%RT, the offset line has to occur before the WaitSecs line
-                            else
-                                resp=[];%pressing any other key results in noresp
-                                output{(i-1)*90+j,10}=NaN;%pressing any other key also results in no RT
-                            end
-                            
+                    end         
                 else
                     resp=[];%not pressing any key results in noresp
                     output{(i-1)*90+j,10}=NaN;
+                    output{(i-1)*90+j,9}=resp; %record responses as empty if no response    
                 end      
-                    output{(i-1)*90+j,9}=resp; %record responses
-                    output{(i-1)*90+j,8}=onset;%onset time, currently put before drawformattedtext call
-                    output{(i-1)*90+j,4}=word;%the stimulus of this trial
-                    output{(i-1)*90+j,2}=j;% the trial count of the current run                    
+                                   
             end
         else
             output((i-1)*90+1:i*90,3)=exp_start;%fill in the exp_start for each run
@@ -152,53 +171,68 @@ function [resp_sofar,errors] = study(pathdata,SSID,addtrig,PTBwindow,y_center,st
                     %draw focuing cross during jitter
                     DrawFormattedText(PTBwindow, '+', 'center', y_center);
                     Screen(PTBwindow, 'Flip');
-                    WaitSecs(run_jit{j});
-
+                    WaitSecs(run_jit{j});                    
+                    
+                    output{(i-1)*90+j,8}=onset;%onset time
+                    output{(i-1)*90+j,4}=word;%the stimulus of this trial
+                    output{(i-1)*90+j,2}=j;% the trial count of the current run
+                    
                     %check response after presentation
                     [pressed, firstPress]=KbQueueCheck;
+                    
                 if pressed %if key was pressed do the following
-                    %if the first key press is by the
-                    %subject then we record the response,
-                    %otherwise we don't
-                    if firstPress(pausekey)
+                     firstPress(find(firstPress==0))=NaN; %little trick to get rid of 0s
+                     [endtime Index]=sort(firstPress); % sort the RT of the first key-presses and their ID (the index are with respect to the firstPress)                 
+                            
+                     %if the first key press is "animate" or if the first key press is experimenter pause and the second key press is "animate"
+                            if Index(1)==hand.animate
+                                   resp='animate';
+                                   output{(i-1)*90+j,10}=endtime(1)-onset;%RT
+                            elseif Index(1)==pausekey&&Index(2)==hand.animate
+                                   resp='animate';
+                                   output{(i-1)*90+j,10}=endtime(2)-onset;%RT
+                            elseif Index(1)==hand.inanimate
+                                   resp='inanimate';
+                                   output{(i-1)*90+j,10}=endtime(1)-onset;%RT
+                            elseif Index(1)==pausekey&&Index(2)==hand.inanimate
+                                   resp='inanimate';
+                                   output{(i-1)*90+j,10}=endtime(2)-onset;%RT
+                            else
+                                resp=[];%pressing any key other than pause key before valid response keys results in noresp
+                                output{(i-1)*90+j,10}=NaN;%pressing any other key also results in no RT
+                            end
+                     output{(i-1)*90+j,9}=resp; %record responses before pause
+                     
+                    %put the pause and termination check
+                    %after we record the response of the
+                    %current trial
+                    if ~isnan(firstPress(pausekey))
                         waitcont=1;
                         DrawFormattedText(PTBwindow,'experiment paused, please wait', 'center', 'center' );
                         Screen(PTBwindow, 'Flip');
                         %save partial data
                        save(strcat(pathdata,'/',SSID,'/',SSID,'_run-',num2str(i),'_trial-',num2str(j),'data.mat'),'output');
-                    while waitcont%check if the pause key has been pressed
-                        [~, ~, keyCodes] = KbCheck;
-                        if keyCodes(experimenter_pass)%if continue key has been pressed
-                            waitcont=0;
-                        end
-                    end
-                      %need to have these two lines to wait for the key release
-                       while KbCheck
-                       end 
-                    end
-                    firstPress(find(firstPress==0))=NaN; %little trick to get rid of 0s
-                    [endtime Index]=min(firstPress); % gets the RT of the first key-press and its ID
-%                     thekeys=KbName(Index); %converts KeyID to keyname
-                            if Index==hand.animate
-                                   resp='animate';
-                                   output{(i-1)*90+j,10}=endtime-onset;%RT, the offset line has to occur before the WaitSecs line
-                            elseif Index==hand.inanimate
-                                   resp='inanimate';
-                                   output{(i-1)*90+j,10}=endtime-onset;%RT, the offset line has to occur before the WaitSecs line
-                            else
-                                resp=[];%pressing any other key results in noresp
-                                output{(i-1)*90+j,10}=NaN;%pressing any other key also results in no RT
+                        while waitcont%check if the pause key has been pressed
+                            [~, ~, keyCodes] = KbCheck;
+                            if keyCodes(experimenter_pass)%if continue key has been pressed
+                                waitcont=0;
+                            elseif keyCodes(termkey)
+                                terminated='yes';
+                                resp_sofar=output;
+                                return
                             end
-                            
+                        end                       
+                           %need to have these two lines to wait for the key release
+                           while KbCheck
+                           end 
+                    end         
                 else
                     resp=[];%not pressing any key results in noresp
                     output{(i-1)*90+j,10}=NaN;
-                end      
-                    output{(i-1)*90+j,9}=resp; %record responses
-                    output{(i-1)*90+j,8}=onset;%onset time, currently put before drawformattedtext call
-                    output{(i-1)*90+j,4}=word;%the stimulus of this trial
-                    output{(i-1)*90+j,2}=j;% the trial count of the current run            
-                end
+                    output{(i-1)*90+j,9}=resp; %record responses as empty if no response    
+                end       
+      
+             end
         end
         
         %run-level debrief
@@ -231,7 +265,6 @@ function [resp_sofar,errors] = study(pathdata,SSID,addtrig,PTBwindow,y_center,st
 %         lastrun=i;
 %         lasttrial=j;
         resp_sofar=output;
-        errors='none';
     catch ME
         %need to copy it here as well otherwise if error occurred in loops these variables
         %won't get returned
@@ -240,5 +273,6 @@ function [resp_sofar,errors] = study(pathdata,SSID,addtrig,PTBwindow,y_center,st
         resp_sofar=output;
         Screen('CloseAll');
         errors=ME;
+        terminated='none';
     end
 end
