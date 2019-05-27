@@ -71,9 +71,11 @@ addtrig=5;%exp start at the 5th trigger
 %% set up screen 
 try
     [w,rect]=Screen('OpenWindow', scanner_screen);
+    HideCursor;
     y_mid=(rect(2)+rect(4))/2;%get the y mid point of the screen for presentation use
 
 % call sub-procedures and pass in PTB window, stimuli, and hand mapping, return responses.
+%% start from study phase
 if strcmp(p.Results.phase,'study')
 %stage 1: call function handling study phase presentation, loop over runs with break in between
     [resp_sofar,study_error,terminated] = study(pathdata,SSID,addtrig,w,y_mid,study_txt,study_num,hand,p.Results.run,p.Results.trial);
@@ -88,6 +90,7 @@ if strcmp(p.Results.phase,'study')
     if ~strcmp(study_error,'none')
         errors=study_error;
         output=data;
+        ShowCursor;
         return
     else
         errors='none';
@@ -125,7 +128,7 @@ if strcmp(p.Results.phase,'study')
     
 %stage 5: call function handling post-scan test, instruct participants to get out of scanner (lock keys during that), remap keys
 
-
+%% start from key practice phase
 elseif strcmp(p.Results.phase,'key_prac')
 %stage 2:
 
@@ -135,6 +138,7 @@ elseif strcmp(p.Results.phase,'key_prac')
 
 %stage 5:
 
+%% start from test phase
 elseif strcmp(p.Results.phase,'test')
 %stage 3:
 
@@ -142,21 +146,24 @@ elseif strcmp(p.Results.phase,'test')
 
 %stage 5:
 
+%% start from post-scan phase
 elseif strcmp(p.Results.phase,'post_scan')
 %stage 5:
 
 end
 
+%% save the combined behavioral data
 %overall data from the current execution of this function
-xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_phase-',p.Results.phase,'_run-',num2str(p.Results.run),'_trial-',num2str(p.Results.trial),'_data.xlsx'),data);
+xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_startphase-',p.Results.phase,'_startrun-',num2str(p.Results.run),'_starttrial-',num2str(p.Results.trial),'_data.xlsx'),data);
 Screen('CloseAll');
+ShowCursor;
 output=data;
 
 catch ME
         Screen('CloseAll');
-        
+        ShowCursor;
         %overall data from the current execution of this function
-        xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_phase-',p.Results.phase,'_run-',num2str(p.Results.run),'_trial-',num2str(p.Results.trial),'_data.xlsx'),data);
+        xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_startphase-',p.Results.phase,'_startrun-',num2str(p.Results.run),'_starttrial-',num2str(p.Results.trial),'_data.xlsx'),data);
         output=data;
         errors=ME;
 end
