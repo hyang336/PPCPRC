@@ -85,8 +85,8 @@ sub_dir=strcat(output,'/pilot_lifetime180/',sub);
                 slice=cellfun(@strtrim,slice,'UniformOutput',false);%get rid of the white spaces
                 comma=repmat(',',(length(substr.runexp{j})-expstart_vol+1),1);
                 comma=cellstr(comma);
-                prefix=cell(length(slice),1);
-                prefix(:)={substr.runsmooth{j}};%should be a unique run name
+                prefix=cell(
+                {substr.runsmooth{j}};%should be a unique run name
                 %prefix=prefix';
                 sliceinfo=cellfun(@strcat,prefix,comma,slice,'UniformOutput',false);
                 %% 2019-03-27 
