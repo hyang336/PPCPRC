@@ -86,7 +86,7 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
     %% present stimuli and collect resp
         %create and start KbQueue, flush each run (in
         %the for-loop)
-        KbQueueCreate(-1,klist);%use default keyboard and only accept 1, 6, and p as input keys in the queue
+        KbQueueCreate([],klist);%use default keyboard and only accept 1, 6, and p as input keys in the queue
         KbQueueStart;
         if i==run % for the starting run, continue from the specified trial 
             output((i-1)*90+trial:i*90,3)=exp_start;%fill in the exp_start for each run
