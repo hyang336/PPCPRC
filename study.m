@@ -21,6 +21,11 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
     pausekey=KbName('p');
     termkey=KbName('t');
     
+    %define key list to only accept response keys (1 & 6)
+    %and pause key in the KbQueue
+    klist=zeros(1,256);
+    klist([pausekey, KbName('1!'), KbName('6^')])=1;
+    
     %flow control
     errors='none';%for debugging, return errors in this function
     terminated='none';%for situations where a scanning run has to be terminated and restarted (i.e. change of exp_start and wait for trigger).
@@ -78,10 +83,10 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
         Screen(PTBwindow, 'Flip');
         WaitSecs(3);
 
-%present stimuli and collect resp
+    %% present stimuli and collect resp
         %create and start KbQueue, flush each run (in
         %the for-loop)
-        KbQueueCreate;
+        KbQueueCreate(-1,klist);%use default keyboard and only accept 1, 6, and p as input keys in the queue
         KbQueueStart;
         if i==run % for the starting run, continue from the specified trial 
             output((i-1)*90+trial:i*90,3)=exp_start;%fill in the exp_start for each run
