@@ -7,7 +7,7 @@ matlabbatch{1}.spm.spatial.smooth.fwhm=kernal_size;
 for i=1:length(filenames)
     expand_nii{i}=spm_select('expand',cellstr(strcat(filepath,filenames{i})));
     matlabbatch{1}.spm.spatial.smooth.data=expand_nii{i};
-    %spm_jobman('run',matlabbatch);
+    spm_jobman('run',matlabbatch);
     smoothed_4d{i}=strcat(filepath,matlabbatch{1}.spm.spatial.smooth.prefix,filenames{i});
 end
 
