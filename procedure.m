@@ -125,9 +125,29 @@ if strcmp(p.Results.phase,'study')
 
 %stage 4: post-process scanning data, use ExpStartTime to assign runs. The "run" field was used to select stimuli to present so it had to fall within a certain range, but now it needs to reflect the actual run number, which can be outside of that range if error occured and a run was broken into multiple runs. However, any run would have the same ExpStartTime.
     scandata=data;%copy the unprocessed data just in case
+    %find the onset columns
+    [headerow,expcol]=find(strcmp(scandata,'ExpStartTime'));
+    %find the task columns
+    [~,taskcol]=find(strcmp(scandata,'task'));
+    %find the run columns
+    [~,runcol]=find(strcmp(scandata,'Run'));
+    
+%     [emptyrow,~]=find(cellfun(@isempty,scandata(:,expcol)));
+%     scandata(emptyrow,expcol)={-1};%fill the empty onset cells with -1 for later cell2mat conversion
+
+    %*********assuming there is not empty cells in the
+    %ExpStartTime column************
+    scan_mat=cell2mat(scandata(headerow+1:end,expcol));%the index won't be correct after cell2mat if there are any empty cells in-between
+    [C,IA,IC]=unique(scan_mat);
+    for k=1:(length(IA)-1)%for all the n-1 runs
+        scandata(IA(k)+headerow:IA(k+1)+headerow-1,runcol)={k};
+        xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_',scandata{IA(k)+headerow,taskcol},'_',num2str(k),'_data.xlsx'),vertcat(scandata(headerow,:),scandata(IA(k)+headerow:IA(k+1)+headerow-1,:)));
+    end
+    scandata(IA(k+1)+headerow:length(scan_mat)+headerow,runcol)={k+1};%for the last run
+    xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_',scandata{IA(k+1)+headerow,taskcol},'_',num2str(k),'_data.xlsx'),vertcat(scandata(headerow,:),scandata(IA(k+1)+headerow:length(scan_mat)+headerow,:)));
     
 %stage 5: call function handling post-scan test, instruct participants to get out of scanner (lock keys during that), remap keys
-
+    
 %% start from key practice phase
 elseif strcmp(p.Results.phase,'key_prac')
 %stage 2:
