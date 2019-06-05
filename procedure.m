@@ -132,19 +132,31 @@ if strcmp(p.Results.phase,'study')
     %find the run columns
     [~,runcol]=find(strcmp(scandata,'Run'));
     
-%     [emptyrow,~]=find(cellfun(@isempty,scandata(:,expcol)));
-%     scandata(emptyrow,expcol)={-1};%fill the empty onset cells with -1 for later cell2mat conversion
-
     %*********assuming there is not empty cells in the
     %ExpStartTime column************
-    scan_mat=cell2mat(scandata(headerow+1:end,expcol));%the index won't be correct after cell2mat if there are any empty cells in-between
-    [C,IA,IC]=unique(scan_mat);
-    for k=1:(length(IA)-1)%for all the n-1 runs
-        scandata(IA(k)+headerow:IA(k+1)+headerow-1,runcol)={k};
-        xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_',scandata{IA(k)+headerow,taskcol},'_',num2str(k),'_data.xlsx'),vertcat(scandata(headerow,:),scandata(IA(k)+headerow:IA(k+1)+headerow-1,:)));
+    taskcell=scandata(headerow+1:end,taskcol);
+    [p,IP,~]=unique(taskcell(~cellfun(@isempty,taskcell)));%unique task
+    
+    scand=cell(1);
+    trow=cell(1);
+    rrow=cell(1);
+    scand_break=cell(1,1);
+    for i=1:length(p)%cut the data according to task
+       [trow{i},~]=find(strcmp(scandata(:,taskcol),p{i}));
+       scand{i}=scandata(trow{i},:);
+       %get unique runs in each task
+       expcell=cell2mat(scand{i}(:,expcol));
+       [C,IA,IC]=unique(expcell);
+       %cut the data according to runs in each task
+       for j=1:length(C)
+            tempcell=cellfun(@(x) isequal(x,C(j)),scandata(:,expcol));%isequal() gives logic rather than cell array
+            [rrow{j},~]=find(tempcell);
+            scand_break{j,i}=scandata(rrow{j},:);
+            scand_break{j,i}(:,runcol)={j};
+            %write to separate spreadsheets
+            xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_task-',p{i},'_run-',num2str(j),'_data.xlsx'),vertcat(scandata(headerow,:),scand_break{j,i}));
+       end
     end
-    scandata(IA(k+1)+headerow:length(scan_mat)+headerow,runcol)={k+1};%for the last run
-    xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_',scandata{IA(k+1)+headerow,taskcol},'_',num2str(k),'_data.xlsx'),vertcat(scandata(headerow,:),scandata(IA(k+1)+headerow:length(scan_mat)+headerow,:)));
     
 %stage 5: call function handling post-scan test, instruct participants to get out of scanner (lock keys during that), remap keys
     
