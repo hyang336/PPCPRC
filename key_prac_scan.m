@@ -1,4 +1,4 @@
-function [resp_sofar,errors,terminated]=key_prac_scan(project_dir,pathdata,SSID,addtrig,PTBwindow,jitter,hand,trial)
+function [resp_sofar,errors,terminated]=key_prac_scan(project_dir,pathdata,SSID,addtrig,PTBwindow,hand,trial)
 %present 1-5 to familiarize the subjects with key
 %mapping. Keep presenting until get 45 (a full run) correct in a row, order
 %randomly sampled using datasampe(data,n). If participants make a wrong
@@ -36,13 +36,6 @@ switch version
 %% version 1
     
     case 1 %5 on left
-          r5=KbName('8*');
-          r4=KbName('7&');
-          r3=KbName('6^');
-          r2=KbName('1!');
-          r1=KbName('2@');
-%           animate=KbName('3#');
-%           inanimate=KbName('4$');
           try
            %% initialize instructions
 
@@ -58,11 +51,6 @@ switch version
             %load instruction
             ins=load_instruction('key_prac',1,hand.ver);
             Screen('TextSize',PTBwindow, 60);            
-            
-            %initialize counter for interrupted prac run, if
-            %it is the first time running this session i
-            %should be 1
-            i=trial;
             
             %display instruction
             [nx, ny, bbox] = DrawFormattedText(PTBwindow, ins{1},'center','center');
@@ -115,6 +103,12 @@ switch version
             %% practice procedure loop
             %threshold for consecutive correct responses=45                
                 success=0;
+                            
+            %initialize counter for interrupted prac run, if
+            %it is the first time running this session i
+            %should be 1
+            i=trial;
+            
             while success < 45
                respond=true;
                curWord=datasample(stim,1);%randomly sample from the 7 options

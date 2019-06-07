@@ -6,6 +6,10 @@ function [output,errors]=procedure(SSID,version_inp,project_dir,pathdata,varargi
 %study phase has spacing constraint for repetitions
 %test phase presentation is simple shuffling, since there is no repetition.
 
+%the script is cumulative:
+%only the corresponding input phase can start from different run
+%and trials, all subsequent phases always start from run 1
+%and trial 1.
 %% input parser
 
 %study phase has 5 runs of 90 trials, key_practice has one
@@ -136,7 +140,7 @@ if strcmp(p.Results.phase,'study')
        end
     
 %stage 2: call function handling practice, one long run (~15 min). If subject cannot complete the task within that time, the rest is not scanned.
-       [resp_keyprac,keyprac_errors,keyprac_terminated]=key_prac_scan(project_dir,pathdata,SSID,addtrig,PTBwindow,jitter,hand,trial);
+       [resp_keyprac,keyprac_errors,keyprac_terminated]=key_prac_scan(project_dir,pathdata,SSID,addtrig,w,hand,1);
        
        %if it was terminated by the experimenter, just
        %proceed.
