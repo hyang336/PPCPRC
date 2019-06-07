@@ -116,49 +116,34 @@ if strcmp(p.Results.phase,'study')
         end
     end
     
-    %wait for experimenter input (continue to next phase or terminate and save)
-    
+    %wait for experimenter input (continue to next phase or terminate and save all the data so far)
+       waittrig=1;
+           while waittrig
+            [keyIsDown, dummy_start, keyCodes] = KbCheck;
+            if keyCodes(experimenter_pass)==1%if continue
+                waittrig=0;
+            elseif keyCodes(termkey)==1%if terminate and save
+                xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_startphase-',p.Results.phase,'_startrun-',num2str(p.Results.run),'_starttrial-',num2str(p.Results.trial),'_data.xlsx'),data);
+                BIDS_event(pathdata,SSID,data)%call data parser
+                Screen('CloseAll');
+                ShowCursor;
+                output=data;
+                return
+            end
+           end
+       %need to have these two lines to wait for the key release
+       while KbCheck
+       end
     
 %stage 2: call function handling practice, one long run (~15 min). If subject cannot complete the task within that time, the rest is not scanned.
-
+       [resp_keyprac,keyprac_errors,keyprac_terminated]=key_prac_scan(project_dir,pathdata,SSID,addtrig,PTBwindow,jitter,hand,trial);
+       
+       %if it was terminated by the experimenter, just
+       %proceed.
+       
 %stage 3: call function handling test phase presentation, loop over runs with break in between
-
-%stage 4: post-process scanning data, use ExpStartTime to assign runs. The "run" field was used to select stimuli to present so it had to fall within a certain range, but now it needs to reflect the actual run number, which can be outside of that range if error occured and a run was broken into multiple runs. However, any run would have the same ExpStartTime.
-    scandata=data;%copy the unprocessed data just in case
-    %find the onset columns
-    [headerow,expcol]=find(strcmp(scandata,'ExpStartTime'));
-    %find the task columns
-    [~,taskcol]=find(strcmp(scandata,'task'));
-    %find the run columns
-    [~,runcol]=find(strcmp(scandata,'Run'));
     
-    %*********assuming there is not empty cells in the
-    %ExpStartTime column************
-    taskcell=scandata(headerow+1:end,taskcol);
-    [p,IP,~]=unique(taskcell(~cellfun(@isempty,taskcell)));%unique task
-    
-    scand=cell(1);
-    trow=cell(1);
-    rrow=cell(1);
-    scand_break=cell(1,1);
-    for i=1:length(p)%cut the data according to task
-       [trow{i},~]=find(strcmp(scandata(:,taskcol),p{i}));
-       scand{i}=scandata(trow{i},:);
-       %get unique runs in each task
-       expcell=cell2mat(scand{i}(:,expcol));
-       [C,IA,IC]=unique(expcell);
-       %cut the data according to runs in each task
-       for j=1:length(C)
-            tempcell=cellfun(@(x) isequal(x,C(j)),scandata(:,expcol));%isequal() gives logic rather than cell array
-            [rrow{j},~]=find(tempcell);
-            scand_break{j,i}=scandata(rrow{j},:);
-            scand_break{j,i}(:,runcol)={j};
-            %write to separate spreadsheets
-            xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_task-',p{i},'_run-',num2str(j),'_data.xlsx'),vertcat(scandata(headerow,:),scand_break{j,i}));
-       end
-    end
-    
-%stage 5: call function handling post-scan test, instruct participants to get out of scanner (lock keys during that), remap keys
+%stage 4: call function handling post-scan test, instruct participants to get out of scanner (lock keys during that), remap keys
     
 %% start from key practice phase
 elseif strcmp(p.Results.phase,'key_prac')
@@ -168,19 +153,15 @@ elseif strcmp(p.Results.phase,'key_prac')
 
 %stage 4:
 
-%stage 5:
-
 %% start from test phase
 elseif strcmp(p.Results.phase,'test')
 %stage 3:
 
 %stage 4:
 
-%stage 5:
-
 %% start from post-scan phase
 elseif strcmp(p.Results.phase,'post_scan')
-%stage 5:
+%stage 4:
 
 end
 
