@@ -94,6 +94,8 @@ if strcmp(p.Results.phase,'study')
     if ~strcmp(study_error,'none')
         errors=study_error;
         output=data;
+        xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_startphase-',p.Results.phase,'_startrun-',num2str(p.Results.run),'_starttrial-',num2str(p.Results.trial),'_data.xlsx'),data);
+        BIDS_event(pathdata,SSID,data)%call data parser
         ShowCursor;
         return
     else
@@ -141,18 +143,97 @@ if strcmp(p.Results.phase,'study')
     
 %stage 2: call function handling practice, one long run (~15 min). If subject cannot complete the task within that time, the rest is not scanned.
        [resp_keyprac,keyprac_errors,keyprac_terminated]=key_prac_scan(project_dir,pathdata,SSID,addtrig,w,hand,1);
+       [trial_row,~]=find(~cellfun('isempty',resp_keyprac(1:end,8)));
+       keypracdata=data(1,:);
+       keypracdata(trial_row+1,3:12)=resp_keyprac(trial_row,1:10);%fill in the dataresp_sofar(trial_row,1:10);%fill in the data
+       xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_task-keyprac_data.xlsx'),keypracdata);
        
+       %if errors occurred in practice phase, return study
+       %data so far and error msg, then terminate the function
+       if ~strcmp(keyprac_errors,'none')
+        errors=keyprac_errors;
+        xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_startphase-',p.Results.phase,'_startrun-',num2str(p.Results.run),'_starttrial-',num2str(p.Results.trial),'_data.xlsx'),data);
+        BIDS_event(pathdata,SSID,data)%call data parser
+        output=data;
+        ShowCursor;
+        return
+        else
+            errors='none';
+       end
+        
        %if it was terminated by the experimenter, just
        %proceed.
+       waittrig=1;
+       DrawFormattedText(w, 'please stay ready for the next phase', 'center', 'center');
+       Screen(w, 'Flip');
+           while waittrig
+            [keyIsDown, dummy_start, keyCodes] = KbCheck;
+            if keyCodes(experimenter_pass)==1%if continue
+                waittrig=0;
+            elseif keyCodes(termkey)==1%if terminate and save
+                xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_startphase-',p.Results.phase,'_startrun-',num2str(p.Results.run),'_starttrial-',num2str(p.Results.trial),'_data.xlsx'),data);
+                BIDS_event(pathdata,SSID,data)%call data parser (for study phase data at this stage
+                Screen('CloseAll');
+                ShowCursor;
+                output=data;
+                return
+            end
+           end
+       %need to have these two lines to wait for the key release
+       while KbCheck
+       end
        
 %stage 3: call function handling test phase presentation, loop over runs with break in between
-    
+    %data gotta be filled from trial_row+451, to not
+    %overwrite study phase data
+
 %stage 4: call function handling post-scan test, instruct participants to get out of scanner (lock keys during that), remap keys
-    
+    %data gotta be filled from trial_row+631, to not
+    %overwrite study and test phase data
 %% start from key practice phase
 elseif strcmp(p.Results.phase,'key_prac')
 %stage 2:
-
+       [resp_keyprac,keyprac_errors,keyprac_terminated]=key_prac_scan(project_dir,pathdata,SSID,addtrig,w,hand,1);
+       [trial_row,~]=find(~cellfun('isempty',resp_keyprac(1:end,8)));
+       keypracdata=data(1,:);
+       keypracdata(trial_row+1,3:12)=resp_keyprac(trial_row,1:10);%fill in the dataresp_sofar(trial_row,1:10);%fill in the data
+       xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_task-keyprac_data.xlsx'),keypracdata);      
+       
+       %if errors occurred in practice phase, return study
+       %data so far and error msg, then terminate the function
+       if ~strcmp(keyprac_errors,'none')
+        errors=keyprac_errors;
+        xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_startphase-',p.Results.phase,'_startrun-',num2str(p.Results.run),'_starttrial-',num2str(p.Results.trial),'_data.xlsx'),data);
+        BIDS_event(pathdata,SSID,data)%call data parser
+        output=data;
+        ShowCursor;
+        return
+        else
+            errors='none';
+       end
+        
+       %if it was terminated by the experimenter, just
+       %proceed.
+       waittrig=1;
+       DrawFormattedText(w, 'please stay ready for the next phase', 'center', 'center');
+       Screen(w, 'Flip');
+           while waittrig
+            [keyIsDown, dummy_start, keyCodes] = KbCheck;
+            if keyCodes(experimenter_pass)==1%if continue
+                waittrig=0;
+            elseif keyCodes(termkey)==1%if terminate and save
+                xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_startphase-',p.Results.phase,'_startrun-',num2str(p.Results.run),'_starttrial-',num2str(p.Results.trial),'_data.xlsx'),data);
+                BIDS_event(pathdata,SSID,data)%call data parser (for study phase data at this stage
+                Screen('CloseAll');
+                ShowCursor;
+                output=data;
+                return
+            end
+           end
+       %need to have these two lines to wait for the key release
+       while KbCheck
+       end
+       
 %stage 3:
 
 %stage 4:
