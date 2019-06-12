@@ -69,9 +69,19 @@ addtrig=5;%exp start at the 5th trigger
 [study_stim,test_stim,hand]=version_select(version_inp);
     study_txt=study_stim(:,1);%stimuli
     study_num=study_stim(:,2);%jitter
-    test_txt=test_stim(:,1);%stimuli
-    test_num=test_stim(:,2);%jitter
+    
+    temppp=cell(1,size(test_stim,2));
+for i=1:36%36 small blocks in the test phase
+    nexttask=test_stim{(i-1)*5+1,4};
+    temppp{1+6*(i-1),4}= strcat('switch_to_',nexttask);
+    temppp{1+6*(i-1),2}=3;%always have a 3s ISI for the switching trial
+    temppp(2+6*(i-1):6+6*(i-1),:)=test_stim((i-1)*5+1:(i-1)*5+5,:);%fill in the rest
+end
 
+    test_txt=temppp(:,1);%stimuli
+    test_num=temppp(:,2);%jitter
+    test_task=temppp(:,4);%task
+    
 %% set up screen 
 try
     [w,rect]=Screen('OpenWindow', scanner_screen);
@@ -184,7 +194,8 @@ if strcmp(p.Results.phase,'study')
        end
        
 %stage 3: call function handling test phase presentation, loop over runs with break in between
-    %data gotta be filled from trial_row+451, to not
+       [resp_test,test_error,test_terminated] = test(pathdata,SSID,addtrig,w,y_mid,test_txt,test_num,test_task,hand,1,1);
+%data gotta be filled from trial_row+451, to not
     %overwrite study phase data
 
 %stage 4: call function handling post-scan test, instruct participants to get out of scanner (lock keys during that), remap keys

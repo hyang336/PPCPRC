@@ -11,6 +11,5 @@
 %experience with "stock", while a person who majored in
 %business may say the opposite. The two tasks will alternate
 %in five-trial blocks. At the beginning of each block, a
-%message will remind you what the next five trials will
-%be.[When you are ready, press with your right middle finger
-%to start]
+%message will inform you what the next five trials will
+%be.[press your right index finger to go to next page]
