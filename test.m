@@ -25,25 +25,36 @@ function [resp_sofar,errors,terminated] = test(pathdata,SSID,addtrig,PTBwindow,y
     %define key list to only accept response keys (1 & 6)
     %and pause key in the KbQueue
     klist=zeros(1,256);
-    klist([pausekey, KbName('1!'), KbName('6^')])=1;
-    
+    klist([pausekey, hand.r1, hand.r2, hand.r3, hand.r4, hand.r5])=1;
+
     %flow control
     errors='none';%for debugging, return errors in this function
     terminated='none';%for situations where a scanning run has to be terminated and restarted (i.e. change of exp_start and wait for trigger).
 %% loop through runs and trials, special treatment on first run    
     try
-    for i=run:5 % 5 runs of 90 trials
+    for i=run:4 % 4 runs of 45 trials 
         
         %parse run stimuli
-        run_stim=stimuli((i-1)*90+1:i*90);%get the stimuli for the selected run in study phase
-        run_jit=jitter((i-1)*90+1:i*90);%get jittering time
-                
+        run_stim=stimuli((i-1)*45+1:i*45);%get the stimuli for the selected run in study phase
+        run_jit=jitter((i-1)*45+1:i*45);%get jittering time
+        run_task=taskorder((i-1)*45+1:i*45);%get task order
+        
         %load instruction
-        ins=load_instruction('study',i,hand.ver);
+        ins=load_instruction('test',i,hand.ver);
         Screen('TextSize',PTBwindow,60);%use font size 60 for instruction
         
-        %display instruction
+        %display instruction P1
         [nx, ny, bbox] = DrawFormattedText(PTBwindow, ins{1},'center','center');
+        Screen('Flip',PTBwindow);
+        waittrig=1;
+        while waittrig
+        [keyIsDown, instime, keyCodes] = KbCheck;
+        if keyCodes(flippage)==1
+            waittrig=0;
+        end
+        end  
+        %P2
+        [nx, ny, bbox] = DrawFormattedText(PTBwindow, ins{2},'center','center');
         Screen('Flip',PTBwindow);
         waittrig=1;
         while waittrig
@@ -52,6 +63,7 @@ function [resp_sofar,errors,terminated] = test(pathdata,SSID,addtrig,PTBwindow,y
             waittrig=0;
         end
         end  
+        
         info = 'The experiment is going to start in a few seconds';
         DrawFormattedText(PTBwindow, info, 'center', 'center');
         Screen(PTBwindow, 'Flip');
@@ -90,8 +102,11 @@ function [resp_sofar,errors,terminated] = test(pathdata,SSID,addtrig,PTBwindow,y
         KbQueueCreate([],klist);%use default keyboard and only accept 1, 6, and p as input keys in the queue
         KbQueueStart;
         if i==run % for the starting run, continue from the specified trial 
-            output((i-1)*90+trial:i*90,3)=exp_start;%fill in the exp_start for each run
-            for j=trial:90 
+            output((i-1)*45+trial:i*45,3)=exp_start;%fill in the exp_start for each run
+            for j=trial:45
+                if j==trial%for the starting trial, always show the current task
+                    
+                end
                     word=run_stim{j};       
 
                     DrawFormattedText(PTBwindow,strcat(word,strcat('\n\n\n',hand.study_scale)), 'center', y_center );%present stimuli
@@ -104,9 +119,9 @@ function [resp_sofar,errors,terminated] = test(pathdata,SSID,addtrig,PTBwindow,y
                     Screen(PTBwindow, 'Flip');
                     WaitSecs(run_jit{j});
                     
-                    output{(i-1)*90+j,8}=onset;%onset time
-                    output{(i-1)*90+j,4}=word;%the stimulus of this trial
-                    output{(i-1)*90+j,2}=j;% the trial count of the current run
+                    output{(i-1)*45+j,8}=onset;%onset time
+                    output{(i-1)*45+j,4}=word;%the stimulus of this trial
+                    output{(i-1)*45+j,2}=j;% the trial count of the current run
                     
                     %check response after presentation
                     [pressed, firstPress]=KbQueueCheck;
@@ -118,21 +133,21 @@ function [resp_sofar,errors,terminated] = test(pathdata,SSID,addtrig,PTBwindow,y
                      %if the first key press is "animate" or if the first key press is experimenter pause and the second key press is "animate"
                             if Index(1)==hand.animate
                                    resp='animate';
-                                   output{(i-1)*90+j,10}=endtime(1)-onset;%RT
+                                   output{(i-1)*45+j,10}=endtime(1)-onset;%RT
                             elseif Index(1)==pausekey&&Index(2)==hand.animate
                                    resp='animate';
-                                   output{(i-1)*90+j,10}=endtime(2)-onset;%RT
+                                   output{(i-1)*45+j,10}=endtime(2)-onset;%RT
                             elseif Index(1)==hand.inanimate
                                    resp='inanimate';
-                                   output{(i-1)*90+j,10}=endtime(1)-onset;%RT
+                                   output{(i-1)*45+j,10}=endtime(1)-onset;%RT
                             elseif Index(1)==pausekey&&Index(2)==hand.inanimate
                                    resp='inanimate';
-                                   output{(i-1)*90+j,10}=endtime(2)-onset;%RT
+                                   output{(i-1)*45+j,10}=endtime(2)-onset;%RT
                             else
                                 resp=[];%pressing any key other than pause key before valid response keys results in noresp
-                                output{(i-1)*90+j,10}=NaN;%pressing any other key also results in no RT
+                                output{(i-1)*45+j,10}=NaN;%pressing any other key also results in no RT
                             end
-                     output{(i-1)*90+j,9}=resp; %record responses before pause
+                     output{(i-1)*45+j,9}=resp; %record responses before pause
                      
                     %put the pause and termination check
                     %after we record the response of the
@@ -159,14 +174,14 @@ function [resp_sofar,errors,terminated] = test(pathdata,SSID,addtrig,PTBwindow,y
                     end         
                 else
                     resp=[];%not pressing any key results in noresp
-                    output{(i-1)*90+j,10}=NaN;
-                    output{(i-1)*90+j,9}=resp; %record responses as empty if no response    
+                    output{(i-1)*45+j,10}=NaN;
+                    output{(i-1)*45+j,9}=resp; %record responses as empty if no response    
                 end      
                                    
             end
         else
-            output((i-1)*90+1:i*90,3)=exp_start;%fill in the exp_start for each run
-            for j=1:90 %for all followin runs, start from the first trial
+            output((i-1)*45+1:i*45,3)=exp_start;%fill in the exp_start for each run
+            for j=1:45 %for all followin runs, start from the first trial
                     word=run_stim{j};
         
                     DrawFormattedText(PTBwindow,strcat(word,strcat('\n\n\n',hand.study_scale)), 'center', y_center );%present stimuli
@@ -179,9 +194,9 @@ function [resp_sofar,errors,terminated] = test(pathdata,SSID,addtrig,PTBwindow,y
                     Screen(PTBwindow, 'Flip');
                     WaitSecs(run_jit{j});                    
                     
-                    output{(i-1)*90+j,8}=onset;%onset time
-                    output{(i-1)*90+j,4}=word;%the stimulus of this trial
-                    output{(i-1)*90+j,2}=j;% the trial count of the current run
+                    output{(i-1)*45+j,8}=onset;%onset time
+                    output{(i-1)*45+j,4}=word;%the stimulus of this trial
+                    output{(i-1)*45+j,2}=j;% the trial count of the current run
                     
                     %check response after presentation
                     [pressed, firstPress]=KbQueueCheck;
@@ -193,21 +208,21 @@ function [resp_sofar,errors,terminated] = test(pathdata,SSID,addtrig,PTBwindow,y
                      %if the first key press is "animate" or if the first key press is experimenter pause and the second key press is "animate"
                             if Index(1)==hand.animate
                                    resp='animate';
-                                   output{(i-1)*90+j,10}=endtime(1)-onset;%RT
+                                   output{(i-1)*45+j,10}=endtime(1)-onset;%RT
                             elseif Index(1)==pausekey&&Index(2)==hand.animate
                                    resp='animate';
-                                   output{(i-1)*90+j,10}=endtime(2)-onset;%RT
+                                   output{(i-1)*45+j,10}=endtime(2)-onset;%RT
                             elseif Index(1)==hand.inanimate
                                    resp='inanimate';
-                                   output{(i-1)*90+j,10}=endtime(1)-onset;%RT
+                                   output{(i-1)*45+j,10}=endtime(1)-onset;%RT
                             elseif Index(1)==pausekey&&Index(2)==hand.inanimate
                                    resp='inanimate';
-                                   output{(i-1)*90+j,10}=endtime(2)-onset;%RT
+                                   output{(i-1)*45+j,10}=endtime(2)-onset;%RT
                             else
                                 resp=[];%pressing any key other than pause key before valid response keys results in noresp
-                                output{(i-1)*90+j,10}=NaN;%pressing any other key also results in no RT
+                                output{(i-1)*45+j,10}=NaN;%pressing any other key also results in no RT
                             end
-                     output{(i-1)*90+j,9}=resp; %record responses before pause
+                     output{(i-1)*45+j,9}=resp; %record responses before pause
                      
                     %put the pause and termination check
                     %after we record the response of the
@@ -222,6 +237,9 @@ function [resp_sofar,errors,terminated] = test(pathdata,SSID,addtrig,PTBwindow,y
                             [~, ~, keyCodes] = KbCheck;
                             if keyCodes(experimenter_pass)%if continue key has been pressed
                                 waitcont=0;
+                                DrawFormattedText(PTBwindow, '+', 'center', 'center');                
+                                Screen('Flip',PTBwindow);
+                                WaitSecs(2);
                             elseif keyCodes(termkey)
                                 terminated='yes';
                                 resp_sofar=output;
@@ -234,8 +252,8 @@ function [resp_sofar,errors,terminated] = test(pathdata,SSID,addtrig,PTBwindow,y
                     end         
                 else
                     resp=[];%not pressing any key results in noresp
-                    output{(i-1)*90+j,10}=NaN;
-                    output{(i-1)*90+j,9}=resp; %record responses as empty if no response    
+                    output{(i-1)*45+j,10}=NaN;
+                    output{(i-1)*45+j,9}=resp; %record responses as empty if no response    
                 end       
       
              end
@@ -243,7 +261,7 @@ function [resp_sofar,errors,terminated] = test(pathdata,SSID,addtrig,PTBwindow,y
         
         %run-level debrief
         Screen('TextSize',PTBwindow,60);%use font size 60 for debriefing
-            if i~=5
+            if i~=4
                debrief = 'Please relax and stay ready for the next run';
             else
                debrief = 'You have finished the first phase of the experiment'; 
@@ -253,7 +271,7 @@ function [resp_sofar,errors,terminated] = test(pathdata,SSID,addtrig,PTBwindow,y
             
         %wait for experimenter input to continue if no error
         %has occured, unless it is the last run
-           if i<5
+           if i<4
                 waittrig=1;
                    while waittrig
                     [keyIsDown, dummy_start, keyCodes] = KbCheck;

@@ -146,6 +146,9 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
                             [~, ~, keyCodes] = KbCheck;
                             if keyCodes(experimenter_pass)%if continue key has been pressed
                                 waitcont=0;
+                                DrawFormattedText(PTBwindow, '+', 'center', 'center');%present a 2s fixation then continue to next trial                
+                                Screen('Flip',PTBwindow);
+                                WaitSecs(2);
                             elseif keyCodes(termkey)
                                 terminated='yes';
                                 resp_sofar=output;

@@ -1,5 +1,28 @@
 %% need to update this!!! 2019-04-20
 function [output,errors]=procedure(SSID,version_inp,project_dir,pathdata,varargin)
+%The script has built in error handling. At each trial of
+%any phases, the experimenter can press the pause key (P) to
+%pause the experiment after the current trial. Participants’
+%responses will still be recorded for the paused trial, and
+%saved in the disk as a .mat file with all responses so far
+%for the current phase (study, key_prac, test). The
+%experimenter can choose to continue the paused experiment
+%by pressing the experimenter pass key (E), which will lead
+%to the presentation of a fixation cross for 2 seconds, then
+%continue to the next trial, with all the appropriate
+%instructions and prompt for the participants. The
+%experimenter can also choose to terminate the paused
+%experiment by pressing the terminate key (T). This is to
+%handle the situation when something happened to the
+%scanner and a separate run has to be started. For the study
+%and the test phase, the script will automatically relunch
+%after pressing the terminate key from the next trial. For
+%the key-prac phase, the script will proceed into the next
+%phase (i.e. test phase) since the stimuli in the key_prac
+%phase is not of set order but are continuously and randomly
+%sampled. This also allow the experimenter to manully
+%terminate the key_prac phase if it runs too long.
+
 %16 versions (hand (2) * set_selection (2) * block_order (4)).
 %study phase one run, test phase one run, both triggered by scanner.
 %pseudorandomization done for each Ss individually.
@@ -70,17 +93,19 @@ addtrig=5;%exp start at the 5th trigger
     study_txt=study_stim(:,1);%stimuli
     study_num=study_stim(:,2);%jitter
     
-    temppp=cell(1,size(test_stim,2));
+    temppp=cell(1);
 for i=1:36%36 small blocks in the test phase
     nexttask=test_stim{(i-1)*5+1,4};
-    temppp{1+6*(i-1),4}= strcat('switch_to_',nexttask);
-    temppp{1+6*(i-1),2}=3;%always have a 3s ISI for the switching trial
-    temppp(2+6*(i-1):6+6*(i-1),:)=test_stim((i-1)*5+1:(i-1)*5+5,:);%fill in the rest
+    temppp{i,1}=nexttask;
+%     temppp{1+6*(i-1),4}= strcat('switch_to_',nexttask);
+%     temppp{1+6*(i-1),1}=strcat(nexttask,' judgement task begins');%switch task prompt
+%     temppp{1+6*(i-1),2}=3;%always have a 3s ISI for the switching trial
+%     temppp(2+6*(i-1):6+6*(i-1),:)=test_stim((i-1)*5+1:(i-1)*5+5,:);%fill in the rest
 end
 
-    test_txt=temppp(:,1);%stimuli
-    test_num=temppp(:,2);%jitter
-    test_task=temppp(:,4);%task
+    test_txt=test_stim(:,1);%stimuli
+    test_num=test_stim(:,2);%jitter
+    test_task=temppp;%task
     
 %% set up screen 
 try
@@ -112,18 +137,24 @@ if strcmp(p.Results.phase,'study')
         errors='none';
     end
     
-    %if the study phase was terminated by the experimenter half run,
+    %if the study phase was terminated by the experimenter halfway,
     %re-engage the study phase function from the next trial to have a new run
     while strcmp(terminated,'yes')
-        if mod(max(trial_row),90)==0%if terminated at the last trial of a run,since trial_row can only go from 1 to 450
+        if floor(max(trial_row)/90)==5%if terminated at the last trial of the last run (i.e. trial 450)
             terminated='none';%skip the while loop
             continue
+        elseif floor(max(trial_row)/90)~=5&&mod(max(trial_row),90)==0%if terminated at the last trial the first n-1 runs
+            lastrun=floor(max(trial_row)/90);%find the maximum run number
+            [resp_sofar,study_error,terminated] = study(pathdata,SSID,addtrig,w,y_mid,study_txt,study_num,hand,lastrun+1,1);%start from the 1st trial of the next run
+            [trial_row,~]=find(~cellfun('isempty',resp_sofar(1:end,8)));%search the onset column (8)
+            data(trial_row+1,3:12)=resp_sofar(trial_row,1:10);%fill in the data
+        else
+            lastrun=floor(max(trial_row)/90);%find the maximum run number
+            lasttrial=mod(max(trial_row),90);%find the maximum trial number, if terminated at the last trial, this will cause the presentation to start from the first trial since mod(A*90,90)=0,that's why we nned the if statment above
+            [resp_sofar,study_error,terminated] = study(pathdata,SSID,addtrig,w,y_mid,study_txt,study_num,hand,lastrun,lasttrial+1);%start from the next trial of the current run
+            [trial_row,~]=find(~cellfun('isempty',resp_sofar(1:end,8)));%search the onset column (8)
+            data(trial_row+1,3:12)=resp_sofar(trial_row,1:10);%fill in the data
         end
-        lastrun=round(max(trial_row)/90);%find the maximum run number
-        lasttrial=mod(max(trial_row),90);%find the maximum trial number, if terminated at the last trial, this will cause the presentation to start from the first trial since mod(A*90,90)=0, A is an integer
-        [resp_sofar,study_error,terminated] = study(pathdata,SSID,addtrig,w,y_mid,study_txt,study_num,hand,lastrun,lasttrial+1);
-        [trial_row,~]=find(~cellfun('isempty',resp_sofar(1:end,8)));%search the onset column (8)
-        data(trial_row+1,3:12)=resp_sofar(trial_row,1:10);%fill in the data
         if ~strcmp(study_error,'none')
             errors=study_error;
             return
