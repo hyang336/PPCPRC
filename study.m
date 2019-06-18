@@ -141,7 +141,7 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
                         DrawFormattedText(PTBwindow,'experiment paused, please wait', 'center', 'center' );
                         Screen(PTBwindow, 'Flip');
                         %save partial data
-                       save(strcat(pathdata,'/',SSID,'/',SSID,'_run-',num2str(i),'_trial-',num2str(j),'data.mat'),'output');
+                       save(strcat(pathdata,'/',SSID,'/',SSID,'_study_run-',num2str(i),'_trial-',num2str(j),'data.mat'),'output');
                         while waitcont%check if the pause key has been pressed
                             [~, ~, keyCodes] = KbCheck;
                             if keyCodes(experimenter_pass)%if continue key has been pressed
@@ -219,7 +219,7 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
                         DrawFormattedText(PTBwindow,'experiment paused, please wait', 'center', 'center' );
                         Screen(PTBwindow, 'Flip');
                         %save partial data
-                       save(strcat(pathdata,'/',SSID,'/',SSID,'_run-',num2str(i),'_trial-',num2str(j),'data.mat'),'output');
+                       save(strcat(pathdata,'/',SSID,'/',SSID,'_study_run-',num2str(i),'_trial-',num2str(j),'data.mat'),'output');
                         while waitcont%check if the pause key has been pressed
                             [~, ~, keyCodes] = KbCheck;
                             if keyCodes(experimenter_pass)%if continue key has been pressed
