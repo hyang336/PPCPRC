@@ -157,6 +157,8 @@ if strcmp(p.Results.phase,'study')
         end
         if ~strcmp(study_error,'none')
             errors=study_error;
+            BIDS_event(pathdata,SSID,data)%call data parser
+            ShowCursor;
             return
         else
             errors='none';
@@ -185,7 +187,7 @@ if strcmp(p.Results.phase,'study')
 %stage 2: call function handling practice, one long run (~15 min). If subject cannot complete the task within that time, the rest is not scanned.
        [resp_keyprac,keyprac_errors,keyprac_terminated]=key_prac_scan(project_dir,pathdata,SSID,addtrig,w,hand,1);
        [trial_row,~]=find(~cellfun('isempty',resp_keyprac(1:end,8)));
-       keypracdata=data(1,:);
+       keypracdata=data(1,:);%get headers
        keypracdata(trial_row+1,3:12)=resp_keyprac(trial_row,1:10);%fill in the dataresp_sofar(trial_row,1:10);%fill in the data
        xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_task-keyprac_data.xlsx'),keypracdata);
        
@@ -248,23 +250,25 @@ if strcmp(p.Results.phase,'study')
     %if the study phase was terminated by the experimenter halfway,
     %re-engage the test phase function from the next trial to have a new run
     while strcmp(test_terminated,'yes')
-        if floor(max(trial_row)/90)==5%if terminated at the last trial of the last run (i.e. trial 450)
+        if floor(max(trial_row)/45)==4%if terminated at the last trial of the last run (i.e. trial 1800)
             test_terminated='none';%skip the while loop
             continue
-        elseif floor(max(trial_row)/90)~=5&&mod(max(trial_row),90)==0%if terminated at the last trial the first n-1 runs
-            lastrun=floor(max(trial_row)/90);%find the maximum run number
+        elseif floor(max(trial_row)/45)~=4&&mod(max(trial_row),45)==0%if terminated at the last trial the first n-1 runs
+            lastrun=floor(max(trial_row)/45);%find the maximum run number
             [resp_test,test_error,test_terminated] = test(pathdata,SSID,addtrig,w,y_mid,test_txt,test_num,test_task,hand,lastrun+1,1);%start from the 1st trial of the next run
             [trial_row,~]=find(~cellfun('isempty',resp_test(1:end,8)));%search the onset column (8)
             data(trial_row+451,3:12)=resp_test(trial_row,1:10);%fill in the data
         else
-            lastrun=floor(max(trial_row)/90);%find the maximum run number
-            lasttrial=mod(max(trial_row),90);%find the maximum trial number, if terminated at the last trial, this will cause the presentation to start from the first trial since mod(A*90,90)=0,that's why we nned the if statment above
+            lastrun=floor(max(trial_row)/45);%find the maximum run number
+            lasttrial=mod(max(trial_row),45);%find the maximum trial number, if terminated at the last trial, this will cause the presentation to start from the first trial since mod(A*90,90)=0,that's why we nned the if statment above
             [resp_test,test_error,test_terminated] = test(pathdata,SSID,addtrig,w,y_mid,test_txt,test_num,test_task,hand,lastrun,lasttrial+1);%start from the next trial of the current run
             [trial_row,~]=find(~cellfun('isempty',resp_test(1:end,8)));%search the onset column (8)
             data(trial_row+451,3:12)=resp_test(trial_row,1:10);%fill in the data
         end
         if ~strcmp(test_error,'none')
             errors=test_error;
+            BIDS_event(pathdata,SSID,data)%call data parser
+            ShowCursor;
             return
         else
             errors='none';
@@ -291,17 +295,62 @@ if strcmp(p.Results.phase,'study')
        end
 
 
-%stage 4: call function handling post-scan test, instruct participants to get out of scanner (lock keys during that), remap keys
+%stage 4: call function handling post-scan test, remap keys
     %data gotta be filled from trial_row+631, to not
     %overwrite study and test phase data
+    
+    %instruct participant to come out of the scanner
+    ins='The next phase will be outside of the scanner.';
+    DrawFormattedText(w,ins, 'center', 'center' );
+    Screen(w, 'Flip');
+    
+    %call sub routines and get data
+    [resp_pscan,ps_errors,ps_terminated] = post_scan_beh(pathdata,SSID,w,y_mid,test_stim,hand,1);
+    [trial_row,~]=find(~cellfun('isempty',resp_pscan(1:end,8)));%search the onset column (8)
+    data(trial_row+631,3:12)=resp_pscan(trial_row,1:10);%fill in the data from row 631
+    
+    %if an error occured in the post-scan phase, terminate the
+    %function and return the error, test_error won't be
+    %catched on this level, so I have to manually return the
+    %function
+    if ~strcmp(ps_errors,'none')
+        errors=ps_errors;
+        output=data;
+        xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_startphase-',p.Results.phase,'_startrun-',num2str(p.Results.run),'_starttrial-',num2str(p.Results.trial),'_data.xlsx'),data);
+        ShowCursor;
+        return
+    else
+        errors='none';
+    end
+    
+    %if the study phase was terminated by the experimenter halfway,
+    %re-engage the test phase function from the next trial to have a new run
+    while strcmp(ps_terminated,'yes')
+        if floor(max(trial_row)/90)==1%if terminated at the last trial of the last run (i.e. trial 90)
+            ps_terminated='none';%skip the while loop
+            continue
+        else
+            lasttrial=mod(max(trial_row),90);%find the maximum trial number, if terminated at the last trial, this will cause the presentation to start from the first trial since mod(A*90,90)=0,that's why we nned the if statment above
+            [resp_pscan,ps_errors,ps_terminated] = post_scan_beh(pathdata,SSID,w,y_mid,test_stim,hand,lasttrial+1);
+            [trial_row,~]=find(~cellfun('isempty',resp_pscan(1:end,8)));%search the onset column (8)
+            data(trial_row+631,3:12)=resp_pscan(trial_row,1:10);%fill in the data
+        end
+        if ~strcmp(ps_errors,'none')
+            errors=ps_errors;
+            ShowCursor;
+            return
+        else
+            errors='none';
+        end
+    end
 %% start from key practice phase
 elseif strcmp(p.Results.phase,'key_prac')
-%stage 2:
-       [resp_keyprac,keyprac_errors,keyprac_terminated]=key_prac_scan(project_dir,pathdata,SSID,addtrig,w,hand,1);
+%stage 2: call function handling practice, one long run (~15 min). If subject cannot complete the task within that time, the rest is not scanned.
+       [resp_keyprac,keyprac_errors,keyprac_terminated]=key_prac_scan(project_dir,pathdata,SSID,addtrig,w,hand,p.Results.trial);
        [trial_row,~]=find(~cellfun('isempty',resp_keyprac(1:end,8)));
-       keypracdata=data(1,:);
+       keypracdata=data(1,:);%get headers
        keypracdata(trial_row+1,3:12)=resp_keyprac(trial_row,1:10);%fill in the dataresp_sofar(trial_row,1:10);%fill in the data
-       xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_task-keyprac_data.xlsx'),keypracdata);      
+       xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_task-keyprac_data.xlsx'),keypracdata);
        
        %if errors occurred in practice phase, return study
        %data so far and error msg, then terminate the function
@@ -338,25 +387,301 @@ elseif strcmp(p.Results.phase,'key_prac')
        while KbCheck
        end
        
-%stage 3:
+%stage 3: call function handling test phase presentation, loop over runs with break in between
+   [resp_test,test_error,test_terminated] = test(pathdata,SSID,addtrig,w,y_mid,test_txt,test_num,test_task,hand,1,1);
+   %find none empty trials
+    [trial_row,~]=find(~cellfun('isempty',resp_test(1:end,8)));%search the onset column (8)
+    data(trial_row+451,3:12)=resp_test(trial_row,1:10);%fill in the data from row 451
+    
+    %if an error occured in the test phase, terminate the
+    %function and return the error, test_error won't be
+    %catched on this level, so I have to manually return the
+    %function
+    if ~strcmp(test_error,'none')
+        errors=test_error;
+        output=data;
+        xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_startphase-',p.Results.phase,'_startrun-',num2str(p.Results.run),'_starttrial-',num2str(p.Results.trial),'_data.xlsx'),data);
+        BIDS_event(pathdata,SSID,data)%call data parser
+        ShowCursor;
+        return
+    else
+        errors='none';
+    end
+    
+    %if the study phase was terminated by the experimenter halfway,
+    %re-engage the test phase function from the next trial to have a new run
+    while strcmp(test_terminated,'yes')
+        if floor(max(trial_row)/45)==4%if terminated at the last trial of the last run (i.e. trial 180)
+            test_terminated='none';%skip the while loop
+            continue
+        elseif floor(max(trial_row)/45)~=4&&mod(max(trial_row),45)==0%if terminated at the last trial the first n-1 runs
+            lastrun=floor(max(trial_row)/45);%find the maximum run number
+            [resp_test,test_error,test_terminated] = test(pathdata,SSID,addtrig,w,y_mid,test_txt,test_num,test_task,hand,lastrun+1,1);%start from the 1st trial of the next run
+            [trial_row,~]=find(~cellfun('isempty',resp_test(1:end,8)));%search the onset column (8)
+            data(trial_row+451,3:12)=resp_test(trial_row,1:10);%fill in the data
+        else
+            lastrun=floor(max(trial_row)/45);%find the maximum run number
+            lasttrial=mod(max(trial_row),45);%find the maximum trial number, if terminated at the last trial, this will cause the presentation to start from the first trial since mod(A*90,90)=0,that's why we nned the if statment above
+            [resp_test,test_error,test_terminated] = test(pathdata,SSID,addtrig,w,y_mid,test_txt,test_num,test_task,hand,lastrun,lasttrial+1);%start from the next trial of the current run
+            [trial_row,~]=find(~cellfun('isempty',resp_test(1:end,8)));%search the onset column (8)
+            data(trial_row+451,3:12)=resp_test(trial_row,1:10);%fill in the data
+        end
+        if ~strcmp(test_error,'none')
+            errors=test_error;
+            BIDS_event(pathdata,SSID,data)%call data parser
+            ShowCursor;
+            return
+        else
+            errors='none';
+        end
+    end
+    
+    %wait for experimenter input (continue to next phase or terminate and save all the data so far)
+       waittrig=1;
+           while waittrig
+            [keyIsDown, dummy_start, keyCodes] = KbCheck;
+            if keyCodes(experimenter_pass)==1%if continue
+                waittrig=0;
+            elseif keyCodes(termkey)==1%if terminate and save
+                xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_startphase-',p.Results.phase,'_startrun-',num2str(p.Results.run),'_starttrial-',num2str(p.Results.trial),'_data.xlsx'),data);
+                BIDS_event(pathdata,SSID,data)%call data parser
+                Screen('CloseAll');
+                ShowCursor;
+                output=data;
+                return
+            end
+           end
+       %need to have these two lines to wait for the key release
+       while KbCheck
+       end
 
-%stage 4:
+
+%stage 4: call function handling post-scan test, remap keys
+    %data gotta be filled from trial_row+631, to not
+    %overwrite study and test phase data
+    
+    %instruct participant to come out of the scanner
+    ins='The next phase will be outside of the scanner.';
+    DrawFormattedText(w,ins, 'center', 'center' );
+    Screen(w, 'Flip');
+    
+    %call sub routines and get data
+    [resp_pscan,ps_errors,ps_terminated] = post_scan_beh(pathdata,SSID,w,y_mid,test_stim,hand,1);
+    [trial_row,~]=find(~cellfun('isempty',resp_pscan(1:end,8)));%search the onset column (8)
+    data(trial_row+631,3:12)=resp_pscan(trial_row,1:10);%fill in the data from row 631
+    
+    %if an error occured in the post-scan phase, terminate the
+    %function and return the error, test_error won't be
+    %catched on this level, so I have to manually return the
+    %function
+    if ~strcmp(ps_errors,'none')
+        errors=ps_errors;
+        output=data;
+        xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_startphase-',p.Results.phase,'_startrun-',num2str(p.Results.run),'_starttrial-',num2str(p.Results.trial),'_data.xlsx'),data);
+        ShowCursor;
+        return
+    else
+        errors='none';
+    end
+    
+    %if the study phase was terminated by the experimenter halfway,
+    %re-engage the test phase function from the next trial to have a new run
+    while strcmp(ps_terminated,'yes')
+        if floor(max(trial_row)/90)==1%if terminated at the last trial of the last run (i.e. trial 90)
+            ps_terminated='none';%skip the while loop
+            continue
+        else
+            lasttrial=mod(max(trial_row),90);%find the maximum trial number, if terminated at the last trial, this will cause the presentation to start from the first trial since mod(A*90,90)=0,that's why we nned the if statment above
+            [resp_pscan,ps_errors,ps_terminated] = post_scan_beh(pathdata,SSID,w,y_mid,test_stim,hand,lasttrial+1);
+            [trial_row,~]=find(~cellfun('isempty',resp_pscan(1:end,8)));%search the onset column (8)
+            data(trial_row+631,3:12)=resp_pscan(trial_row,1:10);%fill in the data
+        end
+        if ~strcmp(ps_errors,'none')
+            errors=ps_errors;
+            ShowCursor;
+            return
+        else
+            errors='none';
+        end
+    end
 
 %% start from test phase
 elseif strcmp(p.Results.phase,'test')
-%stage 3:
+%stage 3: call function handling test phase presentation, loop over runs with break in between
+   [resp_test,test_error,test_terminated] = test(pathdata,SSID,addtrig,w,y_mid,test_txt,test_num,test_task,hand,p.Results.run,p.Results.trial);
+   %find none empty trials
+    [trial_row,~]=find(~cellfun('isempty',resp_test(1:end,8)));%search the onset column (8)
+    data(trial_row+451,3:12)=resp_test(trial_row,1:10);%fill in the data from row 451
+    
+    %if an error occured in the test phase, terminate the
+    %function and return the error, test_error won't be
+    %catched on this level, so I have to manually return the
+    %function
+    if ~strcmp(test_error,'none')
+        errors=test_error;
+        output=data;
+        xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_startphase-',p.Results.phase,'_startrun-',num2str(p.Results.run),'_starttrial-',num2str(p.Results.trial),'_data.xlsx'),data);
+        BIDS_event(pathdata,SSID,data)%call data parser
+        ShowCursor;
+        return
+    else
+        errors='none';
+    end
+    
+    %if the study phase was terminated by the experimenter halfway,
+    %re-engage the test phase function from the next trial to have a new run
+    while strcmp(test_terminated,'yes')
+        if floor(max(trial_row)/45)==4%if terminated at the last trial of the last run (i.e. trial 180)
+            test_terminated='none';%skip the while loop
+            continue
+        elseif floor(max(trial_row)/45)~=4&&mod(max(trial_row),45)==0%if terminated at the last trial the first n-1 runs
+            lastrun=floor(max(trial_row)/45);%find the maximum run number
+            [resp_test,test_error,test_terminated] = test(pathdata,SSID,addtrig,w,y_mid,test_txt,test_num,test_task,hand,lastrun+1,1);%start from the 1st trial of the next run
+            [trial_row,~]=find(~cellfun('isempty',resp_test(1:end,8)));%search the onset column (8)
+            data(trial_row+451,3:12)=resp_test(trial_row,1:10);%fill in the data
+        else
+            lastrun=floor(max(trial_row)/45);%find the maximum run number
+            lasttrial=mod(max(trial_row),45);%find the maximum trial number, if terminated at the last trial, this will cause the presentation to start from the first trial since mod(A*90,90)=0,that's why we nned the if statment above
+            [resp_test,test_error,test_terminated] = test(pathdata,SSID,addtrig,w,y_mid,test_txt,test_num,test_task,hand,lastrun,lasttrial+1);%start from the next trial of the current run
+            [trial_row,~]=find(~cellfun('isempty',resp_test(1:end,8)));%search the onset column (8)
+            data(trial_row+451,3:12)=resp_test(trial_row,1:10);%fill in the data
+        end
+        if ~strcmp(test_error,'none')
+            errors=test_error;
+            BIDS_event(pathdata,SSID,data)%call data parser
+            ShowCursor;
+            return
+        else
+            errors='none';
+        end
+    end
+    
+    %wait for experimenter input (continue to next phase or terminate and save all the data so far)
+       waittrig=1;
+           while waittrig
+            [keyIsDown, dummy_start, keyCodes] = KbCheck;
+            if keyCodes(experimenter_pass)==1%if continue
+                waittrig=0;
+            elseif keyCodes(termkey)==1%if terminate and save
+                xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_startphase-',p.Results.phase,'_startrun-',num2str(p.Results.run),'_starttrial-',num2str(p.Results.trial),'_data.xlsx'),data);
+                BIDS_event(pathdata,SSID,data)%call data parser
+                Screen('CloseAll');
+                ShowCursor;
+                output=data;
+                return
+            end
+           end
+       %need to have these two lines to wait for the key release
+       while KbCheck
+       end
 
-%stage 4:
+
+%stage 4: call function handling post-scan test, remap keys
+    %data gotta be filled from trial_row+631, to not
+    %overwrite study and test phase data
+    
+    %instruct participant to come out of the scanner
+    ins='The next phase will be outside of the scanner.';
+    DrawFormattedText(w,ins, 'center', 'center' );
+    Screen(w, 'Flip');
+    
+    %call sub routines and get data
+    [resp_pscan,ps_errors,ps_terminated] = post_scan_beh(pathdata,SSID,w,y_mid,test_stim,hand,1);
+    [trial_row,~]=find(~cellfun('isempty',resp_pscan(1:end,8)));%search the onset column (8)
+    data(trial_row+631,3:12)=resp_pscan(trial_row,1:10);%fill in the data from row 631
+    
+    %if an error occured in the post-scan phase, terminate the
+    %function and return the error, test_error won't be
+    %catched on this level, so I have to manually return the
+    %function
+    if ~strcmp(ps_errors,'none')
+        errors=ps_errors;
+        output=data;
+        xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_startphase-',p.Results.phase,'_startrun-',num2str(p.Results.run),'_starttrial-',num2str(p.Results.trial),'_data.xlsx'),data);
+        ShowCursor;
+        return
+    else
+        errors='none';
+    end
+    
+    %if the study phase was terminated by the experimenter halfway,
+    %re-engage the test phase function from the next trial to have a new run
+    while strcmp(ps_terminated,'yes')
+        if floor(max(trial_row)/90)==1%if terminated at the last trial of the last run (i.e. trial 90)
+            ps_terminated='none';%skip the while loop
+            continue
+        else
+            lasttrial=mod(max(trial_row),90);%find the maximum trial number, if terminated at the last trial, this will cause the presentation to start from the first trial since mod(A*90,90)=0,that's why we nned the if statment above
+            [resp_pscan,ps_errors,ps_terminated] = post_scan_beh(pathdata,SSID,w,y_mid,test_stim,hand,lasttrial+1);
+            [trial_row,~]=find(~cellfun('isempty',resp_pscan(1:end,8)));%search the onset column (8)
+            data(trial_row+631,3:12)=resp_pscan(trial_row,1:10);%fill in the data
+        end
+        if ~strcmp(ps_errors,'none')
+            errors=ps_errors;
+            ShowCursor;
+            return
+        else
+            errors='none';
+        end
+    end
 
 %% start from post-scan phase
 elseif strcmp(p.Results.phase,'post_scan')
-%stage 4:
+%stage 4: call function handling post-scan test, remap keys
+    %data gotta be filled from trial_row+631, to not
+    %overwrite study and test phase data
+    
+    %instruct participant to come out of the scanner
+    ins='The next phase will be outside of the scanner.';
+    DrawFormattedText(w,ins, 'center', 'center' );
+    Screen(w, 'Flip');
+    
+    %call sub routines and get data
+    [resp_pscan,ps_errors,ps_terminated] = post_scan_beh(pathdata,SSID,w,y_mid,test_stim,hand,p.Results.trial);
+    [trial_row,~]=find(~cellfun('isempty',resp_pscan(1:end,8)));%search the onset column (8)
+    data(trial_row+631,3:12)=resp_pscan(trial_row,1:10);%fill in the data from row 631
+    
+    %if an error occured in the post-scan phase, terminate the
+    %function and return the error, test_error won't be
+    %catched on this level, so I have to manually return the
+    %function
+    if ~strcmp(ps_errors,'none')
+        errors=ps_errors;
+        output=data;
+        xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_startphase-',p.Results.phase,'_startrun-',num2str(p.Results.run),'_starttrial-',num2str(p.Results.trial),'_data.xlsx'),data);
+        ShowCursor;
+        return
+    else
+        errors='none';
+    end
+    
+    %if the study phase was terminated by the experimenter halfway,
+    %re-engage the test phase function from the next trial to have a new run
+    while strcmp(ps_terminated,'yes')
+        if floor(max(trial_row)/90)==1%if terminated at the last trial of the last run (i.e. trial 90)
+            ps_terminated='none';%skip the while loop
+            continue
+        else
+            lasttrial=mod(max(trial_row),90);%find the maximum trial number, if terminated at the last trial, this will cause the presentation to start from the first trial since mod(A*90,90)=0,that's why we nned the if statment above
+            [resp_pscan,ps_errors,ps_terminated] = post_scan_beh(pathdata,SSID,w,y_mid,test_stim,hand,lasttrial+1);
+            [trial_row,~]=find(~cellfun('isempty',resp_pscan(1:end,8)));%search the onset column (8)
+            data(trial_row+631,3:12)=resp_pscan(trial_row,1:10);%fill in the data
+        end
+        if ~strcmp(ps_errors,'none')
+            errors=ps_errors;
+            ShowCursor;
+            return
+        else
+            errors='none';
+        end
+    end
 
 end
 
-%% save the combined behavioral data
+%% save the combined behavioral data and parse the scanning beh data into BIDS format
 %overall data from the current execution of this function
 xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_startphase-',p.Results.phase,'_startrun-',num2str(p.Results.run),'_starttrial-',num2str(p.Results.trial),'_data.xlsx'),data);
+BIDS_event(pathdata,SSID,data)%call data parser
 Screen('CloseAll');
 ShowCursor;
 output=data;

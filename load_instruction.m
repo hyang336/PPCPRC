@@ -131,4 +131,32 @@ elseif strcmp(phase,'key_prac')==1
         page1 = strrep(page1, '%', '');
 
         ins{1}=page1;
+        
+%% post-scan lifetime
+elseif strcmp(phase,'post_scan')==1
+        switch handmapping
+            case 'L5animate'
+                fd_p1 = fopen('postscan_ins_L5animates.m');
+            case 'R5animate'
+                fd_p1 = fopen('postscan_ins_R5animates.m');
+        end
+        if fd_p1==-1
+            error('Could not open instruction files.');
+        end
+
+        page1 = '';
+
+        while ~feof(fd_p1)%read from the first line till the last line
+            tline = fgets(fd_p1);
+            page1=[page1 tline];
+        end
+
+        fclose(fd_p1);
+        page1 = [page1 newline];
+
+        % Get rid of '% ' symbols at the start of each line:
+        page1 = strrep(page1, '% ', '');
+        page1 = strrep(page1, '%', '');
+
+        ins{1}=page1;
 end 

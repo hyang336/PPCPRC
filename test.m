@@ -22,7 +22,7 @@ function [resp_sofar,errors,terminated] = test(pathdata,SSID,addtrig,PTBwindow,y
     pausekey=KbName('p');
     termkey=KbName('t');
     
-    %define key list to only accept response keys (1 & 6)
+    %define key list to only accept response keys 
     %and pause key in the KbQueue
     klist=zeros(1,256);
     klist([pausekey, hand.r1, hand.r2, hand.r3, hand.r4, hand.r5])=1;
