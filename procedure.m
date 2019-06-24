@@ -50,6 +50,9 @@ defaultRun = 1;
 checkRun=@(x) isinteger(int8(x))&&(x>0)&&(x<6);
 defaultTrial=1;
 checkTrial=@(x) isinteger(int8(x))&&(x>0)&&(x<91);
+defaultPilot='';
+validPilot={'','pilot'};
+checkPilot=@(x) any(validatestring(x,validPilot));
 
 addRequired(p,'SSID');
 addRequired(p,'version_inp');
@@ -58,6 +61,7 @@ addRequired(p,'pathdata');
 addParameter(p,'phase',defaultPhase,checkPhase);
 addParameter(p,'run',defaultRun,checkRun);
 addParameter(p,'trial',defaultTrial,checkTrial);
+addParameter(p,'pilot',defaultPilot,checkPilot);
 
 %parse
 parse(p,SSID,version_inp,project_dir,pathdata,varargin{:});
@@ -106,7 +110,24 @@ end
     test_txt=test_stim(:,1);%stimuli
     test_num=test_stim(:,2);%jitter
     test_task=temppp;%task
-    
+
+    %if is pilot testing the script, change key mappings
+    if strcmp(p.Results.pilot,'pilot')
+        switch hand.ver
+            case 'L5animate'
+                hand.r5=KbName('s');
+                hand.r4=KbName('d');
+                hand.r3=KbName('f');
+                hand.r2=KbName('j');
+                hand.r1=KbName('k');
+            case 'R5animate'
+                hand.r5=KbName('l');
+                hand.r4=KbName('k');
+                hand.r3=KbName('j');
+                hand.r2=KbName('f');
+                hand.r1=KbName('d');
+        end
+    end
 %% set up screen 
 try
     [w,rect]=Screen('OpenWindow', scanner_screen);
