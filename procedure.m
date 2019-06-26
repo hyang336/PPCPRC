@@ -51,7 +51,7 @@ checkRun=@(x) isinteger(int8(x))&&(x>0)&&(x<6);
 defaultTrial=1;
 checkTrial=@(x) isinteger(int8(x))&&(x>0)&&(x<91);
 defaultPilot='';
-validPilot={'','pilot'};
+validPilot={'','yes'};
 checkPilot=@(x) any(validatestring(x,validPilot));
 
 addRequired(p,'SSID');
@@ -112,7 +112,7 @@ end
     test_task=temppp;%task
 
     %if is pilot testing the script, change key mappings
-    if strcmp(p.Results.pilot,'pilot')
+    if strcmp(p.Results.pilot,'yes')
         switch hand.ver
             case 'L5animate'
                 hand.r5=KbName('s');
@@ -120,12 +120,16 @@ end
                 hand.r3=KbName('f');
                 hand.r2=KbName('j');
                 hand.r1=KbName('k');
+                hand.animate=KbName('f');
+                hand.inanimate=KbName('j');
             case 'R5animate'
                 hand.r5=KbName('l');
                 hand.r4=KbName('k');
                 hand.r3=KbName('j');
                 hand.r2=KbName('f');
                 hand.r1=KbName('d');
+                hand.animate=KbName('j');
+                hand.inanimate=KbName('f');
         end
     end
 %% set up screen 
@@ -320,11 +324,6 @@ if strcmp(p.Results.phase,'study')
     %data gotta be filled from trial_row+631, to not
     %overwrite study and test phase data
     
-    %instruct participant to come out of the scanner
-    ins='The next phase will be outside of the scanner.';
-    DrawFormattedText(w,ins, 'center', 'center' );
-    Screen(w, 'Flip');
-    
     %call sub routines and get data
     [resp_pscan,ps_errors,ps_terminated] = post_scan_beh(pathdata,SSID,w,y_mid,test_stim,hand,1);
     [trial_row,~]=find(~cellfun('isempty',resp_pscan(1:end,8)));%search the onset column (8)
@@ -480,12 +479,7 @@ elseif strcmp(p.Results.phase,'key_prac')
 %stage 4: call function handling post-scan test, remap keys
     %data gotta be filled from trial_row+631, to not
     %overwrite study and test phase data
-    
-    %instruct participant to come out of the scanner
-    ins='The next phase will be outside of the scanner.';
-    DrawFormattedText(w,ins, 'center', 'center' );
-    Screen(w, 'Flip');
-    
+
     %call sub routines and get data
     [resp_pscan,ps_errors,ps_terminated] = post_scan_beh(pathdata,SSID,w,y_mid,test_stim,hand,1);
     [trial_row,~]=find(~cellfun('isempty',resp_pscan(1:end,8)));%search the onset column (8)
@@ -600,12 +594,7 @@ elseif strcmp(p.Results.phase,'test')
 %stage 4: call function handling post-scan test, remap keys
     %data gotta be filled from trial_row+631, to not
     %overwrite study and test phase data
-    
-    %instruct participant to come out of the scanner
-    ins='The next phase will be outside of the scanner.';
-    DrawFormattedText(w,ins, 'center', 'center' );
-    Screen(w, 'Flip');
-    
+
     %call sub routines and get data
     [resp_pscan,ps_errors,ps_terminated] = post_scan_beh(pathdata,SSID,w,y_mid,test_stim,hand,1);
     [trial_row,~]=find(~cellfun('isempty',resp_pscan(1:end,8)));%search the onset column (8)
@@ -651,12 +640,7 @@ elseif strcmp(p.Results.phase,'post_scan')
 %stage 4: call function handling post-scan test, remap keys
     %data gotta be filled from trial_row+631, to not
     %overwrite study and test phase data
-    
-    %instruct participant to come out of the scanner
-    ins='The next phase will be outside of the scanner.';
-    DrawFormattedText(w,ins, 'center', 'center' );
-    Screen(w, 'Flip');
-    
+
     %call sub routines and get data
     [resp_pscan,ps_errors,ps_terminated] = post_scan_beh(pathdata,SSID,w,y_mid,test_stim,hand,p.Results.trial);
     [trial_row,~]=find(~cellfun('isempty',resp_pscan(1:end,8)));%search the onset column (8)

@@ -42,26 +42,39 @@ function [resp_sofar,errors,terminated] = test(pathdata,SSID,addtrig,PTBwindow,y
         ins=load_instruction('test',i,hand.ver);
         Screen('TextSize',PTBwindow,60);%use font size 60 for instruction
         
-        %display instruction P1
-        [nx, ny, bbox] = DrawFormattedText(PTBwindow, ins{1},'center','center');
-        Screen('Flip',PTBwindow);
-        waittrig=1;
-        while waittrig
-        [keyIsDown, instime, keyCodes] = KbCheck;
-        if keyCodes(flippage)==1
-            waittrig=0;
+        %for first run
+        if i==1
+            %display instruction P1
+            [nx, ny, bbox] = DrawFormattedText(PTBwindow, ins{1},'center','center');
+            Screen('Flip',PTBwindow);
+            waittrig=1;
+            while waittrig
+            [keyIsDown, instime, keyCodes] = KbCheck;
+            if keyCodes(flippage)==1
+                waittrig=0;
+            end
+            end  
+            %P2
+            [nx, ny, bbox] = DrawFormattedText(PTBwindow, ins{2},'center','center');
+            Screen('Flip',PTBwindow);
+            waittrig=1;
+            while waittrig
+            [keyIsDown, instime, keyCodes] = KbCheck;
+            if keyCodes(ins_done)==1
+                waittrig=0;
+            end
+            end  
+        else
+            [nx, ny, bbox] = DrawFormattedText(PTBwindow, ins{1},'center','center');
+            Screen('Flip',PTBwindow);
+            waittrig=1;
+            while waittrig
+            [keyIsDown, instime, keyCodes] = KbCheck;
+            if keyCodes(ins_done)==1
+                waittrig=0;
+            end
+            end  
         end
-        end  
-        %P2
-        [nx, ny, bbox] = DrawFormattedText(PTBwindow, ins{2},'center','center');
-        Screen('Flip',PTBwindow);
-        waittrig=1;
-        while waittrig
-        [keyIsDown, instime, keyCodes] = KbCheck;
-        if keyCodes(ins_done)==1
-            waittrig=0;
-        end
-        end  
         
         info = 'The experiment is going to start in a few seconds';
         DrawFormattedText(PTBwindow, info, 'center', 'center');
@@ -109,6 +122,9 @@ function [resp_sofar,errors,terminated] = test(pathdata,SSID,addtrig,PTBwindow,y
                     DrawFormattedText(PTBwindow,instxt, 'center', y_center );%present initial ins
                     Screen(PTBwindow, 'Flip');
                     WaitSecs(3);
+                    DrawFormattedText(PTBwindow, '+', 'center', y_center);
+                    Screen(PTBwindow, 'Flip');
+                    WaitSecs(2);
                 end
                 
                     word=run_stim{j};       

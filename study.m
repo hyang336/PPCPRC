@@ -24,7 +24,7 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
     %define key list to only accept response keys (1 & 6)
     %and pause key in the KbQueue
     klist=zeros(1,256);
-    klist([pausekey, KbName('1!'), KbName('6^')])=1;
+    klist([pausekey, hand.animate, hand.inanimate])=1;
     
     %flow control
     errors='none';%for debugging, return errors in this function
