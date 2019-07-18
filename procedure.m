@@ -328,6 +328,9 @@ if strcmp(p.Results.phase,'study')
     [resp_pscan,ps_errors,ps_terminated] = post_scan_beh(pathdata,SSID,w,y_mid,test_stim,hand,1);
     [trial_row,~]=find(~cellfun('isempty',resp_pscan(1:end,8)));%search the onset column (8)
     data(trial_row+631,3:12)=resp_pscan(trial_row,1:10);%fill in the data from row 631
+    pscan_data=data(1,:);%get headers
+    pscan_data(trial_row+1,3:12)=resp_pscan(trial_row,1:10);%fill in the dataresp_sofar(trial_row,1:10);%fill in the data
+    xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_task-pscan_data.xlsx'),pscan_data);
     
     %if an error occured in the post-scan phase, terminate the
     %function and return the error, test_error won't be
@@ -484,6 +487,9 @@ elseif strcmp(p.Results.phase,'key_prac')
     [resp_pscan,ps_errors,ps_terminated] = post_scan_beh(pathdata,SSID,w,y_mid,test_stim,hand,1);
     [trial_row,~]=find(~cellfun('isempty',resp_pscan(1:end,8)));%search the onset column (8)
     data(trial_row+631,3:12)=resp_pscan(trial_row,1:10);%fill in the data from row 631
+    pscan_data=data(1,:);%get headers
+    pscan_data(trial_row+1,3:12)=resp_pscan(trial_row,1:10);%fill in the dataresp_sofar(trial_row,1:10);%fill in the data
+    xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_task-pscan_data.xlsx'),pscan_data);
     
     %if an error occured in the post-scan phase, terminate the
     %function and return the error, test_error won't be
@@ -599,6 +605,9 @@ elseif strcmp(p.Results.phase,'test')
     [resp_pscan,ps_errors,ps_terminated] = post_scan_beh(pathdata,SSID,w,y_mid,test_stim,hand,1);
     [trial_row,~]=find(~cellfun('isempty',resp_pscan(1:end,8)));%search the onset column (8)
     data(trial_row+631,3:12)=resp_pscan(trial_row,1:10);%fill in the data from row 631
+    pscan_data=data(1,:);%get headers
+    pscan_data(trial_row+1,3:12)=resp_pscan(trial_row,1:10);%fill in the dataresp_sofar(trial_row,1:10);%fill in the data
+    xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_task-pscan_data.xlsx'),pscan_data);
     
     %if an error occured in the post-scan phase, terminate the
     %function and return the error, test_error won't be
@@ -645,6 +654,9 @@ elseif strcmp(p.Results.phase,'post_scan')
     [resp_pscan,ps_errors,ps_terminated] = post_scan_beh(pathdata,SSID,w,y_mid,test_stim,hand,p.Results.trial);
     [trial_row,~]=find(~cellfun('isempty',resp_pscan(1:end,8)));%search the onset column (8)
     data(trial_row+631,3:12)=resp_pscan(trial_row,1:10);%fill in the data from row 631
+    pscan_data=data(1,:);%get headers
+    pscan_data(trial_row+1,3:12)=resp_pscan(trial_row,1:10);%fill in the dataresp_sofar(trial_row,1:10);%fill in the data
+    xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_task-pscan_data.xlsx'),pscan_data);
     
     %if an error occured in the post-scan phase, terminate the
     %function and return the error, test_error won't be
@@ -686,7 +698,7 @@ end
 %% save the combined behavioral data and parse the scanning beh data into BIDS format
 %overall data from the current execution of this function
 xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_startphase-',p.Results.phase,'_startrun-',num2str(p.Results.run),'_starttrial-',num2str(p.Results.trial),'_data.xlsx'),data);
-BIDS_event(pathdata,SSID,data)%call data parser
+BIDS_event(pathdata,SSID,data);%call data parser
 Screen('CloseAll');
 ShowCursor;
 output=data;

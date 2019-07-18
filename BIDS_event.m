@@ -8,7 +8,8 @@ function BIDS_event(pathdata,SSID,data)
     %fill in the phase column according to tasks
     [studyrow,~]=find(strcmp(scandata(:,taskcol),'animacy'));
     [testrow,~]=find(strcmp(scandata(:,taskcol),'lifetime')|strcmp(scandata(:,taskcol),'recent'));
-    scandata(studyrow,end)={'study'};
+    
+    scandata(studyrow,end)={'study'};%attach a new column at the end to indicate phase
     scandata(testrow,end)={'test'};
     %find the run columns
     [~,runcol]=find(strcmp(scandata,'Run'));

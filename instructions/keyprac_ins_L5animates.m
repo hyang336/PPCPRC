@@ -3,7 +3,7 @@
 %screen. Your task is to press the corresponding keys
 %swiftly and accurately. For each trial, if you made an
 %incorrect response, a picture of the button box and the
-%correct key would be indicated in a red box. 
+%correct key would be indicated in a red box.
 
 %pressing with your left ring finger indicates a 5, with
 %your left middle fingle indicates a 4, with your left index
@@ -13,5 +13,5 @@
 %reading this instruction for 5 seconds.
 
 %once you have made enough correct responses consecutively,
-%you will proceed into the actual experiment. [Press your
-%right middle finger to start]
+%we will proceed into next phase. [Press your right middle
+%finger to start]

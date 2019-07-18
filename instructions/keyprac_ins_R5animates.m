@@ -13,5 +13,5 @@
 %reading this instruction for 5 seconds.
 
 %once you have made enough correct responses consecutively,
-%you will proceed into the actual experiment. [Press your
-%right middle finger to start]
+%we will proceed into next phase. [Press your right middle
+%finger to start]

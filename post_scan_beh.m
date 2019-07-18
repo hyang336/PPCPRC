@@ -7,6 +7,8 @@ output=cell(90,10);%initialize data output; headers are handled in the main proc
     %norm_fam, frequency, run-number which is dependent on how many different exp_start afterwards,etc.), that's because this
     %function only takes the words, the jitters, and the task as input.
     
+output(:,3)={-1};%fill the ExpStartTime column with -1, necessary for data parsing (BIDS_event)   
+
 %for instruction reading
 %     scan_trig=KbName('5%');
 %     flippage=KbName('1!');
