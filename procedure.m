@@ -96,6 +96,7 @@ addtrig=5;%exp start at the 5th trigger
 [study_stim,test_stim,hand]=version_select(version_inp);
     study_txt=study_stim(:,1);%stimuli
     study_num=study_stim(:,2);%jitter
+    study_prop=study_stim(:,4:5);%objective_freq and norm_fam
     
     temppp=cell(1);
 for i=1:36%36 small blocks in the test phase
@@ -109,6 +110,7 @@ end
 
     test_txt=test_stim(:,1);%stimuli
     test_num=test_stim(:,2);%jitter
+    test_prop=test_stim(:,5:6);%object_freq and norm_fam
     test_task=temppp;%task
 
     %if is pilot testing the script, change key mappings
@@ -142,7 +144,7 @@ try
 %% start from study phase
 if strcmp(p.Results.phase,'study')
 %stage 1: call function handling study phase presentation, loop over runs with break in between
-    [resp_sofar,study_error,terminated] = study(pathdata,SSID,addtrig,w,y_mid,study_txt,study_num,hand,p.Results.run,p.Results.trial);
+    [resp_sofar,study_error,terminated] = study(pathdata,SSID,addtrig,w,y_mid,study_txt,study_num,study_prop,hand,p.Results.run,p.Results.trial);
     %find none empty trials
     [trial_row,~]=find(~cellfun('isempty',resp_sofar(1:end,8)));%search the onset column (8)
     data(trial_row+1,3:12)=resp_sofar(trial_row,1:10);%fill in the data
@@ -170,13 +172,13 @@ if strcmp(p.Results.phase,'study')
             continue
         elseif floor(max(trial_row)/90)~=5&&mod(max(trial_row),90)==0%if terminated at the last trial the first n-1 runs
             lastrun=floor(max(trial_row)/90);%find the maximum run number
-            [resp_sofar,study_error,terminated] = study(pathdata,SSID,addtrig,w,y_mid,study_txt,study_num,hand,lastrun+1,1);%start from the 1st trial of the next run
+            [resp_sofar,study_error,terminated] = study(pathdata,SSID,addtrig,w,y_mid,study_txt,study_num,study_prop,hand,lastrun+1,1);%start from the 1st trial of the next run
             [trial_row,~]=find(~cellfun('isempty',resp_sofar(1:end,8)));%search the onset column (8)
             data(trial_row+1,3:12)=resp_sofar(trial_row,1:10);%fill in the data
         else
             lastrun=floor(max(trial_row)/90);%find the maximum run number
             lasttrial=mod(max(trial_row),90);%find the maximum trial number, if terminated at the last trial, this will cause the presentation to start from the first trial since mod(A*90,90)=0,that's why we nned the if statment above
-            [resp_sofar,study_error,terminated] = study(pathdata,SSID,addtrig,w,y_mid,study_txt,study_num,hand,lastrun,lasttrial+1);%start from the next trial of the current run
+            [resp_sofar,study_error,terminated] = study(pathdata,SSID,addtrig,w,y_mid,study_txt,study_num,study_prop,hand,lastrun,lasttrial+1);%start from the next trial of the current run
             [trial_row,~]=find(~cellfun('isempty',resp_sofar(1:end,8)));%search the onset column (8)
             data(trial_row+1,3:12)=resp_sofar(trial_row,1:10);%fill in the data
         end
@@ -252,7 +254,7 @@ if strcmp(p.Results.phase,'study')
        end
        
 %stage 3: call function handling test phase presentation, loop over runs with break in between
-   [resp_test,test_error,test_terminated] = test(pathdata,SSID,addtrig,w,y_mid,test_txt,test_num,test_task,hand,1,1);
+   [resp_test,test_error,test_terminated] = test(pathdata,SSID,addtrig,w,y_mid,test_txt,test_num,test_prop,test_task,hand,1,1);
    %find none empty trials
     [trial_row,~]=find(~cellfun('isempty',resp_test(1:end,8)));%search the onset column (8)
     data(trial_row+451,3:12)=resp_test(trial_row,1:10);%fill in the data from row 451
@@ -280,13 +282,13 @@ if strcmp(p.Results.phase,'study')
             continue
         elseif floor(max(trial_row)/45)~=4&&mod(max(trial_row),45)==0%if terminated at the last trial the first n-1 runs
             lastrun=floor(max(trial_row)/45);%find the maximum run number
-            [resp_test,test_error,test_terminated] = test(pathdata,SSID,addtrig,w,y_mid,test_txt,test_num,test_task,hand,lastrun+1,1);%start from the 1st trial of the next run
+            [resp_test,test_error,test_terminated] = test(pathdata,SSID,addtrig,w,y_mid,test_txt,test_num,test_prop,test_task,hand,lastrun+1,1);%start from the 1st trial of the next run
             [trial_row,~]=find(~cellfun('isempty',resp_test(1:end,8)));%search the onset column (8)
             data(trial_row+451,3:12)=resp_test(trial_row,1:10);%fill in the data
         else
             lastrun=floor(max(trial_row)/45);%find the maximum run number
             lasttrial=mod(max(trial_row),45);%find the maximum trial number, if terminated at the last trial, this will cause the presentation to start from the first trial since mod(A*90,90)=0,that's why we nned the if statment above
-            [resp_test,test_error,test_terminated] = test(pathdata,SSID,addtrig,w,y_mid,test_txt,test_num,test_task,hand,lastrun,lasttrial+1);%start from the next trial of the current run
+            [resp_test,test_error,test_terminated] = test(pathdata,SSID,addtrig,w,y_mid,test_txt,test_num,test_prop,test_task,hand,lastrun,lasttrial+1);%start from the next trial of the current run
             [trial_row,~]=find(~cellfun('isempty',resp_test(1:end,8)));%search the onset column (8)
             data(trial_row+451,3:12)=resp_test(trial_row,1:10);%fill in the data
         end
@@ -411,7 +413,7 @@ elseif strcmp(p.Results.phase,'key_prac')
        end
        
 %stage 3: call function handling test phase presentation, loop over runs with break in between
-   [resp_test,test_error,test_terminated] = test(pathdata,SSID,addtrig,w,y_mid,test_txt,test_num,test_task,hand,1,1);
+   [resp_test,test_error,test_terminated] = test(pathdata,SSID,addtrig,w,y_mid,test_txt,test_num,test_prop,test_task,hand,1,1);
    %find none empty trials
     [trial_row,~]=find(~cellfun('isempty',resp_test(1:end,8)));%search the onset column (8)
     data(trial_row+451,3:12)=resp_test(trial_row,1:10);%fill in the data from row 451
@@ -439,13 +441,13 @@ elseif strcmp(p.Results.phase,'key_prac')
             continue
         elseif floor(max(trial_row)/45)~=4&&mod(max(trial_row),45)==0%if terminated at the last trial the first n-1 runs
             lastrun=floor(max(trial_row)/45);%find the maximum run number
-            [resp_test,test_error,test_terminated] = test(pathdata,SSID,addtrig,w,y_mid,test_txt,test_num,test_task,hand,lastrun+1,1);%start from the 1st trial of the next run
+            [resp_test,test_error,test_terminated] = test(pathdata,SSID,addtrig,w,y_mid,test_txt,test_num,test_prop,test_task,hand,lastrun+1,1);%start from the 1st trial of the next run
             [trial_row,~]=find(~cellfun('isempty',resp_test(1:end,8)));%search the onset column (8)
             data(trial_row+451,3:12)=resp_test(trial_row,1:10);%fill in the data
         else
             lastrun=floor(max(trial_row)/45);%find the maximum run number
             lasttrial=mod(max(trial_row),45);%find the maximum trial number, if terminated at the last trial, this will cause the presentation to start from the first trial since mod(A*90,90)=0,that's why we nned the if statment above
-            [resp_test,test_error,test_terminated] = test(pathdata,SSID,addtrig,w,y_mid,test_txt,test_num,test_task,hand,lastrun,lasttrial+1);%start from the next trial of the current run
+            [resp_test,test_error,test_terminated] = test(pathdata,SSID,addtrig,w,y_mid,test_txt,test_num,test_prop,test_task,hand,lastrun,lasttrial+1);%start from the next trial of the current run
             [trial_row,~]=find(~cellfun('isempty',resp_test(1:end,8)));%search the onset column (8)
             data(trial_row+451,3:12)=resp_test(trial_row,1:10);%fill in the data
         end
@@ -529,7 +531,7 @@ elseif strcmp(p.Results.phase,'key_prac')
 %% start from test phase
 elseif strcmp(p.Results.phase,'test')
 %stage 3: call function handling test phase presentation, loop over runs with break in between
-   [resp_test,test_error,test_terminated] = test(pathdata,SSID,addtrig,w,y_mid,test_txt,test_num,test_task,hand,p.Results.run,p.Results.trial);
+   [resp_test,test_error,test_terminated] = test(pathdata,SSID,addtrig,w,y_mid,test_txt,test_num,test_prop,test_task,hand,p.Results.run,p.Results.trial);
    %find none empty trials
     [trial_row,~]=find(~cellfun('isempty',resp_test(1:end,8)));%search the onset column (8)
     data(trial_row+451,3:12)=resp_test(trial_row,1:10);%fill in the data from row 451
@@ -557,13 +559,13 @@ elseif strcmp(p.Results.phase,'test')
             continue
         elseif floor(max(trial_row)/45)~=4&&mod(max(trial_row),45)==0%if terminated at the last trial the first n-1 runs
             lastrun=floor(max(trial_row)/45);%find the maximum run number
-            [resp_test,test_error,test_terminated] = test(pathdata,SSID,addtrig,w,y_mid,test_txt,test_num,test_task,hand,lastrun+1,1);%start from the 1st trial of the next run
+            [resp_test,test_error,test_terminated] = test(pathdata,SSID,addtrig,w,y_mid,test_txt,test_num,test_prop,test_task,hand,lastrun+1,1);%start from the 1st trial of the next run
             [trial_row,~]=find(~cellfun('isempty',resp_test(1:end,8)));%search the onset column (8)
             data(trial_row+451,3:12)=resp_test(trial_row,1:10);%fill in the data
         else
             lastrun=floor(max(trial_row)/45);%find the maximum run number
             lasttrial=mod(max(trial_row),45);%find the maximum trial number, if terminated at the last trial, this will cause the presentation to start from the first trial since mod(A*90,90)=0,that's why we nned the if statment above
-            [resp_test,test_error,test_terminated] = test(pathdata,SSID,addtrig,w,y_mid,test_txt,test_num,test_task,hand,lastrun,lasttrial+1);%start from the next trial of the current run
+            [resp_test,test_error,test_terminated] = test(pathdata,SSID,addtrig,w,y_mid,test_txt,test_num,test_prop,test_task,hand,lastrun,lasttrial+1);%start from the next trial of the current run
             [trial_row,~]=find(~cellfun('isempty',resp_test(1:end,8)));%search the onset column (8)
             data(trial_row+451,3:12)=resp_test(trial_row,1:10);%fill in the data
         end

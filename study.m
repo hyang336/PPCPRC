@@ -7,10 +7,10 @@
 %% since we reduced 10 runs to 5 runs (double the trial count in each run), but the block number was not changed
 %% since the main function of it was to counter balance the order of presentation between subjects
 %% the output from this function should list the correct run number
-function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,y_center,stimuli,jitter,hand,run,trial)%run is in the range of [1,5], trial is in [1,90]
+function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,y_center,stimuli,jitter,study_prop,hand,run,trial)%run is in the range of [1,5], trial is in [1,90]
     output=cell(450,10);%initialize data output; headers are handled in the main procedure script (all but participant_ID and version [3 12])
     %some of the columns in the output will be empty (e.g.
-    %norm_fam, frequency, run-number which is dependent on how many different exp_start afterwards,etc.), that's because this
+    %run-number which is dependent on how many different exp_start afterwards,etc.), that's because this
     %function only takes the words and the jitters as input.
     output(:,7)={'animacy'};% fill the "task" column
     
@@ -106,6 +106,8 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
                     output{(i-1)*90+j,8}=onset;%onset time
                     output{(i-1)*90+j,4}=word;%the stimulus of this trial
                     output{(i-1)*90+j,2}=j;% the trial count of the current run
+                    output{(i-1)*90+j,5}=study_prop{(i-1)*90+j,1};%objective freq.
+                    output{(i-1)*90+j,6}=study_prop{(i-1)*90+j,2};%norm_fam
                     
                     %check response after presentation
                     [pressed, firstPress]=KbQueueCheck;
@@ -184,6 +186,8 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
                     output{(i-1)*90+j,8}=onset;%onset time
                     output{(i-1)*90+j,4}=word;%the stimulus of this trial
                     output{(i-1)*90+j,2}=j;% the trial count of the current run
+                    output{(i-1)*90+j,5}=study_prop{(i-1)*90+j,1};%objective freq.
+                    output{(i-1)*90+j,6}=study_prop{(i-1)*90+j,2};%norm_fam
                     
                     %check response after presentation
                     [pressed, firstPress]=KbQueueCheck;

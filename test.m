@@ -7,10 +7,10 @@
 %% the main function of it was to counter balance the order of presentation between subjects
 %% the output from this function should list the correct run number
 
-function [resp_sofar,errors,terminated] = test(pathdata,SSID,addtrig,PTBwindow,y_center,stimuli,jitter,taskorder,hand,run,trial)%run is in the range of [1,5], trial is in [1,90]
+function [resp_sofar,errors,terminated] = test(pathdata,SSID,addtrig,PTBwindow,y_center,stimuli,jitter,test_prop,taskorder,hand,run,trial)%run is in the range of [1,5], trial is in [1,90]
     output=cell(length(stimuli),10);%initialize data output; headers are handled in the main procedure script (all but participant_ID and version [3 12])
     %some of the columns in the output will be empty (e.g.
-    %norm_fam, frequency, run-number which is dependent on how many different exp_start afterwards,etc.), that's because this
+    %run-number which is dependent on how many different exp_start afterwards,etc.), that's because this
     %function only takes the words, the jitters, and the task as input.
     
     
@@ -143,6 +143,8 @@ function [resp_sofar,errors,terminated] = test(pathdata,SSID,addtrig,PTBwindow,y
                     output{(i-1)*45+j,8}=onset;%onset time
                     output{(i-1)*45+j,4}=word;%the stimulus of this trial
                     output{(i-1)*45+j,2}=j;% the trial count of the current run
+                    output{(i-1)*45+j,5}=test_prop{(i-1)*45+j,1};%objective freq.
+                    output{(i-1)*45+j,6}=test_prop{(i-1)*45+j,2};%norm_fam
                     
                     %check response after presentation
                     [pressed, firstPress]=KbQueueCheck;
@@ -247,6 +249,8 @@ function [resp_sofar,errors,terminated] = test(pathdata,SSID,addtrig,PTBwindow,y
                     output{(i-1)*45+j,8}=onset;%onset time
                     output{(i-1)*45+j,4}=word;%the stimulus of this trial
                     output{(i-1)*45+j,2}=j;% the trial count of the current run
+                    output{(i-1)*45+j,5}=test_prop{(i-1)*45+j,1};%objective freq.
+                    output{(i-1)*45+j,6}=test_prop{(i-1)*45+j,2};%norm_fam
                     
                     %check response after presentation
                     [pressed, firstPress]=KbQueueCheck;
