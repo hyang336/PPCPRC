@@ -171,12 +171,12 @@ if strcmp(p.Results.phase,'study')
             terminated='none';%skip the while loop
             continue
         elseif floor(max(trial_row)/90)~=5&&mod(max(trial_row),90)==0%if terminated at the last trial the first n-1 runs
-            lastrun=floor(max(trial_row)/90);%find the maximum run number
+            lastrun=ceil(max(trial_row)/90);%find the maximum run number
             [resp_sofar,study_error,terminated] = study(pathdata,SSID,addtrig,w,y_mid,study_txt,study_num,study_prop,hand,lastrun+1,1);%start from the 1st trial of the next run
             [trial_row,~]=find(~cellfun('isempty',resp_sofar(1:end,8)));%search the onset column (8)
             data(trial_row+1,3:12)=resp_sofar(trial_row,1:10);%fill in the data
         else
-            lastrun=floor(max(trial_row)/90);%find the maximum run number
+            lastrun=ceil(max(trial_row)/90);%find the maximum run number
             lasttrial=mod(max(trial_row),90);%find the maximum trial number, if terminated at the last trial, this will cause the presentation to start from the first trial since mod(A*90,90)=0,that's why we nned the if statment above
             [resp_sofar,study_error,terminated] = study(pathdata,SSID,addtrig,w,y_mid,study_txt,study_num,study_prop,hand,lastrun,lasttrial+1);%start from the next trial of the current run
             [trial_row,~]=find(~cellfun('isempty',resp_sofar(1:end,8)));%search the onset column (8)
@@ -184,6 +184,7 @@ if strcmp(p.Results.phase,'study')
         end
         if ~strcmp(study_error,'none')
             errors=study_error;
+            output=data;
             BIDS_event(pathdata,SSID,data)%call data parser
             ShowCursor;
             return
@@ -281,12 +282,12 @@ if strcmp(p.Results.phase,'study')
             test_terminated='none';%skip the while loop
             continue
         elseif floor(max(trial_row)/45)~=4&&mod(max(trial_row),45)==0%if terminated at the last trial the first n-1 runs
-            lastrun=floor(max(trial_row)/45);%find the maximum run number
+            lastrun=ceil(max(trial_row)/45);%find the maximum run number
             [resp_test,test_error,test_terminated] = test(pathdata,SSID,addtrig,w,y_mid,test_txt,test_num,test_prop,test_task,hand,lastrun+1,1);%start from the 1st trial of the next run
             [trial_row,~]=find(~cellfun('isempty',resp_test(1:end,8)));%search the onset column (8)
             data(trial_row+451,3:12)=resp_test(trial_row,1:10);%fill in the data
         else
-            lastrun=floor(max(trial_row)/45);%find the maximum run number
+            lastrun=ceil(max(trial_row)/45);%find the maximum run number
             lasttrial=mod(max(trial_row),45);%find the maximum trial number, if terminated at the last trial, this will cause the presentation to start from the first trial since mod(A*90,90)=0,that's why we nned the if statment above
             [resp_test,test_error,test_terminated] = test(pathdata,SSID,addtrig,w,y_mid,test_txt,test_num,test_prop,test_task,hand,lastrun,lasttrial+1);%start from the next trial of the current run
             [trial_row,~]=find(~cellfun('isempty',resp_test(1:end,8)));%search the onset column (8)
@@ -294,6 +295,7 @@ if strcmp(p.Results.phase,'study')
         end
         if ~strcmp(test_error,'none')
             errors=test_error;
+            output=data;
             BIDS_event(pathdata,SSID,data)%call data parser
             ShowCursor;
             return
@@ -362,6 +364,7 @@ if strcmp(p.Results.phase,'study')
         end
         if ~strcmp(ps_errors,'none')
             errors=ps_errors;
+            output=data;
             ShowCursor;
             return
         else
@@ -440,12 +443,12 @@ elseif strcmp(p.Results.phase,'key_prac')
             test_terminated='none';%skip the while loop
             continue
         elseif floor(max(trial_row)/45)~=4&&mod(max(trial_row),45)==0%if terminated at the last trial the first n-1 runs
-            lastrun=floor(max(trial_row)/45);%find the maximum run number
+            lastrun=ceil(max(trial_row)/45);%find the maximum run number
             [resp_test,test_error,test_terminated] = test(pathdata,SSID,addtrig,w,y_mid,test_txt,test_num,test_prop,test_task,hand,lastrun+1,1);%start from the 1st trial of the next run
             [trial_row,~]=find(~cellfun('isempty',resp_test(1:end,8)));%search the onset column (8)
             data(trial_row+451,3:12)=resp_test(trial_row,1:10);%fill in the data
         else
-            lastrun=floor(max(trial_row)/45);%find the maximum run number
+            lastrun=ceil(max(trial_row)/45);%find the maximum run number
             lasttrial=mod(max(trial_row),45);%find the maximum trial number, if terminated at the last trial, this will cause the presentation to start from the first trial since mod(A*90,90)=0,that's why we nned the if statment above
             [resp_test,test_error,test_terminated] = test(pathdata,SSID,addtrig,w,y_mid,test_txt,test_num,test_prop,test_task,hand,lastrun,lasttrial+1);%start from the next trial of the current run
             [trial_row,~]=find(~cellfun('isempty',resp_test(1:end,8)));%search the onset column (8)
@@ -453,6 +456,7 @@ elseif strcmp(p.Results.phase,'key_prac')
         end
         if ~strcmp(test_error,'none')
             errors=test_error;
+            output=data;
             BIDS_event(pathdata,SSID,data)%call data parser
             ShowCursor;
             return
@@ -521,6 +525,7 @@ elseif strcmp(p.Results.phase,'key_prac')
         end
         if ~strcmp(ps_errors,'none')
             errors=ps_errors;
+            output=data;
             ShowCursor;
             return
         else
@@ -558,12 +563,12 @@ elseif strcmp(p.Results.phase,'test')
             test_terminated='none';%skip the while loop
             continue
         elseif floor(max(trial_row)/45)~=4&&mod(max(trial_row),45)==0%if terminated at the last trial the first n-1 runs
-            lastrun=floor(max(trial_row)/45);%find the maximum run number
+            lastrun=ceil(max(trial_row)/45);%find the maximum run number
             [resp_test,test_error,test_terminated] = test(pathdata,SSID,addtrig,w,y_mid,test_txt,test_num,test_prop,test_task,hand,lastrun+1,1);%start from the 1st trial of the next run
             [trial_row,~]=find(~cellfun('isempty',resp_test(1:end,8)));%search the onset column (8)
             data(trial_row+451,3:12)=resp_test(trial_row,1:10);%fill in the data
         else
-            lastrun=floor(max(trial_row)/45);%find the maximum run number
+            lastrun=ceil(max(trial_row)/45);%find the maximum run number
             lasttrial=mod(max(trial_row),45);%find the maximum trial number, if terminated at the last trial, this will cause the presentation to start from the first trial since mod(A*90,90)=0,that's why we nned the if statment above
             [resp_test,test_error,test_terminated] = test(pathdata,SSID,addtrig,w,y_mid,test_txt,test_num,test_prop,test_task,hand,lastrun,lasttrial+1);%start from the next trial of the current run
             [trial_row,~]=find(~cellfun('isempty',resp_test(1:end,8)));%search the onset column (8)
@@ -572,6 +577,7 @@ elseif strcmp(p.Results.phase,'test')
         if ~strcmp(test_error,'none')
             errors=test_error;
             BIDS_event(pathdata,SSID,data)%call data parser
+            output=data;%critical ADDED 20190909
             ShowCursor;
             return
         else
@@ -639,6 +645,7 @@ elseif strcmp(p.Results.phase,'test')
         end
         if ~strcmp(ps_errors,'none')
             errors=ps_errors;
+            output=data;
             ShowCursor;
             return
         else
@@ -688,6 +695,7 @@ elseif strcmp(p.Results.phase,'post_scan')
         end
         if ~strcmp(ps_errors,'none')
             errors=ps_errors;
+            output=data;
             ShowCursor;
             return
         else
