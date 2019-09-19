@@ -53,6 +53,9 @@ checkTrial=@(x) isinteger(int8(x))&&(x>0)&&(x<91);
 defaultPilot='';
 validPilot={'','yes'};
 checkPilot=@(x) any(validatestring(x,validPilot));
+defaultEyetracking='yes';
+validEyetracking={'yes','no'};
+checkEyetracking=@(x) any(validatestring(x,validEyetracking));
 
 addRequired(p,'SSID');
 addRequired(p,'version_inp');
@@ -62,6 +65,7 @@ addParameter(p,'phase',defaultPhase,checkPhase);
 addParameter(p,'run',defaultRun,checkRun);
 addParameter(p,'trial',defaultTrial,checkTrial);
 addParameter(p,'pilot',defaultPilot,checkPilot);
+addParameter(p,'Eyetracking',defaultEyetracking,checkEyetracking);
 
 %parse
 parse(p,SSID,version_inp,project_dir,pathdata,varargin{:});
@@ -135,13 +139,102 @@ end
                 hand.inanimate=KbName('f');
         end
     end
-%% set up screen 
+
+    
+    
 try
+    %% set up screen 
     [w,rect]=Screen('OpenWindow', scanner_screen);
     HideCursor;
     y_mid=(rect(2)+rect(4))/2;%get the y mid point of the screen for presentation use
+    
+    %% setup eye-tracking
+    %data file name
+    edfFile=strcat(pathdata,'/',SSID,'_eyeD');
+    fprintf('EDFFile: %s\n', edfFile );
+    %mysterious initializing function...
+    el=EyelinkInitDefaults(w);
+    
+    %Initialization of the connection with the Eyelink Gazetracker.
+    %Exit function if failed
+    dummymode=strcmp(p.Results.Eyetracking,'no');
+    if ~EyelinkInit(dummymode)
+       fprintf('Eyelink Init aborted.\n');
+       cleanup;
+       return;
+    end
+    
+    % the following code is used to check the version of the eye tracker
+    % and version of the host software
 
-% call sub-procedures and pass in PTB window, stimuli, and hand mapping, return responses.
+    [v vs]=Eyelink('GetTrackerVersion');
+    fprintf('Running experiment on a ''%s'' tracker.\n', vs );
+
+    % open file to record data to
+    fi = Eyelink('Openfile', edfFile);
+    if fi~=0
+        fprintf('Cannot create EDF file ''%s'' ', edffilename);
+        Eyelink( 'Shutdown');
+        Screen('CloseAll');
+        return;
+    end
+
+    Eyelink('command', 'add_file_preamble_text ''Recorded by EyelinkToolbox demo-experiment''');
+    [width, height]=Screen('WindowSize', scanner_screen);
+    
+    % SET UP TRACKER CONFIGURATION
+    % Setting the proper recording resolution, proper calibration type, 
+    % as well as the data file content;
+    Eyelink('command','screen_pixel_coords = %ld %ld %ld %ld', 0, 0, width-1, height-1);
+    Eyelink('message', 'DISPLAY_COORDS %ld %ld %ld %ld', 0, 0, width-1, height-1);                
+    % set calibration type. (5 points)
+    Eyelink('command', 'calibration_type = HV5');
+    
+    % set EDF file contents using the file_sample_data and
+    % file-event_filter commands
+    % set link data thtough link_sample_data and link_event_filter
+    Eyelink('command', 'file_event_filter = LEFT,RIGHT,FIXATION,SACCADE,BLINK,MESSAGE,BUTTON,INPUT');
+    Eyelink('command', 'link_event_filter = LEFT,RIGHT,FIXATION,SACCADE,BLINK,MESSAGE,BUTTON,INPUT');
+
+    % check the software version
+    % add "HTARGET" to record possible target data for EyeLink Remote
+    if sscanf(vs(12:end),'%f') >=4
+        Eyelink('command', 'file_sample_data  = LEFT,RIGHT,GAZE,HREF,AREA,HTARGET,GAZERES,STATUS,INPUT');
+        Eyelink('command', 'link_sample_data  = LEFT,RIGHT,GAZE,GAZERES,AREA,HTARGET,STATUS,INPUT');
+    else
+        Eyelink('command', 'file_sample_data  = LEFT,RIGHT,GAZE,HREF,AREA,GAZERES,STATUS,INPUT');
+        Eyelink('command', 'link_sample_data  = LEFT,RIGHT,GAZE,GAZERES,AREA,STATUS,INPUT');
+    end
+    
+    % make sure we're still connected. We can call this at the beginning of
+    % each run if we really need eye data, but otherwise just call it once
+    % here
+    if Eyelink('IsConnected')~=1 && dummymode == 0
+        fprintf('not connected, clean up\n');
+        Eyelink( 'Shutdown');
+        Screen('CloseAll');
+        return;
+    end
+
+    % Calibrate the eye tracker
+    % setup the proper calibration foreground and background colors
+    el.backgroundcolour = [255 255 255];
+    el.calibrationtargetcolour = [0 0 0];
+
+    % parameters are in frequency, volume, and duration
+    % set the second value in each line to 0 to turn off the sound
+    el.cal_target_beep=[600 0.5 0.05];
+    el.drift_correction_target_beep=[600 0.5 0.05];
+    el.calibration_failed_beep=[400 0.5 0.25];
+    el.calibration_success_beep=[800 0.5 0.25];
+    el.drift_correction_failed_beep=[400 0.5 0.25];
+    el.drift_correction_success_beep=[800 0.5 0.25];
+    % you must call this function to apply the changes from above
+    EyelinkUpdateDefaults(el);
+    %call another mysterious function...
+    EyelinkDoTrackerSetup(el);
+    
+%% call sub-procedures and pass in PTB window, stimuli, and hand mapping, return responses.
 %% start from study phase
 if strcmp(p.Results.phase,'study')
 %stage 1: call function handling study phase presentation, loop over runs with break in between

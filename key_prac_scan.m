@@ -127,12 +127,39 @@ screenrec=[0 0 Xp Yp];
             KbQueueStart;
             while success < 45               
                
+                % Sending a 'TRIALID' message to mark the start of a trial in Data
+                % Viewer.  This is different than the start of recording message
+                % START that is logged when the trial recording begins. The viewer
+                % will not parse any messages, events, or samples, that exist in
+                % the data file prior to this message.
+                Eyelink('Message', 'TRIALID %d', i);
+                
+%                 % Do a drift correction at the beginning of each trial
+%                 % Performing drift correction (checking) is optional for
+%                 % EyeLink 1000 eye trackers.
+%                 EyelinkDoDriftCorrection(el);% start recording eye position (preceded by a short pause so that 
+%                 
+                % the tracker can finish the mode transition)
+                % The paramerters for the 'StartRecording' call controls the
+                % file_samples, file_events, link_samples, link_events availability
+                Eyelink('Command', 'set_idle_mode');
+                WaitSecs(0.05);
+                %         Eyelink('StartRecording', 1, 1, 1, 1);
+                Eyelink('StartRecording');
+                % record a few samples before we actually start displaying
+                % otherwise you may lose a few msec of data
+                WaitSecs(0.1);
+                
                curWord=datasample(stim,1);%randomly sample from the 7 options
                curWord=curWord{1};
                DrawFormattedText(PTBwindow,curWord, 'center', 'center' );
                onset=Screen(PTBwindow,'Flip');
                KbQueueFlush;
-                              
+               % write out a message to indicate the time of the picture onset
+               % this message can be used to create an interest period in EyeLink
+               % Data Viewer.               
+               Eyelink('Message', 'SYNCTIME');
+               
                WaitSecs('UntilTime',onset+1.5);%present the number for 1.5 seconds
                jitter=truncexp_jitter_sample(1,4,0.5,1);%randomly sample the truncated exponential distribution for ISI, mean~1.5s
                 %draw fixation
@@ -140,6 +167,15 @@ screenrec=[0 0 Xp Yp];
                 
                 Screen(PTBwindow,'Flip');
                 WaitSecs(jitter);
+                
+                % stop the recording of eye-movements for the current trial
+                Eyelink('StopRecording');
+                % Sending a 'TRIAL_RESULT' message to mark the end of a trial in
+                % Data Viewer. This is different than the end of recording message
+                % END that is logged when the trial recording ends. The viewer will
+                % not parse any messages, events, or samples that exist in the data
+                % file after this message.
+                Eyelink('Message', 'TRIAL_RESULT 0')
                 
                 %record resp
                 output{i,8}=onset;
