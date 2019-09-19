@@ -29,28 +29,27 @@ klist([pausekey, hand.r1, hand.r2, hand.r3, hand.r4, hand.r5])=1;
 img_folder=strcat(project_dir,'/button_box/');
 
 if strcmp(hand.ver,'L5animate')
-handv=imread(strcat(img_folder,'left_5.JPG'));
-h5=imread(strcat(img_folder,'left_ring.JPG'));
-h4=imread(strcat(img_folder,'left_middle.JPG'));
-h3=imread(strcat(img_folder,'left_index.JPG'));
-h2=imread(strcat(img_folder,'right_index.JPG'));
-h1=imread(strcat(img_folder,'right_middle.JPG'));
+handv=imread(strcat(img_folder,'left_5.jpg'));
+h5=imread(strcat(img_folder,'left_ring.jpg'));
+h4=imread(strcat(img_folder,'left_middle.jpg'));
+h3=imread(strcat(img_folder,'left_index.jpg'));
+h2=imread(strcat(img_folder,'right_index.jpg'));
+h1=imread(strcat(img_folder,'right_middle.jpg'));
 else
-handv=imread(strcat(img_folder,'right_5.JPG'));
-h1=imread(strcat(img_folder,'left_middle.JPG'));
-h2=imread(strcat(img_folder,'left_index.JPG'));
-h3=imread(strcat(img_folder,'right_index.JPG'));
-h4=imread(strcat(img_folder,'right_middle.JPG'));
-h5=imread(strcat(img_folder,'right_ring.JPG'));
+handv=imread(strcat(img_folder,'right_5.jpg'));
+h1=imread(strcat(img_folder,'left_middle.jpg'));
+h2=imread(strcat(img_folder,'left_index.jpg'));
+h3=imread(strcat(img_folder,'right_index.jpg'));
+h4=imread(strcat(img_folder,'right_middle.jpg'));
+h5=imread(strcat(img_folder,'right_ring.jpg'));
 end
 %flow control
 errors='none';%for debugging, return errors in this function
 terminated='none';%for situations where a scanning run has to be terminated and restarted (i.e. change of exp_start and wait for trigger).
-    
 
-    
-%% version 1
-    
+
+[Xp, Yp] = Screen('WindowSize', PTBwindow);
+screenrec=[0 0 Xp Yp];
 
           try
            %% initialize instructions
@@ -66,11 +65,11 @@ terminated='none';%for situations where a scanning run has to be terminated and 
             
             %load instruction
             ins=load_instruction('key_prac',1,hand.ver);
-            Screen('TextSize',PTBwindow, 60);            
+            Screen('TextSize',PTBwindow, 35);            
             
             %display instruction
             [nx, ny, bbox] = DrawFormattedText(PTBwindow, ins{1},'center','center');
-            Screen('Flip',PTBwindow);
+            Screen(PTBwindow,'Flip');
             waittrig=1;
             while waittrig
             [keyIsDown, instime, keyCodes] = KbCheck;
@@ -79,8 +78,8 @@ terminated='none';%for situations where a scanning run has to be terminated and 
             end
             end
             %display hand figure for 5 sec
-            Screen('DrawTexture', PTBwindow, vtex);
-            Screen('Flip',PTBwindow);
+            Screen('DrawTexture', PTBwindow, vtex,[],screenrec);
+            Screen(PTBwindow,'Flip');
             WaitSecs(5);
             
             info = 'The experiment is going to start in a few seconds';
@@ -108,7 +107,7 @@ terminated='none';%for situations where a scanning run has to be terminated and 
             %of the experiment for the current run
             exp_start=dummy_t{end};
 
-            Screen('TextSize',PTBwindow,80);%use font size 80 for stimuli
+            Screen('TextSize',PTBwindow,60);%use font size 80 for stimuli
 
             %draw first focuing cross for 3 seconds
             DrawFormattedText(PTBwindow, '+', 'center', 'center');
@@ -131,7 +130,7 @@ terminated='none';%for situations where a scanning run has to be terminated and 
                curWord=datasample(stim,1);%randomly sample from the 7 options
                curWord=curWord{1};
                DrawFormattedText(PTBwindow,curWord, 'center', 'center' );
-               onset=Screen('Flip',PTBwindow);
+               onset=Screen(PTBwindow,'Flip');
                KbQueueFlush;
                               
                WaitSecs('UntilTime',onset+1.5);%present the number for 1.5 seconds
@@ -139,7 +138,7 @@ terminated='none';%for situations where a scanning run has to be terminated and 
                 %draw fixation
                 DrawFormattedText(PTBwindow, '+', 'center', 'center');
                 
-                Screen('Flip',PTBwindow);
+                Screen(PTBwindow,'Flip');
                 WaitSecs(jitter);
                 
                 %record resp
@@ -207,44 +206,44 @@ terminated='none';%for situations where a scanning run has to be terminated and 
                 %if the resp doesn't match the stimulus, display the
                 %correct key, then proceed to next trial
                 elseif strcmp(curWord,'1')
-                    Screen('DrawTexture', PTBwindow, h1_tex);
-                    Screen('Flip',PTBwindow);
+                    Screen('DrawTexture', PTBwindow, h1_tex,[],screenrec);
+                    Screen(PTBwindow,'Flip');
                     WaitSecs(2);
                     success=0;
                     DrawFormattedText(PTBwindow, '+', 'center', 'center');                
-                    Screen('Flip',PTBwindow);
+                    Screen(PTBwindow,'Flip');
                     WaitSecs(2);                        
                 elseif strcmp(curWord,'2')
-                    Screen('DrawTexture', PTBwindow, h2_tex);
-                    Screen('Flip',PTBwindow);
+                    Screen('DrawTexture', PTBwindow, h2_tex,[],screenrec);
+                    Screen(PTBwindow,'Flip');
                     WaitSecs(2);
                     success=0;
                     DrawFormattedText(PTBwindow, '+', 'center', 'center');                
-                    Screen('Flip',PTBwindow);
+                    Screen(PTBwindow,'Flip');
                     WaitSecs(2);                        
                 elseif strcmp(curWord,'3')
-                    Screen('DrawTexture', PTBwindow, h3_tex);
-                    Screen('Flip',PTBwindow);
+                    Screen('DrawTexture', PTBwindow, h3_tex,[],screenrec);
+                    Screen(PTBwindow,'Flip');
                     WaitSecs(2);
                     success=0;
                     DrawFormattedText(PTBwindow, '+', 'center', 'center');                
-                    Screen('Flip',PTBwindow);
+                    Screen(PTBwindow,'Flip');
                     WaitSecs(2);                        
                 elseif strcmp(curWord,'4')
-                    Screen('DrawTexture', PTBwindow, h4_tex);
-                    Screen('Flip',PTBwindow);
+                    Screen('DrawTexture', PTBwindow, h4_tex,[],screenrec);
+                    Screen(PTBwindow,'Flip');
                     WaitSecs(2);
                     success=0;
                     DrawFormattedText(PTBwindow, '+', 'center', 'center');                
-                    Screen('Flip',PTBwindow);
+                    Screen(PTBwindow,'Flip');
                     WaitSecs(2);                        
                 elseif strcmp(curWord,'5')
-                    Screen('DrawTexture', PTBwindow, h5_tex);
-                    Screen('Flip',PTBwindow);
+                    Screen('DrawTexture', PTBwindow, h5_tex,[],screenrec);
+                    Screen(PTBwindow,'Flip');
                     WaitSecs(2);
                     success=0;
                     DrawFormattedText(PTBwindow, '+', 'center', 'center');                
-                    Screen('Flip',PTBwindow);
+                    Screen(PTBwindow,'Flip');
                     WaitSecs(2);                        
                 end
                 
@@ -262,7 +261,7 @@ terminated='none';%for situations where a scanning run has to be terminated and 
                             if keyCodes(experimenter_pass)%if continue key has been pressed
                                 waitcont=0;
                                 DrawFormattedText(PTBwindow, '+', 'center', 'center');                
-                                Screen('Flip',PTBwindow);
+                                Screen(PTBwindow,'Flip');
                                 WaitSecs(2);
                             elseif keyCodes(termkey)
                                 terminated='yes';
@@ -280,44 +279,44 @@ terminated='none';%for situations where a scanning run has to be terminated and 
                     output{i,10}=NaN;
                     output{i,9}=resp; %record responses as empty if no response
                     if strcmp(curWord,'1')
-                        Screen('DrawTexture', PTBwindow, h5_tex);
-                        Screen('Flip',PTBwindow);
+                        Screen('DrawTexture', PTBwindow, h5_tex,[],screenrec);
+                        Screen(PTBwindow,'Flip');
                         WaitSecs(2);
                         success=0;
                         DrawFormattedText(PTBwindow, '+', 'center', 'center');                
-                        Screen('Flip',PTBwindow);
+                        Screen(PTBwindow,'Flip');
                         WaitSecs(2);                        
                     elseif strcmp(curWord,'2')
-                        Screen('DrawTexture', PTBwindow, h4_tex);
-                        Screen('Flip',PTBwindow);
+                        Screen('DrawTexture', PTBwindow, h4_tex,[],screenrec);
+                        Screen(PTBwindow,'Flip');
                         WaitSecs(2);
                         success=0;
                         DrawFormattedText(PTBwindow, '+', 'center', 'center');                
-                        Screen('Flip',PTBwindow);
+                        Screen(PTBwindow,'Flip');
                         WaitSecs(2);                        
                     elseif strcmp(curWord,'3')
-                        Screen('DrawTexture', PTBwindow, h3_tex);
-                        Screen('Flip',PTBwindow);
+                        Screen('DrawTexture', PTBwindow, h3_tex,[],screenrec);
+                        Screen(PTBwindow,'Flip');
                         WaitSecs(2);
                         success=0;
                         DrawFormattedText(PTBwindow, '+', 'center', 'center');                
-                        Screen('Flip',PTBwindow);
+                        Screen(PTBwindow,'Flip');
                         WaitSecs(2);                        
                     elseif strcmp(curWord,'4')
-                        Screen('DrawTexture', PTBwindow, h2_tex);
-                        Screen('Flip',PTBwindow);
+                        Screen('DrawTexture', PTBwindow, h2_tex,[],screenrec);
+                        Screen(PTBwindow,'Flip');
                         WaitSecs(2);
                         success=0;
                         DrawFormattedText(PTBwindow, '+', 'center', 'center');                
-                        Screen('Flip',PTBwindow);
+                        Screen(PTBwindow,'Flip');
                         WaitSecs(2);                        
                     elseif strcmp(curWord,'5')
-                        Screen('DrawTexture', PTBwindow, h1_tex);
-                        Screen('Flip',PTBwindow);
+                        Screen('DrawTexture', PTBwindow, h1_tex,[],screenrec);
+                        Screen(PTBwindow,'Flip');
                         WaitSecs(2);
                         success=0;
                         DrawFormattedText(PTBwindow, '+', 'center', 'center');                
-                        Screen('Flip',PTBwindow);
+                        Screen(PTBwindow,'Flip');
                         WaitSecs(2);                        
                     end
                 end
@@ -327,7 +326,7 @@ terminated='none';%for situations where a scanning run has to be terminated and 
             
             resp_sofar=output;
             DrawFormattedText(PTBwindow,endofprac, 'center', 'center' );
-            Screen('Flip',PTBwindow);
+            Screen(PTBwindow,'Flip');
             WaitSecs(3);
             
         catch ME

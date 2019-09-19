@@ -3,8 +3,9 @@
 
 %In this part, you will see one word at a time, and your task is to judge 
 %whether the thing that the word refers to is an animal (animate) or not an
-%animal (inanimate). You will notice some repetition, please ignore them
-%and make your responses as usual.
+%animal (inanimate). You will notice some repetitions, please ignore them
+%and make your responses as usual. Pleas try to fixate your eyes on the
+%fixation cross through out the experiment
 
 %pressing with your right index finger for animate, and left index for
 %inanimate. [press your right middle finger to continue]

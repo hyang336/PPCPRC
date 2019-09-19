@@ -53,11 +53,11 @@ output(:,3)={-1};%fill the ExpStartTime column with -1, necessary for data parsi
         
         %load instruction
         ins=load_instruction('post_scan',1,hand.ver);
-        Screen('TextSize',PTBwindow,60);%use font size 60 for instruction
+        Screen('TextSize',PTBwindow,35);%use font size 40 for instruction on Linux laptop
         
         %display instruction P1
         [nx, ny, bbox] = DrawFormattedText(PTBwindow, ins{1},'center','center');
-        Screen('Flip',PTBwindow);
+        Screen(PTBwindow,'Flip');
         waittrig=1;
         while waittrig
         [keyIsDown, instime, keyCodes] = KbCheck;
@@ -66,7 +66,7 @@ output(:,3)={-1};%fill the ExpStartTime column with -1, necessary for data parsi
         end
         end  
         
-        Screen('TextSize',PTBwindow,80);%use font size 80 for stimuli
+        Screen('TextSize',PTBwindow,60);%use font size 60 for stimuli on Linux laptop
         
         %draw first focuing cross for 3 seconds
         DrawFormattedText(PTBwindow, '+', 'center', y_center);
@@ -155,7 +155,7 @@ output(:,3)={-1};%fill the ExpStartTime column with -1, necessary for data parsi
                             if keyCodes(experimenter_pass)%if continue key has been pressed
                                 waitcont=0;
                                 DrawFormattedText(PTBwindow, '+', 'center', 'center');                
-                                Screen('Flip',PTBwindow);
+                                Screen(PTBwindow,'Flip');
                                 WaitSecs(2);
                             elseif keyCodes(termkey)
                                 terminated='yes';
@@ -177,7 +177,7 @@ output(:,3)={-1};%fill the ExpStartTime column with -1, necessary for data parsi
         
         
         %run-level debrief
-        Screen('TextSize',PTBwindow,60);%use font size 60 for debriefing
+        Screen('TextSize',PTBwindow,40);%use font size 40 for debriefing on Linux laptop
         debrief = 'You have finished the experiment'; 
         DrawFormattedText(PTBwindow, debrief, 'center', 'center');
         Screen(PTBwindow, 'Flip');

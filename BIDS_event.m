@@ -3,6 +3,7 @@ function BIDS_event(pathdata,SSID,data)
     scandata{1,size(scandata,2)+1}='phase';%add a phase column so that test phase doesnt produce duplicated files
     %find the onset columns
     [headerow,expcol]=find(strcmp(scandata,'ExpStartTime'));
+    headers=scandata(headerow,:);
     %find the task columns
     [~,taskcol]=find(strcmp(scandata,'task'));
     %fill in the phase column according to tasks
@@ -36,7 +37,8 @@ function BIDS_event(pathdata,SSID,data)
             scand_break{j,i}=scandata(rrow{j},:);
             scand_break{j,i}(:,runcol)={j};
             %write to separate spreadsheets
-            xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_task-',p{i},'_run-',num2str(j),'_data.xlsx'),vertcat(scandata(headerow,:),scand_break{j,i}));
+            scand_break_t=cell2table(scand_break{j,i},'VariableNames',headers);
+            writetable(scand_break_t,strcat(pathdata,'/',SSID,'/',SSID,'_task-',p{i},'_run-',num2str(j),'_data.xlsx'));
        end
     end
 end

@@ -39,7 +39,7 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
                 
         %load instruction
         ins=load_instruction('study',i,hand.ver);
-        Screen('TextSize',PTBwindow,60);%use font size 60 for instruction
+        Screen('TextSize',PTBwindow,35);%use font size 40 for instruction on Linux laptop
         
         %display instruction
         [nx, ny, bbox] = DrawFormattedText(PTBwindow, ins{1},'center','center');
@@ -76,7 +76,7 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
         %of the experiment for the current run
         exp_start=dummy_t(end);
         
-        Screen('TextSize',PTBwindow,80);%use font size 80 for stimuli
+        Screen('TextSize',PTBwindow,60);%use font size 60 for stimuli on linux Laptop
         
         %draw first focuing cross for 3 seconds
         DrawFormattedText(PTBwindow, '+', 'center', y_center);
@@ -149,7 +149,7 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
                             if keyCodes(experimenter_pass)%if continue key has been pressed
                                 waitcont=0;
                                 DrawFormattedText(PTBwindow, '+', 'center', 'center');%present a 2s fixation then continue to next trial                
-                                Screen('Flip',PTBwindow);
+                                Screen(PTBwindow,'Flip');
                                 WaitSecs(2);
                             elseif keyCodes(termkey)
                                 terminated='yes';
@@ -248,7 +248,7 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
         end
         
         %run-level debrief
-        Screen('TextSize',PTBwindow,60);%use font size 60 for debriefing
+        Screen('TextSize',PTBwindow,40);%use font size 40 for debriefing on Linux laptop
             if i~=5
                debrief = 'Please relax and stay ready for the next run';
             else

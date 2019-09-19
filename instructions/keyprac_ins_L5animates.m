@@ -12,6 +12,8 @@
 %a 1. You will see a picture of this mapping once you finish
 %reading this instruction for 5 seconds.
 
+%Pleas try to fixate your eyes on the fixation cross through
+%out the experiment
 %once you have made enough correct responses consecutively,
 %we will proceed into next phase. [Press your right middle
 %finger to start]

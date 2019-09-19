@@ -40,7 +40,7 @@ function [resp_sofar,errors,terminated] = test(pathdata,SSID,addtrig,PTBwindow,y
         
         %load instruction
         ins=load_instruction('test',i,hand.ver);
-        Screen('TextSize',PTBwindow,60);%use font size 60 for instruction
+        Screen('TextSize',PTBwindow,35);%use font size 40 for instruction on Linux laptop
         
         %for first run
         if i==1
@@ -101,7 +101,7 @@ function [resp_sofar,errors,terminated] = test(pathdata,SSID,addtrig,PTBwindow,y
         %of the experiment for the current run
         exp_start=dummy_t(end);
         
-        Screen('TextSize',PTBwindow,80);%use font size 80 for stimuli
+        Screen('TextSize',PTBwindow,60);%use font size 60 for stimuli on Linux laptop
         
         %draw first focuing cross for 3 seconds
         DrawFormattedText(PTBwindow, '+', 'center', y_center);
@@ -204,7 +204,7 @@ function [resp_sofar,errors,terminated] = test(pathdata,SSID,addtrig,PTBwindow,y
                             if keyCodes(experimenter_pass)%if continue key has been pressed
                                 waitcont=0;
                                 DrawFormattedText(PTBwindow, '+', 'center', 'center');                
-                                Screen('Flip',PTBwindow);
+                                Screen(PTBwindow,'Flip');
                                 WaitSecs(2);
                             elseif keyCodes(termkey)
                                 terminated='yes';
@@ -310,7 +310,7 @@ function [resp_sofar,errors,terminated] = test(pathdata,SSID,addtrig,PTBwindow,y
                             if keyCodes(experimenter_pass)%if continue key has been pressed
                                 waitcont=0;
                                 DrawFormattedText(PTBwindow, '+', 'center', 'center');                
-                                Screen('Flip',PTBwindow);
+                                Screen(PTBwindow,'Flip');
                                 WaitSecs(2);
                             elseif keyCodes(termkey)
                                 terminated='yes';
@@ -332,7 +332,7 @@ function [resp_sofar,errors,terminated] = test(pathdata,SSID,addtrig,PTBwindow,y
         end
         
         %run-level debrief
-        Screen('TextSize',PTBwindow,60);%use font size 60 for debriefing
+        Screen('TextSize',PTBwindow,40);%use font size 40 for debriefing on Linux laptop
             if i~=4
                debrief = 'Please relax and stay ready for the next run';
             else
