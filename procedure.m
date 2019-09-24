@@ -182,6 +182,11 @@ try
     Eyelink('command', 'add_file_preamble_text ''Recorded by EyelinkToolbox demo-experiment''');
     [width, height]=Screen('WindowSize', scanner_screen);
     
+    %reduce calibration and validation FOV to
+    %adapt to scanner screen
+    Eyelink('command','calibration_area_proportion = 0.8 0.8');
+    Eyelink('command','validation_area_proportion = 0.75 0.75');
+    
     % SET UP TRACKER CONFIGURATION
     % Setting the proper recording resolution, proper calibration type, 
     % as well as the data file content;
