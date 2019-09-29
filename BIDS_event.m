@@ -38,7 +38,7 @@ function BIDS_event(pathdata,SSID,data)
             scand_break{j,i}(:,runcol)={j};
             %write to separate spreadsheets
             scand_break_t=cell2table(scand_break{j,i},'VariableNames',headers);
-            writetable(scand_break_t,strcat(pathdata,'/',SSID,'/',SSID,'_task-',p{i},'_run-',num2str(j),'_data.xlsx'));
+           writetable(scand_break_t,strcat(pathdata,'/',SSID,'/','sub-',SSID,'_task-',p{i},'_run-',num2str(j,'%02.f'),'_data.xlsx'));
        end
     end
 end

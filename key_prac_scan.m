@@ -190,7 +190,7 @@ screenrec=[0 0 Xp Yp];
                      firstPress(find(firstPress==0))=NaN; %little trick to get rid of 0s
                      [endtime Index]=sort(firstPress); % sort the RT of the first key-presses and their ID (the index are with respect to the firstPress)                 
                             
-                     %if the first key press is "animate" or if the first key press is experimenter pause and the second key press is "animate"
+                     %if the first key press is resp or if the first key press is experimenter pause and the second key press is "animate"
                             if Index(1)==hand.r5
                                    resp='5';
                                    output{i,10}=endtime(1)-onset;%RT

@@ -1,5 +1,5 @@
 %% need to update this!!! 2019-04-20
-function [output,errors]=procedure(SSID,version_inp,project_dir,pathdata,varargin)
+function [output,errors]=procedure_ettest(SSID,version_inp,project_dir,pathdata,varargin)
 %The script has built in error handling. At each trial of
 %any phases, the experimenter can press the pause key (P) to
 %pause the experiment after the current trial. Participants�
@@ -184,8 +184,8 @@ try
     
     %reduce calibration and validation FOV to
     %adapt to scanner screen
-    Eyelink('command','calibration_area_proportion = 0.8 0.8');
-    Eyelink('command','validation_area_proportion = 0.75 0.75');
+    Eyelink('command','calibration_area_proportion = 0.6 0.6');
+    Eyelink('command','validation_area_proportion = 0.5 0.5');
     
     % SET UP TRACKER CONFIGURATION
     % Setting the proper recording resolution, proper calibration type, 
