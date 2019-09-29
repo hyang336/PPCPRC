@@ -36,7 +36,7 @@ function BIDS_event(pathdata,SSID,data)
             scand_break{j,i}=scandata(rrow{j},:);
             scand_break{j,i}(:,runcol)={j};
             %write to separate spreadsheets
-            xlswrite(strcat(pathdata,'/',SSID,'/',SSID,'_task-',p{i},'_run-',num2str(j),'_data.xlsx'),vertcat(scandata(headerow,:),scand_break{j,i}));
+            xlswrite(strcat(pathdata,'/',SSID,'/','sub-',SSID,'_task-',p{i},'_run-',num2str(j,'%02.f'),'_data.xlsx'),vertcat(scandata(headerow,:),scand_break{j,i}));
        end
     end
 end
