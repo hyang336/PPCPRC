@@ -73,21 +73,21 @@ switch noresp_opt
                                                 
                 %get design onset, duration, conditions, and confound regressors
                 run=regexp(substr.run{j},'run-\d\d_','match');%find corresponding run number to load the events.tsv
-                runum=erase(run{1},'_');
-                substr.runevent{j}=load_event_test(project_derivative,sub,task,runum);%store the loaded event files in sub.runevent; sub-xxx, task-xxx_, run-xx
-               
-            %% 2019-09-29 need to modify event loading script to have more info read
+                %runum=erase(run{1},'_');
+                substr.runevent{j}=load_event_test(project_derivative,sub,task,run);%store the loaded event files in sub.runevent; sub-xxx, task-xxx_, run-xx
+                %the event output has no headers, they are in order of {'onset','obj_freq','norm_fam','task','duration','resp','RT'};
+         
 %                 %make task-xxx_run-specific dir
 %                 mkdir(temp_dir,strcat(task{1},erase(run{1},'_')));
 %                 run_temp=strcat(temp_dir,strcat(task{1},erase(run{1},'_')));
-                
+                %% 20191001 need to also put in task info
                 %change these to what types of block you have
-                lifetime_1=substr.runevent{j}(cellfun(@(x)x==1,substr.runevent{j}(:,3)),:);
-                lifetime_2=substr.runevent{j}(cellfun(@(x)x==2,substr.runevent{j}(:,3)),:);
-                lifetime_3=substr.runevent{j}(cellfun(@(x)x==3,substr.runevent{j}(:,3)),:);
-                lifetime_4=substr.runevent{j}(cellfun(@(x)x==4,substr.runevent{j}(:,3)),:);
-                lifetime_5=substr.runevent{j}(cellfun(@(x)x==5,substr.runevent{j}(:,3)),:);
-                noresp=substr.runevent{j}(cellfun(@(x)isnan(x),substr.runevent{j}(:,3)),:);
+                lifetime_1=substr.runevent{j}(cellfun(@(x)x==1,substr.runevent{j}(:,6)),:);
+                lifetime_2=substr.runevent{j}(cellfun(@(x)x==2,substr.runevent{j}(:,6)),:);
+                lifetime_3=substr.runevent{j}(cellfun(@(x)x==3,substr.runevent{j}(:,6)),:);
+                lifetime_4=substr.runevent{j}(cellfun(@(x)x==4,substr.runevent{j}(:,6)),:);
+                lifetime_5=substr.runevent{j}(cellfun(@(x)x==5,substr.runevent{j}(:,6)),:);
+                noresp=substr.runevent{j}(cellfun(@(x)isnan(x),substr.runevent{j}(:,6)),:);
                 
                 
                 conf_name=strcat(project_derivative,'/',fmriprep_foldername,'/fmriprep/',sub,'/func/',sub,'_',task{1},run{1},'*confound*.tsv');%use task{1} and run{1} since it's iteratively defined
