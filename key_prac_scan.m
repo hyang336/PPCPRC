@@ -280,7 +280,7 @@ terminated='none';%for situations where a scanning run has to be terminated and 
                     output{i,10}=NaN;
                     output{i,9}=resp; %record responses as empty if no response
                     if strcmp(curWord,'1')
-                        Screen('DrawTexture', PTBwindow, h5_tex);
+                        Screen('DrawTexture', PTBwindow, h1_tex);
                         Screen('Flip',PTBwindow);
                         WaitSecs(2);
                         success=0;
@@ -288,7 +288,7 @@ terminated='none';%for situations where a scanning run has to be terminated and 
                         Screen('Flip',PTBwindow);
                         WaitSecs(2);                        
                     elseif strcmp(curWord,'2')
-                        Screen('DrawTexture', PTBwindow, h4_tex);
+                        Screen('DrawTexture', PTBwindow, h2_tex);
                         Screen('Flip',PTBwindow);
                         WaitSecs(2);
                         success=0;
@@ -304,7 +304,7 @@ terminated='none';%for situations where a scanning run has to be terminated and 
                         Screen('Flip',PTBwindow);
                         WaitSecs(2);                        
                     elseif strcmp(curWord,'4')
-                        Screen('DrawTexture', PTBwindow, h2_tex);
+                        Screen('DrawTexture', PTBwindow, h4_tex);
                         Screen('Flip',PTBwindow);
                         WaitSecs(2);
                         success=0;
@@ -312,7 +312,7 @@ terminated='none';%for situations where a scanning run has to be terminated and 
                         Screen('Flip',PTBwindow);
                         WaitSecs(2);                        
                     elseif strcmp(curWord,'5')
-                        Screen('DrawTexture', PTBwindow, h1_tex);
+                        Screen('DrawTexture', PTBwindow, h5_tex);
                         Screen('Flip',PTBwindow);
                         WaitSecs(2);
                         success=0;

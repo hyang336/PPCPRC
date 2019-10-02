@@ -62,7 +62,7 @@ switch noresp_opt
             
             %record which condtions each run has, useful for specifying design matrix at
             %the end
-            runbycond=cell(length(substr.run),11);%maximam 11 condtions (5 in each task + noresp) that may differ between runs.
+            runbycond=cell(length(substr.run),6);%maximam 6 condtions that may differ between runs.
             
             %loop through runs
             for j=1:length(substr.run)
@@ -80,20 +80,20 @@ switch noresp_opt
 %                 %make task-xxx_run-specific dir
 %                 mkdir(temp_dir,strcat(task{1},erase(run{1},'_')));
 %                 run_temp=strcat(temp_dir,strcat(task{1},erase(run{1},'_')));
-              
+                %% 20191001 need to also put in task info
                 %change these to what types of block you have
                 freq_trials=substr.runevent{j}(strcmp(substr.runevent{j}(:,4),'recent'),:);
                 fam_trials=substr.runevent{j}(strcmp(substr.runevent{j}(:,4),'lifetime'),:);
-                recent_1=freq_trials(cellfun(@(x)x==1,fam_trials(:,6)),:);
-                recent_2=freq_trials(cellfun(@(x)x==2,fam_trials(:,6)),:);
-                recent_3=freq_trials(cellfun(@(x)x==3,fam_trials(:,6)),:);
-                recent_4=freq_trials(cellfun(@(x)x==4,fam_trials(:,6)),:);
-                recent_5=freq_trials(cellfun(@(x)x==5,fam_trials(:,6)),:);
-                lifetime_1=fam_trials(cellfun(@(x)x==1,fam_trials(:,6)),:);
-                lifetime_2=fam_trials(cellfun(@(x)x==2,fam_trials(:,6)),:);
-                lifetime_3=fam_trials(cellfun(@(x)x==3,fam_trials(:,6)),:);
-                lifetime_4=fam_trials(cellfun(@(x)x==4,fam_trials(:,6)),:);
-                lifetime_5=fam_trials(cellfun(@(x)x==5,fam_trials(:,6)),:);
+                recent_1
+                recent_2
+                recent_3
+                recent_4
+                recent_5
+                lifetime_1=substr.runevent{j}(cellfun(@(x)x==1,substr.runevent{j}(:,6)),:);
+                lifetime_2=substr.runevent{j}(cellfun(@(x)x==2,substr.runevent{j}(:,6)),:);
+                lifetime_3=substr.runevent{j}(cellfun(@(x)x==3,substr.runevent{j}(:,6)),:);
+                lifetime_4=substr.runevent{j}(cellfun(@(x)x==4,substr.runevent{j}(:,6)),:);
+                lifetime_5=substr.runevent{j}(cellfun(@(x)x==5,substr.runevent{j}(:,6)),:);
                 noresp=substr.runevent{j}(cellfun(@(x)isnan(x),substr.runevent{j}(:,6)),:);
                 
                 
@@ -112,9 +112,9 @@ switch noresp_opt
                 prefix(:)={substr.runsmooth{j}};%should be a unique run name
                 %prefix=prefix';
                 sliceinfo=cellfun(@strcat,prefix,comma,slice,'UniformOutput',false);
-                %% 2019-10-02 
+                %% 2019-03-27 
                 %an indicator for which condition is missing in a given run
-                cond={'recent_1','recent_2','recent_3','recent_4','recent_5','lifetime_1','lifetime_2','lifetime_3','lifetime_4','lifetime_5','noresp';recent_1,recent_2,recent_3,recent_4,recent_5,lifetime_1,lifetime_2,lifetime_3,lifetime_4,lifetime_5,noresp};
+                cond={'lifetime_1','lifetime_2','lifetime_3','lifetime_4','lifetime_5','noresp';lifetime_1,lifetime_2,lifetime_3,lifetime_4,lifetime_5,noresp};
                 [~,have_cond]=find(cellfun(@(x)~isempty(x),cond(2,:)));
                 miss_cond=find(cellfun(@(x)isempty(x),cond(2,:)));
                 remove_cond=length(miss_cond);%num of cond to be removed from matlabbatch
