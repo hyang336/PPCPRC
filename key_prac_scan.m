@@ -7,6 +7,7 @@ function [resp_sofar,errors,terminated]=key_prac_scan(project_dir,pathdata,SSID,
 
 output=cell(500,10);%maximum record 500 trials
 output(:,7)={'key_prac'};% fill the "task" column
+output(:,1)={1};%fill in "run" column, there is only one key_prac run
 
 %create a cell structure for all the options
 stim={'1','2','3','4','5'};%,'animate','inanimate'};
@@ -167,15 +168,15 @@ screenrec=[0 0 Xp Yp];
                 
                 Screen(PTBwindow,'Flip');
                 WaitSecs(jitter);
-                
-                % stop the recording of eye-movements for the current trial
-                Eyelink('StopRecording');
+                              
                 % Sending a 'TRIAL_RESULT' message to mark the end of a trial in
                 % Data Viewer. This is different than the end of recording message
                 % END that is logged when the trial recording ends. The viewer will
                 % not parse any messages, events, or samples that exist in the data
                 % file after this message.
                 Eyelink('Message', 'TRIAL_RESULT 0')
+                % stop the recording of eye-movements for the current trial
+                Eyelink('StopRecording');
                 
                 %record resp
                 output{i,8}=onset;
@@ -315,7 +316,7 @@ screenrec=[0 0 Xp Yp];
                     output{i,10}=NaN;
                     output{i,9}=resp; %record responses as empty if no response
                     if strcmp(curWord,'1')
-                        Screen('DrawTexture', PTBwindow, h5_tex,[],screenrec);
+                        Screen('DrawTexture', PTBwindow, h1_tex,[],screenrec);
                         Screen(PTBwindow,'Flip');
                         WaitSecs(2);
                         success=0;
@@ -323,7 +324,7 @@ screenrec=[0 0 Xp Yp];
                         Screen(PTBwindow,'Flip');
                         WaitSecs(2);                        
                     elseif strcmp(curWord,'2')
-                        Screen('DrawTexture', PTBwindow, h4_tex,[],screenrec);
+                        Screen('DrawTexture', PTBwindow, h2_tex,[],screenrec);
                         Screen(PTBwindow,'Flip');
                         WaitSecs(2);
                         success=0;
@@ -339,7 +340,7 @@ screenrec=[0 0 Xp Yp];
                         Screen(PTBwindow,'Flip');
                         WaitSecs(2);                        
                     elseif strcmp(curWord,'4')
-                        Screen('DrawTexture', PTBwindow, h2_tex,[],screenrec);
+                        Screen('DrawTexture', PTBwindow, h4_tex,[],screenrec);
                         Screen(PTBwindow,'Flip');
                         WaitSecs(2);
                         success=0;
@@ -347,7 +348,7 @@ screenrec=[0 0 Xp Yp];
                         Screen(PTBwindow,'Flip');
                         WaitSecs(2);                        
                     elseif strcmp(curWord,'5')
-                        Screen('DrawTexture', PTBwindow, h1_tex,[],screenrec);
+                        Screen('DrawTexture', PTBwindow, h5_tex,[],screenrec);
                         Screen(PTBwindow,'Flip');
                         WaitSecs(2);
                         success=0;

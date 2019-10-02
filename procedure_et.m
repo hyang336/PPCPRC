@@ -1,5 +1,5 @@
 %% need to update this!!! 2019-04-20
-function [output,errors]=procedure_ettest(SSID,version_inp,project_dir,pathdata,varargin)
+function [output,keypracdata,errors]=procedure_ettest(SSID,version_inp,project_dir,pathdata,varargin)
 %The script has built in error handling. At each trial of
 %any phases, the experimenter can press the pause key (P) to
 %pause the experiment after the current trial. Participants�
@@ -484,9 +484,10 @@ elseif strcmp(p.Results.phase,'key_prac')
        [resp_keyprac,keyprac_errors,keyprac_terminated]=key_prac_scan(project_dir,pathdata,SSID,addtrig,w,hand,p.Results.trial);
        [trial_row,~]=find(~cellfun('isempty',resp_keyprac(1:end,8)));
        keypracdata=data(1,:);%get headers
-       keypracdata(trial_row+1,3:12)=resp_keyprac(trial_row,1:10);%fill in the dataresp_sofar(trial_row,1:10);%fill in the data
+       keypracdata(trial_row+1,1:2)=data(trial_row+1,1:2);%fill in SSID and version
+       keypracdata(trial_row+1,3:12)=resp_keyprac(trial_row,1:10);%fill in the dataresp_sofar(trial_row,1:10);
        keypracdata_t=cell2table(keypracdata(2:end,:),'VariableNames',headers);
-       writetable(keypracdata_t,strcat(pathdata,'/',SSID,'/',SSID,'_task-keyprac_data.xlsx'));
+       writetable(keypracdata_t,strcat(pathdata,'/',SSID,'/sub-',SSID,'_task-keyprac_run-01_data.xlsx'));
        
        %if errors occurred in practice phase, return study
        %data so far and error msg, then terminate the function
