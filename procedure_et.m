@@ -77,6 +77,7 @@ parse(p,SSID,version_inp,project_dir,pathdata,varargin{:});
 %% add project path, may be changed for different PC
 addpath(genpath(project_dir));
 
+
 %% initialize constants
 KbName('UnifyKeyNames');
 % scan_trig=KbName('5%');
@@ -146,6 +147,9 @@ try
     %% set up screen 
     [w,rect]=Screen('OpenWindow', scanner_screen);
     HideCursor;
+    %suppress character output to Matlab in case subject mess up the script
+    ListenChar(2);
+    
     y_mid=(rect(2)+rect(4))/2;%get the y mid point of the screen for presentation use
     
     %% setup eye-tracking
@@ -833,11 +837,13 @@ writetable(data_table,strcat(pathdata,'/',SSID,'/',SSID,'_startphase-',p.Results
 BIDS_event(pathdata,SSID,data);%call data parser
 Screen('CloseAll');
 ShowCursor;
+ListenChar();
 output=data;
 
 catch ME
         Screen('CloseAll');
         ShowCursor;
+        ListenChar();
         %overall data from the current execution of this function
         data_table=cell2table(data(2:end,:),'VariableNames',headers);
         writetable(data_table,strcat(pathdata,'/',SSID,'/',SSID,'_startphase-',p.Results.phase,'_startrun-',num2str(p.Results.run),'_starttrial-',num2str(p.Results.trial),'_data.xlsx'));
