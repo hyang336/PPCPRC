@@ -24,7 +24,9 @@ termkey=KbName('t');
 %define key list to only accept response keys (in hand struct)
 %and pause key in the KbQueue
 klist=zeros(1,256);
-klist([pausekey, hand.r1, hand.r2, hand.r3, hand.r4, hand.r5])=1;
+p_klist=klist;
+klist([hand.r1, hand.r2, hand.r3, hand.r4, hand.r5])=1;
+p_klist(pausekey)=1;
 
 %load images
 img_folder=strcat(project_dir,'/button_box/');
@@ -124,8 +126,10 @@ screenrec=[0 0 Xp Yp];
             %it is the first time running this session i
             %should be 1
             i=trial;
-            KbQueueCreate([],klist);%use default keyboard and only accept the 5 resp keys and p as input keys in the queue
-            KbQueueStart;
+            KbQueueCreate(13,klist);%queue for button boxes only accept the 5 resp keys 
+            KbQueueCreate(8,p_klist);%queue for keyboards only accept pause key
+            KbQueueStart(13);
+            KbQueueStart(8);
             while success < 45               
                
                 % Sending a 'TRIALID' message to mark the start of a trial in Data
@@ -155,7 +159,8 @@ screenrec=[0 0 Xp Yp];
                curWord=curWord{1};
                DrawFormattedText(PTBwindow,curWord, 'center', 'center' );
                onset=Screen(PTBwindow,'Flip');
-               KbQueueFlush;
+               KbQueueFlush(13);
+               KbQueueFlush(8);
                % write out a message to indicate the time of the picture onset
                % this message can be used to create an interest period in EyeLink
                % Data Viewer.               
@@ -185,43 +190,44 @@ screenrec=[0 0 Xp Yp];
                 output{i,3}=exp_start;%record ExpStartTime for each trial since we dont know when the run is going to restart
                
                 %check response after presentation
-                [pressed, firstPress]=KbQueueCheck;
+                [pressed, firstRESP]=KbQueueCheck(13);%check response
+                [paused,~]=KbQueueCheck(8);%check experimenter pause
                %% get response
                 if pressed%if key was pressed do the following
-                     firstPress(find(firstPress==0))=NaN; %little trick to get rid of 0s
-                     [endtime Index]=sort(firstPress); % sort the RT of the first key-presses and their ID (the index are with respect to the firstPress)                 
+                     firstRESP(find(firstRESP==0))=NaN; %little trick to get rid of 0s
+                     [endtime Index]=sort(firstRESP); % sort the RT of the first key-presses and their ID (the index are with respect to the firstRESP)                 
                             
-                     %if the first key press is resp or if the first key press is experimenter pause and the second key press is "animate"
+                     %use the first pressed key as response
                             if Index(1)==hand.r5
                                    resp='5';
                                    output{i,10}=endtime(1)-onset;%RT
-                            elseif Index(1)==pausekey&&Index(2)==hand.r5
-                                   resp='5';
-                                   output{i,10}=endtime(2)-onset;%RT
+%                             elseif Index(1)==pausekey&&Index(2)==hand.r5
+%                                    resp='5';
+%                                    output{i,10}=endtime(2)-onset;%RT
                             elseif Index(1)==hand.r4
                                    resp='4';
                                    output{i,10}=endtime(1)-onset;%RT
-                            elseif Index(1)==pausekey&&Index(2)==hand.r4
-                                   resp='4';
-                                   output{i,10}=endtime(2)-onset;%RT
+%                             elseif Index(1)==pausekey&&Index(2)==hand.r4
+%                                    resp='4';
+%                                    output{i,10}=endtime(2)-onset;%RT
                             elseif Index(1)==hand.r3
                                    resp='3';
                                    output{i,10}=endtime(1)-onset;%RT
-                            elseif Index(1)==pausekey&&Index(2)==hand.r3
-                                   resp='3';
-                                   output{i,10}=endtime(2)-onset;%RT
+%                             elseif Index(1)==pausekey&&Index(2)==hand.r3
+%                                    resp='3';
+%                                    output{i,10}=endtime(2)-onset;%RT
                             elseif Index(1)==hand.r2
                                    resp='2';
                                    output{i,10}=endtime(1)-onset;%RT
-                            elseif Index(1)==pausekey&&Index(2)==hand.r2
-                                   resp='2';
-                                   output{i,10}=endtime(2)-onset;%RT
+%                             elseif Index(1)==pausekey&&Index(2)==hand.r2
+%                                    resp='2';
+%                                    output{i,10}=endtime(2)-onset;%RT
                             elseif Index(1)==hand.r1
                                    resp='1';
                                    output{i,10}=endtime(1)-onset;%RT
-                            elseif Index(1)==pausekey&&Index(2)==hand.r1
-                                   resp='1';
-                                   output{i,10}=endtime(2)-onset;%RT
+%                             elseif Index(1)==pausekey&&Index(2)==hand.r1
+%                                    resp='1';
+%                                    output{i,10}=endtime(2)-onset;%RT
                             else
                                 resp=[];%pressing any key other than pause key before valid response keys results in noresp
                                 output{i,10}=NaN;%pressing any other key also results in no RT
@@ -287,7 +293,8 @@ screenrec=[0 0 Xp Yp];
                     %put the pause and termination check
                     %after we record the response of the
                     %current trial
-                    if ~isnan(firstPress(pausekey))
+                    %% 20191004
+                    if paused
                         waitcont=1;
                         DrawFormattedText(PTBwindow,'experiment paused, please wait', 'center', 'center' );
                         Screen(PTBwindow, 'Flip');

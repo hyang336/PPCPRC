@@ -1,5 +1,5 @@
 %% need to update this!!! 2019-04-20
-function [output,keypracdata,errors]=procedure_ettest(SSID,version_inp,project_dir,pathdata,varargin)
+function [output,keypracdata,errors]=procedure_et(SSID,version_inp,project_dir,pathdata,varargin)
 %The script has built in error handling. At each trial of
 %any phases, the experimenter can press the pause key (P) to
 %pause the experiment after the current trial. Participants�

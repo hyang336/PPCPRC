@@ -24,7 +24,9 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
     %define key list to only accept response keys (1 & 6)
     %and pause key in the KbQueue
     klist=zeros(1,256);
-    klist([pausekey, hand.animate, hand.inanimate])=1;
+    p_klist=klist;
+    p_klist(pausekey)=1;
+    klist([hand.animate, hand.inanimate])=1;
     
     %flow control
     errors='none';%for debugging, return errors in this function
@@ -86,8 +88,10 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
     %% present stimuli and collect resp
         %create and start KbQueue, flush each run (in
         %the for-loop)
-        KbQueueCreate([],klist);%use default keyboard and only accept 1, 6, and p as input keys in the queue
-        KbQueueStart;
+        KbQueueCreate(13,klist);%queue for button boxes only accept the resp keys
+        KbQueueCreate(8,p_klist);%queue for keyboards only accept pause key
+        KbQueueStart(13);
+        KbQueueStart(8);
         if i==run % for the starting run, continue from the specified trial 
             output((i-1)*90+trial:i*90,3)=exp_start;%fill in the exp_start for each run
             for j=trial:90 
@@ -96,7 +100,8 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
                     DrawFormattedText(PTBwindow,strcat(word,strcat('\n\n\n',hand.study_scale)), 'center', y_center );%present stimuli
 
                     onset=Screen(PTBwindow,'Flip');%put presentation outside of KbCheck while-loop to keep presenting after a key is pressed, also use the returned value for RT
-                    KbQueueFlush;%flush keyboard buffer to start response collection for the current trial after stimuulus onset
+                    KbQueueFlush(13);%flush keyboard buffer to start response collection for the current trial after stimuulus onset
+                    KbQueueFlush(8);
                     WaitSecs('UntilTime',onset+1.5);%VERY IMPORTANT, wait until 1.5 seconds has passed since the onset of the image
                     %draw focuing cross during jitter
                     DrawFormattedText(PTBwindow, '+', 'center', y_center);
@@ -110,25 +115,26 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
                     output{(i-1)*90+j,6}=study_prop{(i-1)*90+j,2};%norm_fam
                     
                     %check response after presentation
-                    [pressed, firstPress]=KbQueueCheck;
+                    [pressed, firstRESP]=KbQueueCheck(13);
+                    [paused,~]=KbQueueCheck(8);
                     
                 if pressed %if key was pressed do the following
-                     firstPress(find(firstPress==0))=NaN; %little trick to get rid of 0s
-                     [endtime Index]=sort(firstPress); % sort the RT of the first key-presses and their ID (the index are with respect to the firstPress)                 
+                     firstRESP(find(firstRESP==0))=NaN; %little trick to get rid of 0s
+                     [endtime Index]=sort(firstRESP); % sort the RT of the first key-presses and their ID (the index are with respect to the firstPress)                 
                             
                      %if the first key press is "animate" or if the first key press is experimenter pause and the second key press is "animate"
                             if Index(1)==hand.animate
                                    resp='animate';
                                    output{(i-1)*90+j,10}=endtime(1)-onset;%RT
-                            elseif Index(1)==pausekey&&Index(2)==hand.animate
-                                   resp='animate';
-                                   output{(i-1)*90+j,10}=endtime(2)-onset;%RT
+%                             elseif Index(1)==pausekey&&Index(2)==hand.animate
+%                                    resp='animate';
+%                                    output{(i-1)*90+j,10}=endtime(2)-onset;%RT
                             elseif Index(1)==hand.inanimate
                                    resp='inanimate';
                                    output{(i-1)*90+j,10}=endtime(1)-onset;%RT
-                            elseif Index(1)==pausekey&&Index(2)==hand.inanimate
-                                   resp='inanimate';
-                                   output{(i-1)*90+j,10}=endtime(2)-onset;%RT
+%                             elseif Index(1)==pausekey&&Index(2)==hand.inanimate
+%                                    resp='inanimate';
+%                                    output{(i-1)*90+j,10}=endtime(2)-onset;%RT
                             else
                                 resp=[];%pressing any key other than pause key before valid response keys results in noresp
                                 output{(i-1)*90+j,10}=NaN;%pressing any other key also results in no RT
@@ -138,7 +144,7 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
                     %put the pause and termination check
                     %after we record the response of the
                     %current trial
-                    if ~isnan(firstPress(pausekey))
+                    if paused
                         waitcont=1;
                         DrawFormattedText(PTBwindow,'experiment paused, please wait', 'center', 'center' );
                         Screen(PTBwindow, 'Flip');
@@ -176,7 +182,8 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
                     DrawFormattedText(PTBwindow,strcat(word,strcat('\n\n\n',hand.study_scale)), 'center', y_center );%present stimuli
 
                     onset=Screen(PTBwindow,'Flip');%put presentation outside of KbCheck while-loop to keep presenting after a key is pressed, also use the returned value for RT
-                    KbQueueFlush;%flush keyboard buffer to start response collection for the current trial after stimuulus onset
+                    KbQueueFlush(13);%flush keyboard buffer to start response collection for the current trial after stimuulus onset
+                    KbQueueFlush(8);
                     WaitSecs('UntilTime',onset+1.5);%VERY IMPORTANT, wait until 1.5 seconds has passed since the onset of the image
                     %draw focuing cross during jitter
                     DrawFormattedText(PTBwindow, '+', 'center', y_center);
@@ -190,25 +197,25 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
                     output{(i-1)*90+j,6}=study_prop{(i-1)*90+j,2};%norm_fam
                     
                     %check response after presentation
-                    [pressed, firstPress]=KbQueueCheck;
-                    
+                    [pressed, firstRESP]=KbQueueCheck(13);
+                    [paused,~]=KbQueueCheck(8);
                 if pressed %if key was pressed do the following
-                     firstPress(find(firstPress==0))=NaN; %little trick to get rid of 0s
-                     [endtime Index]=sort(firstPress); % sort the RT of the first key-presses and their ID (the index are with respect to the firstPress)                 
+                     firstRESP(find(firstRESP==0))=NaN; %little trick to get rid of 0s
+                     [endtime Index]=sort(firstRESP); % sort the RT of the first key-presses and their ID (the index are with respect to the firstPress)                 
                             
                      %if the first key press is "animate" or if the first key press is experimenter pause and the second key press is "animate"
                             if Index(1)==hand.animate
                                    resp='animate';
                                    output{(i-1)*90+j,10}=endtime(1)-onset;%RT
-                            elseif Index(1)==pausekey&&Index(2)==hand.animate
-                                   resp='animate';
-                                   output{(i-1)*90+j,10}=endtime(2)-onset;%RT
+%                             elseif Index(1)==pausekey&&Index(2)==hand.animate
+%                                    resp='animate';
+%                                    output{(i-1)*90+j,10}=endtime(2)-onset;%RT
                             elseif Index(1)==hand.inanimate
                                    resp='inanimate';
                                    output{(i-1)*90+j,10}=endtime(1)-onset;%RT
-                            elseif Index(1)==pausekey&&Index(2)==hand.inanimate
-                                   resp='inanimate';
-                                   output{(i-1)*90+j,10}=endtime(2)-onset;%RT
+%                             elseif Index(1)==pausekey&&Index(2)==hand.inanimate
+%                                    resp='inanimate';
+%                                    output{(i-1)*90+j,10}=endtime(2)-onset;%RT
                             else
                                 resp=[];%pressing any key other than pause key before valid response keys results in noresp
                                 output{(i-1)*90+j,10}=NaN;%pressing any other key also results in no RT
@@ -218,7 +225,7 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
                     %put the pause and termination check
                     %after we record the response of the
                     %current trial
-                    if ~isnan(firstPress(pausekey))
+                    if paused
                         waitcont=1;
                         DrawFormattedText(PTBwindow,'experiment paused, please wait', 'center', 'center' );
                         Screen(PTBwindow, 'Flip');
