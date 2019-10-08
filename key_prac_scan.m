@@ -127,9 +127,9 @@ screenrec=[0 0 Xp Yp];
             %should be 1
             i=trial;
             KbQueueCreate(13,klist);%queue for button boxes only accept the 5 resp keys 
-            KbQueueCreate(8,p_klist);%queue for keyboards only accept pause key
+            KbQueueCreate([],p_klist);%queue for keyboards only accept pause key
             KbQueueStart(13);
-            KbQueueStart(8);
+            KbQueueStart([]);
             while success < 45               
                
                 % Sending a 'TRIALID' message to mark the start of a trial in Data
@@ -160,7 +160,7 @@ screenrec=[0 0 Xp Yp];
                DrawFormattedText(PTBwindow,curWord, 'center', 'center' );
                onset=Screen(PTBwindow,'Flip');
                KbQueueFlush(13);
-               KbQueueFlush(8);
+               KbQueueFlush([]);
                % write out a message to indicate the time of the picture onset
                % this message can be used to create an interest period in EyeLink
                % Data Viewer.               
@@ -191,7 +191,7 @@ screenrec=[0 0 Xp Yp];
                
                 %check response after presentation
                 [pressed, firstRESP]=KbQueueCheck(13);%check response
-                [paused,~]=KbQueueCheck(8);%check experimenter pause
+                [paused,~]=KbQueueCheck([]);%check experimenter pause
                %% get response
                 if pressed%if key was pressed do the following
                      firstRESP(find(firstRESP==0))=NaN; %little trick to get rid of 0s

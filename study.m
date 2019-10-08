@@ -8,6 +8,7 @@
 %% since the main function of it was to counter balance the order of presentation between subjects
 %% the output from this function should list the correct run number
 function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,y_center,stimuli,jitter,study_prop,hand,run,trial)%run is in the range of [1,5], trial is in [1,90]
+    KbName('UnifyKeyNames');
     output=cell(450,10);%initialize data output; headers are handled in the main procedure script (all but participant_ID and version [3 12])
     %some of the columns in the output will be empty (e.g.
     %run-number which is dependent on how many different exp_start afterwards,etc.), that's because this
@@ -80,6 +81,8 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
         
         Screen('TextSize',PTBwindow,60);%use font size 60 for stimuli on linux Laptop
         
+        Eyelink('Message', 'Study_run %d', i);%send msg to eyelink marking run#
+        
         %draw first focuing cross for 3 seconds
         DrawFormattedText(PTBwindow, '+', 'center', y_center);
         Screen(PTBwindow, 'Flip');
@@ -89,24 +92,42 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
         %create and start KbQueue, flush each run (in
         %the for-loop)
         KbQueueCreate(13,klist);%queue for button boxes only accept the resp keys
-        KbQueueCreate(8,p_klist);%queue for keyboards only accept pause key
+        KbQueueCreate([],p_klist);%queue for keyboards only accept pause key
         KbQueueStart(13);
-        KbQueueStart(8);
-        if i==run % for the starting run, continue from the specified trial 
+        KbQueueStart([]);
+        
+        if i==run % for the starting run, continue from the specified trial            
             output((i-1)*90+trial:i*90,3)=exp_start;%fill in the exp_start for each run
             for j=trial:90 
-                    word=run_stim{j};       
+                % Sending a 'TRIALID' message to mark the start of a trial in Data
+                % Viewer.  This is different than the start of recording message
+                % START that is logged when the trial recording begins. The viewer
+                % will not parse any messages, events, or samples, that exist in
+                % the data file prior to this message.
+                Eyelink('Message', 'TRIALID %d', j);
+                Eyelink('Command', 'set_idle_mode');
+                WaitSecs(0.05);
+                Eyelink('StartRecording');
+                
+                    word=run_stim{j};%select stimulus
 
                     DrawFormattedText(PTBwindow,strcat(word,strcat('\n\n\n',hand.study_scale)), 'center', y_center );%present stimuli
 
                     onset=Screen(PTBwindow,'Flip');%put presentation outside of KbCheck while-loop to keep presenting after a key is pressed, also use the returned value for RT
                     KbQueueFlush(13);%flush keyboard buffer to start response collection for the current trial after stimuulus onset
-                    KbQueueFlush(8);
+                    KbQueueFlush([]);
+                    Eyelink('Message', 'SYNCTIME');%eyetracking trigger for onset
+                    
                     WaitSecs('UntilTime',onset+1.5);%VERY IMPORTANT, wait until 1.5 seconds has passed since the onset of the image
                     %draw focuing cross during jitter
                     DrawFormattedText(PTBwindow, '+', 'center', y_center);
                     Screen(PTBwindow, 'Flip');
                     WaitSecs(run_jit{j});
+                    
+                    Eyelink('Message', 'TRIAL_RESULT 0')
+                    % stop the recording of eye-movements for the current
+                    % trial after the fixation following the stimulus
+                    Eyelink('StopRecording');
                     
                     output{(i-1)*90+j,8}=onset;%onset time
                     output{(i-1)*90+j,4}=word;%the stimulus of this trial
@@ -116,7 +137,7 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
                     
                     %check response after presentation
                     [pressed, firstRESP]=KbQueueCheck(13);
-                    [paused,~]=KbQueueCheck(8);
+                    [paused,~]=KbQueueCheck([]);
                     
                 if pressed %if key was pressed do the following
                      firstRESP(find(firstRESP==0))=NaN; %little trick to get rid of 0s
@@ -177,18 +198,29 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
         else
             output((i-1)*90+1:i*90,3)=exp_start;%fill in the exp_start for each run
             for j=1:90 %for all followin runs, start from the first trial
+                    Eyelink('Message', 'TRIALID %d', j);
+                    Eyelink('Command', 'set_idle_mode');
+                    WaitSecs(0.05);                
+                    Eyelink('StartRecording');
+                    
                     word=run_stim{j};
         
                     DrawFormattedText(PTBwindow,strcat(word,strcat('\n\n\n',hand.study_scale)), 'center', y_center );%present stimuli
 
                     onset=Screen(PTBwindow,'Flip');%put presentation outside of KbCheck while-loop to keep presenting after a key is pressed, also use the returned value for RT
                     KbQueueFlush(13);%flush keyboard buffer to start response collection for the current trial after stimuulus onset
-                    KbQueueFlush(8);
+                    KbQueueFlush([]);
+                    Eyelink('Message', 'SYNCTIME');
+                    
                     WaitSecs('UntilTime',onset+1.5);%VERY IMPORTANT, wait until 1.5 seconds has passed since the onset of the image
                     %draw focuing cross during jitter
                     DrawFormattedText(PTBwindow, '+', 'center', y_center);
                     Screen(PTBwindow, 'Flip');
                     WaitSecs(run_jit{j});                    
+                    
+                    Eyelink('Message', 'TRIAL_RESULT 0')
+                    % stop the recording of eye-movements for the current trial
+                    Eyelink('StopRecording');
                     
                     output{(i-1)*90+j,8}=onset;%onset time
                     output{(i-1)*90+j,4}=word;%the stimulus of this trial
@@ -198,7 +230,7 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
                     
                     %check response after presentation
                     [pressed, firstRESP]=KbQueueCheck(13);
-                    [paused,~]=KbQueueCheck(8);
+                    [paused,~]=KbQueueCheck([]);
                 if pressed %if key was pressed do the following
                      firstRESP(find(firstRESP==0))=NaN; %little trick to get rid of 0s
                      [endtime Index]=sort(firstRESP); % sort the RT of the first key-presses and their ID (the index are with respect to the firstPress)                 

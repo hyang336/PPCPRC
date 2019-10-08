@@ -19,14 +19,14 @@ p_klist=klist;
 klist([hand.r1, hand.r2, hand.r3, hand.r4, hand.r5])=1;
 p_klist(pausekey)=1;
   KbQueueCreate(13,klist);%Queue for button boxes and only accept the 5 resp keys and p as input keys in the queue
-  KbQueueCreate(8,p_klist); %Queue for the key board/expeirmenter control         
+  KbQueueCreate([],p_klist); %Queue for the key board/expeirmenter control         
   KbQueueStart(13);
-  KbQueueStart(8);
+  KbQueueStart([]);
             KbQueueFlush(13);
-            KbQueueFlush(8);
+            KbQueueFlush([]);
             count=0;
-            while 1
             ListenChar(2);
+            while 1            
             [pressed, firstPress]=KbQueueCheck(13);
                %% get response
                 if pressed%if key was pressed do the following
@@ -35,7 +35,7 @@ p_klist(pausekey)=1;
                      result(count+1)=Index(1);
                      count=count+1;
                 end
-                [paused,~]=KbQueueCheck(8);
+                [paused,~]=KbQueueCheck([]);
                 if paused
                     disp('pause key pressed');
                 end
