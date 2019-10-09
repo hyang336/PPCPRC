@@ -87,6 +87,7 @@ termkey=KbName('t');
 %create data cell, later use xlswrite to export
 data=cell(811,12);%630 trials in scanner, and 180 trials post-scan, plus headers
 data(1,:)={'ParticipantNum' 'Version' 'Run' 'Trial' 'ExpStartTime' 'Stimuli' 'objective_freq' 'norm_fam' 'task' 'StimOnsetTime' 'Response' 'RespTime'};
+keypracdata=cell(1);%evaluate cell data
 headers=data(1,:);
 SSID=num2str(SSID,'%03.f');%pad SSID with zeros and convert to string
 data(2:end,1)={SSID};
@@ -849,8 +850,8 @@ output=data;
 
     % download data file
     try
-        fprintf('Receiving data file ''%s''\n', edfFile,strcat(pathdata,'/'),'dest_is_path' );
-        status=Eyelink('ReceiveFile');
+        fprintf('Receiving data file ''%s''\n' ,edfFile);
+        status=Eyelink('ReceiveFile', edfFile,strcat(pathdata,'/'),'dest_is_path');
         if status > 0
             fprintf('ReceiveFile status %d\n', status);
         end

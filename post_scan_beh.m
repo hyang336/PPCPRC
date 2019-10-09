@@ -47,7 +47,7 @@ output(:,3)={-1};%fill the ExpStartTime column with -1, necessary for data parsi
         stim=test_stimuli(freq_row,:);
         order=randperm(size(stim,1));
         stim=stim(order,:);
-        jitter=truncexp_jitter_sample(2.5,10,1.5,90);%generate jittering time
+        jitter=truncexp_jitter_sample(2,6,0.5,90);%generate jittering time
         stim(:,2)=num2cell(jitter);
         stim(:,4)={'post_scan'};
         

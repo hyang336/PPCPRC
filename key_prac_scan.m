@@ -14,6 +14,9 @@ stim={'1','2','3','4','5'};%,'animate','inanimate'};
 KbName('UnifyKeyNames');
 endofprac='practice ends';
 
+[id,name] = GetKeyboardIndices;%get the device indices to be used in KbQueue
+bboxid=id(find(~cellfun(@isempty,strfind(name,'Current Designs'))));
+
 %setting up control keys
 scan_trig=KbName('5%');
 ins_done=KbName('2@');
@@ -126,9 +129,9 @@ screenrec=[0 0 Xp Yp];
             %it is the first time running this session i
             %should be 1
             i=trial;
-            KbQueueCreate(13,klist);%queue for button boxes only accept the 5 resp keys 
+            KbQueueCreate(bboxid,klist);%queue for button boxes only accept the 5 resp keys 
             KbQueueCreate([],p_klist);%queue for keyboards only accept pause key
-            KbQueueStart(13);
+            KbQueueStart(bboxid);
             KbQueueStart([]);
             while success < 45               
                
@@ -159,7 +162,7 @@ screenrec=[0 0 Xp Yp];
                curWord=curWord{1};
                DrawFormattedText(PTBwindow,curWord, 'center', 'center' );
                onset=Screen(PTBwindow,'Flip');
-               KbQueueFlush(13);
+               KbQueueFlush(bboxid);
                KbQueueFlush([]);
                % write out a message to indicate the time of the picture onset
                % this message can be used to create an interest period in EyeLink
@@ -190,7 +193,7 @@ screenrec=[0 0 Xp Yp];
                 output{i,3}=exp_start;%record ExpStartTime for each trial since we dont know when the run is going to restart
                
                 %check response after presentation
-                [pressed, firstRESP]=KbQueueCheck(13);%check response
+                [pressed, firstRESP]=KbQueueCheck(bboxid);%check response
                 [paused,~]=KbQueueCheck([]);%check experimenter pause
                %% get response
                 if pressed%if key was pressed do the following

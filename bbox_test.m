@@ -5,6 +5,7 @@ KbName('UnifyKeyNames');
 ver=input('version number:');
 [study_stim,test_stim,hand]=version_select(ver);
 [id,name] = GetKeyboardIndices;%get the device indices to be used in KbQueue
+bboxid=id(find(~cellfun(@isempty,strfind(name,'Current Designs'))));
 
 scan_trig=KbName('5%');
 ins_done=KbName('2@');
@@ -18,16 +19,16 @@ klist=zeros(1,256);
 p_klist=klist;
 klist([hand.r1, hand.r2, hand.r3, hand.r4, hand.r5])=1;
 p_klist(pausekey)=1;
-  KbQueueCreate(13,klist);%Queue for button boxes and only accept the 5 resp keys and p as input keys in the queue
+  KbQueueCreate(bboxid,klist);%Queue for button boxes and only accept the 5 resp keys and p as input keys in the queue
   KbQueueCreate([],p_klist); %Queue for the key board/expeirmenter control         
-  KbQueueStart(13);
+  KbQueueStart(bboxid);
   KbQueueStart([]);
-            KbQueueFlush(13);
+            KbQueueFlush(bboxid);
             KbQueueFlush([]);
             count=0;
             ListenChar(2);
             while 1            
-            [pressed, firstPress]=KbQueueCheck(13);
+            [pressed, firstPress]=KbQueueCheck(bboxid);
                %% get response
                 if pressed%if key was pressed do the following
                      firstPress(find(firstPress==0))=NaN; %little trick to get rid of 0s

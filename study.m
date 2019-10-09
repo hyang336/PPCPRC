@@ -22,6 +22,9 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
     pausekey=KbName('p');
     termkey=KbName('t');
     
+    [id,name] = GetKeyboardIndices;%get the device indices to be used in KbQueue
+    bboxid=id(find(~cellfun(@isempty,strfind(name,'Current Designs'))));
+    
     %define key list to only accept response keys (1 & 6)
     %and pause key in the KbQueue
     klist=zeros(1,256);
@@ -91,9 +94,9 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
     %% present stimuli and collect resp
         %create and start KbQueue, flush each run (in
         %the for-loop)
-        KbQueueCreate(13,klist);%queue for button boxes only accept the resp keys
+        KbQueueCreate(bboxid,klist);%queue for button boxes only accept the resp keys
         KbQueueCreate([],p_klist);%queue for keyboards only accept pause key
-        KbQueueStart(13);
+        KbQueueStart(bboxid);
         KbQueueStart([]);
         
         if i==run % for the starting run, continue from the specified trial            
@@ -114,7 +117,7 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
                     DrawFormattedText(PTBwindow,strcat(word,strcat('\n\n\n',hand.study_scale)), 'center', y_center );%present stimuli
 
                     onset=Screen(PTBwindow,'Flip');%put presentation outside of KbCheck while-loop to keep presenting after a key is pressed, also use the returned value for RT
-                    KbQueueFlush(13);%flush keyboard buffer to start response collection for the current trial after stimuulus onset
+                    KbQueueFlush(bboxid);%flush keyboard buffer to start response collection for the current trial after stimuulus onset
                     KbQueueFlush([]);
                     Eyelink('Message', 'SYNCTIME');%eyetracking trigger for onset
                     
@@ -136,7 +139,7 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
                     output{(i-1)*90+j,6}=study_prop{(i-1)*90+j,2};%norm_fam
                     
                     %check response after presentation
-                    [pressed, firstRESP]=KbQueueCheck(13);
+                    [pressed, firstRESP]=KbQueueCheck(bboxid);
                     [paused,~]=KbQueueCheck([]);
                     
                 if pressed %if key was pressed do the following
@@ -208,7 +211,7 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
                     DrawFormattedText(PTBwindow,strcat(word,strcat('\n\n\n',hand.study_scale)), 'center', y_center );%present stimuli
 
                     onset=Screen(PTBwindow,'Flip');%put presentation outside of KbCheck while-loop to keep presenting after a key is pressed, also use the returned value for RT
-                    KbQueueFlush(13);%flush keyboard buffer to start response collection for the current trial after stimuulus onset
+                    KbQueueFlush(bboxid);%flush keyboard buffer to start response collection for the current trial after stimuulus onset
                     KbQueueFlush([]);
                     Eyelink('Message', 'SYNCTIME');
                     
@@ -229,7 +232,7 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
                     output{(i-1)*90+j,6}=study_prop{(i-1)*90+j,2};%norm_fam
                     
                     %check response after presentation
-                    [pressed, firstRESP]=KbQueueCheck(13);
+                    [pressed, firstRESP]=KbQueueCheck(bboxid);
                     [paused,~]=KbQueueCheck([]);
                 if pressed %if key was pressed do the following
                      firstRESP(find(firstRESP==0))=NaN; %little trick to get rid of 0s
