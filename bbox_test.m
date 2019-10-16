@@ -1,5 +1,5 @@
 %% ask Subject to press with their left pinky, left ring finger, middle finger, etc. all the way to the right pinky, once per finger
-
+clear all
 addpath(genpath(pwd));
 KbName('UnifyKeyNames');
 ver=input('version number:');
@@ -40,7 +40,7 @@ p_klist(pausekey)=1;
                 if paused
                     disp('pause key pressed');
                 end
-                if count==8
+                if count==5
                     ListenChar();
                     break
                 end

@@ -851,7 +851,7 @@ output=data;
     % download data file
     try
         fprintf('Receiving data file ''%s''\n' ,edfFile);
-        status=Eyelink('ReceiveFile', edfFile,strcat(pathdata,'/'),'dest_is_path');
+        status=Eyelink('ReceiveFile', edfFile,strcat(pathdata,'/',SSID,'/'),1);
         if status > 0
             fprintf('ReceiveFile status %d\n', status);
         end
