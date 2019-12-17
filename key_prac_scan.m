@@ -1,4 +1,4 @@
-function [resp_sofar,errors,terminated]=key_prac_scan(project_dir,pathdata,SSID,addtrig,PTBwindow,hand,trial)
+function [resp_sofar,errors,terminated]=key_prac_scan(project_dir,pathdata,SSID,addtrig,PTBwindow,hand,trial,StimSize)
 %present 1-5 to familiarize the subjects with key
 %mapping. Keep presenting until get 45 (a full run) correct in a row, order
 %randomly sampled using datasampe(data,n). If participants make a wrong
@@ -113,7 +113,7 @@ screenrec=[0 0 Xp Yp];
             %of the experiment for the current run
             exp_start=dummy_t{end};
 
-            Screen('TextSize',PTBwindow,60);%use font size 80 for stimuli
+            Screen('TextSize',PTBwindow,StimSize);%use font size 80 for stimuli
 
             %draw first focuing cross for 3 seconds
             DrawFormattedText(PTBwindow, '+', 'center', 'center');

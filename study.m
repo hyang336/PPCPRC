@@ -7,7 +7,7 @@
 %% since we reduced 10 runs to 5 runs (double the trial count in each run), but the block number was not changed
 %% since the main function of it was to counter balance the order of presentation between subjects
 %% the output from this function should list the correct run number
-function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,y_center,stimuli,jitter,study_prop,hand,run,trial)%run is in the range of [1,5], trial is in [1,90]
+function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,y_center,stimuli,jitter,study_prop,hand,run,trial,StimSize)%run is in the range of [1,5], trial is in [1,90]
     KbName('UnifyKeyNames');
     output=cell(450,10);%initialize data output; headers are handled in the main procedure script (all but participant_ID and version [3 12])
     %some of the columns in the output will be empty (e.g.
@@ -82,7 +82,7 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
         %of the experiment for the current run
         exp_start=dummy_t(end);
         
-        Screen('TextSize',PTBwindow,60);%use font size 60 for stimuli on linux Laptop
+        Screen('TextSize',PTBwindow,StimSize);%use font size 60 for stimuli on linux Laptop
         
         Eyelink('Message', 'Study_run %d', i);%send msg to eyelink marking run#
         
@@ -114,7 +114,7 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
                 
                     word=run_stim{j};%select stimulus
 
-                    DrawFormattedText(PTBwindow,strcat(word,strcat('\n\n\n',hand.study_scale)), 'center', y_center );%present stimuli
+                    DrawFormattedText(PTBwindow,strcat(word,strcat('\n\n',hand.study_scale)), 'center', y_center );%present stimuli
 
                     onset=Screen(PTBwindow,'Flip');%put presentation outside of KbCheck while-loop to keep presenting after a key is pressed, also use the returned value for RT
                     KbQueueFlush(bboxid);%flush keyboard buffer to start response collection for the current trial after stimuulus onset
@@ -170,7 +170,7 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
                     %current trial
                     if paused
                         waitcont=1;
-                        DrawFormattedText(PTBwindow,'experiment paused, please wait', 'center', 'center' );
+                        DrawFormattedText(PTBwindow,'experiment paused,\n please wait', 'center', 'center' );
                         Screen(PTBwindow, 'Flip');
                         %save partial data
                        save(strcat(pathdata,'/',SSID,'/',SSID,'_study_run-',num2str(i),'_trial-',num2str(j),'data.mat'),'output');
@@ -208,7 +208,7 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
                     
                     word=run_stim{j};
         
-                    DrawFormattedText(PTBwindow,strcat(word,strcat('\n\n\n',hand.study_scale)), 'center', y_center );%present stimuli
+                    DrawFormattedText(PTBwindow,strcat(word,strcat('\n\n',hand.study_scale)), 'center', y_center );%present stimuli
 
                     onset=Screen(PTBwindow,'Flip');%put presentation outside of KbCheck while-loop to keep presenting after a key is pressed, also use the returned value for RT
                     KbQueueFlush(bboxid);%flush keyboard buffer to start response collection for the current trial after stimuulus onset
@@ -262,7 +262,7 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
                     %current trial
                     if paused
                         waitcont=1;
-                        DrawFormattedText(PTBwindow,'experiment paused, please wait', 'center', 'center' );
+                        DrawFormattedText(PTBwindow,'experiment paused,\n please wait', 'center', 'center' );
                         Screen(PTBwindow, 'Flip');
                         %save partial data
                        save(strcat(pathdata,'/',SSID,'/',SSID,'_study_run-',num2str(i),'_trial-',num2str(j),'data.mat'),'output');
