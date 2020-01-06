@@ -128,7 +128,7 @@ function [resp_sofar,errors,terminated] = test(pathdata,SSID,addtrig,PTBwindow,y
             for j=trial:45
                 if j==trial||mod(j,5)==1%for the starting trial, or at the beginning of every five trials, show the current task
                     instxt=taskorder{ceil((j+(i-1)*45)/5)};
-                    instxt=strcat(instxt,' task begins !');
+                    instxt=strcat(instxt,' task\n begins !');
                     DrawFormattedText(PTBwindow,instxt, 'center', y_center );%present initial ins
                     Screen(PTBwindow, 'Flip');
                     WaitSecs(3);
@@ -222,7 +222,7 @@ function [resp_sofar,errors,terminated] = test(pathdata,SSID,addtrig,PTBwindow,y
                     %current trial
                     if paused
                         waitcont=1;
-                        DrawFormattedText(PTBwindow,'experiment paused,\n please wait', 'center', 'center' );
+                        DrawFormattedText(PTBwindow,'task paused,\n please wait', 'center', 'center' );
                         Screen(PTBwindow, 'Flip');
                         %save partial data
                        save(strcat(pathdata,'/',SSID,'/',SSID,'_test_run-',num2str(i),'_trial-',num2str(j),'data.mat'),'output');
@@ -255,7 +255,7 @@ function [resp_sofar,errors,terminated] = test(pathdata,SSID,addtrig,PTBwindow,y
             for j=1:45 %for all followin runs, start from the first trial
                 if mod(j,5)==1% at the beginning of every five trials, show the current task
                     instxt=taskorder{ceil((j+(i-1)*45)/5)};
-                    instxt=strcat(instxt,' task begins !');
+                    instxt=strcat(instxt,' task\n begins !');
                     DrawFormattedText(PTBwindow,instxt, 'center', y_center );%present initial ins
                     Screen(PTBwindow, 'Flip');
                     WaitSecs(3);
@@ -345,7 +345,7 @@ function [resp_sofar,errors,terminated] = test(pathdata,SSID,addtrig,PTBwindow,y
                     %current trial
                     if paused
                         waitcont=1;
-                        DrawFormattedText(PTBwindow,'experiment paused,\n please wait', 'center', 'center' );
+                        DrawFormattedText(PTBwindow,'task paused,\n please wait', 'center', 'center' );
                         Screen(PTBwindow, 'Flip');
                         %save partial data
                        save(strcat(pathdata,'/',SSID,'/',SSID,'_test_run-',num2str(i),'_trial-',num2str(j),'data.mat'),'output');

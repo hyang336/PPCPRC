@@ -170,7 +170,7 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
                     %current trial
                     if paused
                         waitcont=1;
-                        DrawFormattedText(PTBwindow,'experiment paused,\n please wait', 'center', 'center' );
+                        DrawFormattedText(PTBwindow,'task paused,\n please wait', 'center', 'center' );
                         Screen(PTBwindow, 'Flip');
                         %save partial data
                        save(strcat(pathdata,'/',SSID,'/',SSID,'_study_run-',num2str(i),'_trial-',num2str(j),'data.mat'),'output');
@@ -262,7 +262,7 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
                     %current trial
                     if paused
                         waitcont=1;
-                        DrawFormattedText(PTBwindow,'experiment paused,\n please wait', 'center', 'center' );
+                        DrawFormattedText(PTBwindow,'task paused,\n please wait', 'center', 'center' );
                         Screen(PTBwindow, 'Flip');
                         %save partial data
                        save(strcat(pathdata,'/',SSID,'/',SSID,'_study_run-',num2str(i),'_trial-',num2str(j),'data.mat'),'output');

@@ -299,7 +299,7 @@ screenrec=[0 0 Xp Yp];
                     %% 20191004
                     if paused
                         waitcont=1;
-                        DrawFormattedText(PTBwindow,'experiment paused, please wait', 'center', 'center' );
+                        DrawFormattedText(PTBwindow,'task paused, please wait', 'center', 'center' );
                         Screen(PTBwindow, 'Flip');
                         %save partial data
                        save(strcat(pathdata,'/',SSID,'/',SSID,'_keyPrac_trial-',num2str(i),'_data.mat'),'output');
