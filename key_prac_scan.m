@@ -293,33 +293,7 @@ screenrec=[0 0 Xp Yp];
                     WaitSecs(2);                        
                 end
                 
-                    %put the pause and termination check
-                    %after we record the response of the
-                    %current trial
-                    %% 20191004
-                    if paused
-                        waitcont=1;
-                        DrawFormattedText(PTBwindow,'task paused, please wait', 'center', 'center' );
-                        Screen(PTBwindow, 'Flip');
-                        %save partial data
-                       save(strcat(pathdata,'/',SSID,'/',SSID,'_keyPrac_trial-',num2str(i),'_data.mat'),'output');
-                        while waitcont%check if the pause key has been pressed
-                            [~, ~, keyCodes] = KbCheck;
-                            if keyCodes(experimenter_pass)%if continue key has been pressed
-                                waitcont=0;
-                                DrawFormattedText(PTBwindow, '+', 'center', 'center');                
-                                Screen(PTBwindow,'Flip');
-                                WaitSecs(2);
-                            elseif keyCodes(termkey)
-                                terminated='yes';
-                                resp_sofar=output;
-                                return
-                            end
-                        end                       
-                           %need to have these two lines to wait for the key release
-                       while KbCheck
-                       end 
-                    end  
+                    
                     
                 else
                     resp=[];%not pressing any key results in noresp
@@ -367,8 +341,35 @@ screenrec=[0 0 Xp Yp];
                         WaitSecs(2);                        
                     end
                 end
-                    
-                i=i+1;
+                
+                 %put the pause and termination check
+                    %after we record the response of the
+                    %current trial
+                    %% 20200106
+                    if paused
+                        waitcont=1;
+                        DrawFormattedText(PTBwindow,'task paused, please wait', 'center', 'center' );
+                        Screen(PTBwindow, 'Flip');
+                        %save partial data
+                       save(strcat(pathdata,'/',SSID,'/',SSID,'_keyPrac_trial-',num2str(i),'_data.mat'),'output');
+                        while waitcont%check if the pause key has been pressed
+                            [~, ~, keyCodes] = KbCheck;
+                            if keyCodes(experimenter_pass)%if continue key has been pressed
+                                waitcont=0;
+                                DrawFormattedText(PTBwindow, '+', 'center', 'center');                
+                                Screen(PTBwindow,'Flip');
+                                WaitSecs(2);
+                            elseif keyCodes(termkey)
+                                terminated='yes';
+                                resp_sofar=output;
+                                return
+                            end
+                        end                       
+                           %need to have these two lines to wait for the key release
+                       while KbCheck
+                       end 
+                    end  
+                    i=i+1;
             end
             
             resp_sofar=output;

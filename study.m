@@ -165,7 +165,13 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
                             end
                      output{(i-1)*90+j,9}=resp; %record responses before pause
                      
-                    %put the pause and termination check
+                   
+                else
+                    resp=[];%not pressing any key results in noresp
+                    output{(i-1)*90+j,10}=NaN;
+                    output{(i-1)*90+j,9}=resp; %record responses as empty if no response    
+                end      
+                 %put the pause and termination check
                     %after we record the response of the
                     %current trial
                     if paused
@@ -190,13 +196,7 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
                            %need to have these two lines to wait for the key release
                        while KbCheck
                        end 
-                    end         
-                else
-                    resp=[];%not pressing any key results in noresp
-                    output{(i-1)*90+j,10}=NaN;
-                    output{(i-1)*90+j,9}=resp; %record responses as empty if no response    
-                end      
-                                   
+                    end                            
             end
         else
             output((i-1)*90+1:i*90,3)=exp_start;%fill in the exp_start for each run
@@ -257,7 +257,13 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
                             end
                      output{(i-1)*90+j,9}=resp; %record responses before pause
                      
-                    %put the pause and termination check
+                            
+                else
+                    resp=[];%not pressing any key results in noresp
+                    output{(i-1)*90+j,10}=NaN;
+                    output{(i-1)*90+j,9}=resp; %record responses as empty if no response    
+                end       
+                %put the pause and termination check
                     %after we record the response of the
                     %current trial
                     if paused
@@ -279,13 +285,7 @@ function [resp_sofar,errors,terminated] = study(pathdata,SSID,addtrig,PTBwindow,
                            %need to have these two lines to wait for the key release
                            while KbCheck
                            end 
-                    end         
-                else
-                    resp=[];%not pressing any key results in noresp
-                    output{(i-1)*90+j,10}=NaN;
-                    output{(i-1)*90+j,9}=resp; %record responses as empty if no response    
-                end       
-      
+                    end 
              end
         end
         
