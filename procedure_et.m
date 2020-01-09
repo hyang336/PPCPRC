@@ -347,7 +347,7 @@ if strcmp(p.Results.phase,'study')
        %if it was terminated by the experimenter, just
        %proceed.
        waittrig=1;
-       DrawFormattedText(w, 'please stay ready for the next phase', 'center', 'center');
+       DrawFormattedText(w, 'please wait', 'center', 'center');
        Screen(w, 'Flip');
            while waittrig
             [keyIsDown, dummy_start, keyCodes] = KbCheck;

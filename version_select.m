@@ -41,7 +41,7 @@ function [study_stim,test_stim,hand]=version_select(version)
            hand.r1=KbName('2@');
            hand.animate=KbName('6^');
            hand.inanimate=KbName('1!');
-           hand.study_scale='animate         inanimate';
+           hand.study_scale='anim.  inanim.';
            hand.test_scale='5   4   3   2   1';
            hand.ver='L5animate';
      case 'R5animate'
@@ -52,7 +52,7 @@ function [study_stim,test_stim,hand]=version_select(version)
            hand.r1=KbName('7&');
            hand.animate=KbName('1!');
            hand.inanimate=KbName('6^');
-           hand.study_scale='inanimate         animate';
+           hand.study_scale='inanim.  anim.';
            hand.test_scale='1   2   3   4   5';
            hand.ver='R5animate';
  end
