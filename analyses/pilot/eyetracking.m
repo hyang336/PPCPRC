@@ -1,3 +1,5 @@
+%script to transform eye-tracking data into an fMRI
+%compatible format
 data=Edf2Mat('C:\Users\haozi\Desktop\PhD\fMRI_PrC-PPC_data\pilot\eye_tracking\001\001_eyeD.edf');
 
 trial_onsets=find(strcmp(data.Events.Messages.info,'SYNCTIME'));

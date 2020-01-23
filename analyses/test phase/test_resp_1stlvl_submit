@@ -1,0 +1,29 @@
+#!/bin/bash
+usage(){
+echo "usage: lifetime180_GLM_submit <bids_dir> <project_derivatives> <output_dir> <sub> <exp_start volume> <fmriprep_foldername> <TR>"
+}
+bids_dir=$1
+project_derivatives=$2
+output_dir=$3
+if [$4='all']
+then
+	subs=$(cut -f 1 $bids_dir/participants.tsv|tail -n +2)
+else
+subs=$4
+fi
+expstart_vol=$5
+fmriprep_fn=$6
+TR=$7
+if [ "$#" -eq 7 ]
+then
+	mkdir -p $output_dir/test_resp_1stlvl
+	for sub in $subs
+	do
+	neurogliaSubmit -j LongSkinny 'matlab -nosplash -nodisplay -r "addpath(genpath('"'/project/6007967/hyang336/matlab/'"')); test_resp_1stlvl('"'$project_derivatives'"','"'$output_dir'"','"'$sub'"','"$expstart_vol"','"'$fmriprep_fn'"','"$TR"',"'regress'"); exit;"' 
+	sleep 3
+	done
+else
+usage
+exit 1
+fi
+

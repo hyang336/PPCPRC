@@ -9,3 +9,8 @@ we are gonna have a switch-case in the 1st lvl script for how to deal with nores
 1)need to modify the event-loading function
 2)need to modify the condition defining code since now we have two conditions in the test phase
 3)2nd lvl script should pull results from 1st lvl (in each subject's folder)
+
+20191021
+the regress part (of noresp trials)s has been tested on sub-005 locally without issue
+
+TODO:run this on all existing subjects on Graham
