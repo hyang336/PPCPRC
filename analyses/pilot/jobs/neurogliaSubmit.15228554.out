@@ -1,0 +1,99 @@
+SINGULARITY_IMG: /project/6007967/akhanf/singularity/akhanf-vasst-dev-master-v0.0.4g.simg
+CMD: matlab -nosplash -nodisplay -r addpath(genpath('/project/6007967/hyang336/matlab/')); lifetime180('/home/hyang336/projects/rrg-akhanf/cfmm-deriv/Kohler/PPC_MD/','/home/hyang336/projects/rrg-akhanf/cfmm-deriv/Kohler/PPC_MD/','sub-004',5,'fmriprep1.3.2_s004_multi-echo',2.5); exit;
+START_TIME: Mon May 27 17:39:12 EDT 2019
+Opening log file:  /home/hyang336/java.log.28467
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2017 The MathWorks, Inc.
+                   R2017a (9.2.0.556344) 64-bit (glnxa64)
+                               March 27, 2017
+
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+
+
+------------------------------------------------------------------------
+Running job #1
+------------------------------------------------------------------------
+Running 'fMRI model specification'
+
+SPM12: spm_fMRI_design (v7210)                     21:45:13 - 27/05/2019
+========================================================================
+Saving fMRI design                      :               ...SPM.mat saved
+
+SPM12: spm_fmri_spm_ui (v7018)                     21:45:14 - 27/05/2019
+========================================================================
+Mapping files                           : Failed  'fMRI model specification'
+Error using spm_vol>spm_vol_hdr (line 80)
+File "/home/hyang336/projects/rrg-akhanf/cfmm-deriv/Kohler/PPC_MD/pilot_lifetime180/sub-004/temp/smoothed_sub-004_task-lifetime_run-01_space-MNI152NLin2009cAsym_desc-preproc_bold.nii" does not exist.
+In file "/project/6007967/hyang336/matlab/spm12/spm_vol.m" (v5958), function "spm_vol_hdr" at line 80.
+In file "/project/6007967/hyang336/matlab/spm12/spm_vol.m" (v5958), function "spm_vol" at line 61.
+In file "/project/6007967/hyang336/matlab/spm12/spm_data_hdr_read.m" (v4940), function "spm_data_hdr_read" at line 40.
+In file "/project/6007967/hyang336/matlab/spm12/spm_fmri_spm_ui.m" (v7018), function "spm_fmri_spm_ui" at line 288.
+In file "/project/6007967/hyang336/matlab/spm12/config/spm_run_fmri_spec.m" (v6562), function "spm_run_fmri_spec" at line 386.
+
+Running 'Model estimation'
+
+SPM12: spm_spm (v7120)                             21:45:16 - 27/05/2019
+========================================================================
+Failed  'Model estimation'
+Error using spm_spm (line 309)
+Data have not been specified.
+In file "/project/6007967/hyang336/matlab/spm12/spm_spm.m" (v7120), function "spm_spm" at line 309.
+In file "/project/6007967/hyang336/matlab/spm12/config/spm_run_fmri_est.m" (v7057), function "spm_run_fmri_est" at line 34.
+
+Running 'Contrast Manager'
+
+SPM12: spm_contrasts.m                             21:45:16 - 27/05/2019
+========================================================================
+Contrasts folder                        :                 ./sub-004/temp
+Failed  'Contrast Manager'
+Error using spm_run_con (line 34)
+This model has not been estimated.
+In file "/project/6007967/hyang336/matlab/spm12/config/spm_run_con.m" (v7093), function "spm_run_con" at line 34.
+
+Running 'Results Report'
+
+SPM12: spm_results_ui (v7204)                      21:45:16 - 27/05/2019
+========================================================================
+[Warning: dialog is no longer supported when MATLAB is started with the
+-nodisplay or -noFigureWindows option or there is no display. For more
+information, see "Changes to -nodisplay and -noFigureWindows Startup Options"
+in the MATLAB Release Notes. To view the release note in your system browser,
+run web('www.mathworks.com/help/matlab/release-notes.html#br5ktrh-3',
+'-browser')] 
+[> In warnfiguredialog (line 21)
+  In dialog (line 35)
+  In msgbox (line 211)
+  In spm (line 1168)
+  In spm_getSPM (line 228)
+  In spm_results_ui (line 259)
+  In spm_run_results (line 76)
+  In cfg_run_cm (line 29)
+  In cfg_util>local_runcj (line 1688)
+  In cfg_util (line 959)
+  In spm_jobman>fill_run_job (line 469)
+  In spm_jobman (line 247)
+  In lifetime180 (line 174)] 
+[Warning: uiwait is no longer supported when MATLAB is started with the
+-nodisplay or -noFigureWindows option or there is no display. For more
+information, see "Changes to -nodisplay and -noFigureWindows Startup Options"
+in the MATLAB Release Notes. To view the release note in your system browser,
+run web('www.mathworks.com/help/matlab/release-notes.html#br5ktrh-3',
+'-browser')] 
+[> In warnfiguredialog (line 21)
+  In uiwait (line 40)
+  In spm (line 1177)
+  In spm_getSPM (line 228)
+  In spm_results_ui (line 259)
+  In spm_run_results (line 76)
+  In cfg_run_cm (line 29)
+  In cfg_util>local_runcj (line 1688)
+  In cfg_util (line 959)
+  In spm_jobman>fill_run_job (line 469)
+  In spm_jobman (line 247)
+  In lifetime180 (line 174)] 
+Your MATLAB session has timed out.  All license keys have been returned.
+slurmstepd: error: *** JOB 15228554 ON gra118 CANCELLED AT 2019-05-29T10:21:19 ***

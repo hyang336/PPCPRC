@@ -1,0 +1,86 @@
+SINGULARITY_IMG: /project/6007967/akhanf/singularity/akhanf-vasst-dev-master-v0.0.4g.simg
+CMD: matlab -nosplash -nodisplay -r addpath(genpath('/project/6007967/hyang336/matlab/')); lifetime180('/home/hyang336/projects/rrg-akhanf/cfmm-deriv/Kohler/PPC_MD/','/home/hyang336/projects/rrg-akhanf/cfmm-deriv/Kohler/PPC_MD/','sub-004',5,'fmriprep1.3.2_s004_multi-echo',2.5); exit;
+START_TIME: Mon Apr 15 16:12:09 EDT 2019
+Opening log file:  /home/hyang336/java.log.1285
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2017 The MathWorks, Inc.
+                   R2017a (9.2.0.556344) 64-bit (glnxa64)
+                               March 27, 2017
+
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+
+
+------------------------------------------------------------------------
+Running job #1
+------------------------------------------------------------------------
+Running 'fMRI model specification'
+
+SPM12: spm_fMRI_design (v7210)                     20:17:51 - 15/04/2019
+========================================================================
+Saving fMRI design                      :               ...SPM.mat saved
+
+SPM12: spm_fmri_spm_ui (v7018)                     20:17:52 - 15/04/2019
+========================================================================
+Mapping files                           :                        ...done
+Calculating globals                     :                        ...done
+Saving SPM configuration                :               ...SPM.mat saved
+Saving SPM configuration                :               ...SPM.mat saved
+Completed                               :          20:18:13 - 15/04/2019
+Done    'fMRI model specification'
+Running 'Model estimation'
+
+SPM12: spm_spm (v7120)                             20:18:14 - 15/04/2019
+========================================================================
+
+SPM12: spm_est_non_sphericity (v6913)              20:18:16 - 15/04/2019
+========================================================================
+Chunk   1/8                             :                  ...processing                       ...doneChunk   2/8                             :                  ...processing                       ...doneChunk   3/8                             :                  ...processing                       ...doneChunk   4/8                             :                  ...processing                       ...doneChunk   5/8                             :                  ...processing                       ...doneChunk   6/8                             :                  ...processing                       ...doneChunk   7/8                             :                  ...processing                       ...doneChunk   8/8                             :                  ...processing
+Temporal non-sphericity (53128 voxels)  :             ...ReML estimation
+  ReML Block 1                
+  ReML Iteration 1                      :        ...8.732904e-01 [+4.25]
+  ReML Iteration 2                      :        ...3.949272e-05 [+4.50]
+  ReML Block 2                
+  ReML Iteration 1                      :        ...3.558114e-01 [+4.25]
+  ReML Iteration 2                      :        ...8.341030e-04 [+4.50]
+  ReML Block 3                
+  ReML Iteration 1                      :        ...3.709872e-01 [+4.25]
+  ReML Iteration 2                      :        ...4.864666e-07 [+4.50]
+  ReML Block 4                
+  ReML Iteration 1                      :        ...4.008844e-01 [+4.25]
+  ReML Iteration 2                      :        ...5.213435e-04 [+4.50]
+
+SPM12: spm_spm (v7120)                             20:19:19 - 15/04/2019
+========================================================================
+Chunk   1/8                             :                  ...processing                       ...doneChunk   2/8                             :                  ...processing                       ...doneChunk   3/8                             :                  ...processing                       ...doneChunk   4/8                             :                  ...processing                       ...doneChunk   5/8                             :                  ...processing                       ...doneChunk   6/8                             :                  ...processing                       ...doneChunk   7/8                             :                  ...processing                       ...doneChunk   8/8                             :                  ...processing                       ...done
+Spatial non-sphericity (over scans)     :      ...estimating derivatives ...writing resels/voxel image                       ...done
+Saving SPM.mat                          :                     ...writing                       ...done
+Completed                               :          20:20:32 - 15/04/2019
+Done
+Done    'Model estimation'
+Running 'Contrast Manager'
+
+SPM12: spm_contrasts.m                             20:20:32 - 15/04/2019
+========================================================================
+Contrasts folder                        :                 ./sub-004/temp
+	contrast image  1               :                   ...computing       ...written con_0001.nii
+	spm{T} image  1                 :                   ...computing      ...written spmT_0001.nii
+	Saving SPM.mat                  :                     ...writing              ...SPM.mat saved
+Completed                               :          20:20:33 - 15/04/2019
+Done    'Contrast Manager'
+Running 'Results Report'
+
+SPM12: spm_results_ui (v7204)                      20:20:33 - 15/04/2019
+========================================================================
+	SPM computation                 :                ...initialising           ...height threshold           ...extent threshold                       ...done
+Printing 'Graphics' figure to:
+  /project/6007967/cfmm-deriv/Kohler/PPC_MD/pilot_lifetime180/sub-004/temp/spm_2019Apr15.ps
+Written /project/6007967/cfmm-deriv/Kohler/PPC_MD/pilot_lifetime180/sub-004/temp/spmT_0001_linear inc lifetime fwe.nii
+Done    'Results Report'
+Done
+
+RETURNVAL=0
+END_TIME: Mon Apr 15 16:20:46 EDT 2019

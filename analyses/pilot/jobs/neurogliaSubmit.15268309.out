@@ -1,0 +1,97 @@
+SINGULARITY_IMG: /project/6007967/akhanf/singularity/akhanf-vasst-dev-master-v0.0.4g.simg
+CMD: matlab -nosplash -nodisplay -r addpath(genpath('/project/6007967/hyang336/matlab/')); lifetime180('/home/hyang336/projects/rrg-akhanf/cfmm-deriv/Kohler/PPC_MD/','/home/hyang336/projects/rrg-akhanf/cfmm-deriv/Kohler/PPC_MD/','sub-004',5,'fmriprep1.3.2_s004_multi-echo',2.5); exit;
+START_TIME: Tue May 28 15:15:43 EDT 2019
+Opening log file:  /home/hyang336/java.log.9352
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2017 The MathWorks, Inc.
+                   R2017a (9.2.0.556344) 64-bit (glnxa64)
+                               March 27, 2017
+
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+[Warning: Directory already exists.] 
+[> In lifetime180 (line 19)] 
+[Warning: Directory already exists.] 
+[> In lifetime180 (line 20)] 
+Initialising batch system... done.
+
+
+------------------------------------------------------------------------
+Running job #1
+------------------------------------------------------------------------
+Running 'Smooth'
+Done    'Smooth'
+Done
+
+
+
+------------------------------------------------------------------------
+Running job #1
+------------------------------------------------------------------------
+Running 'Smooth'
+Done    'Smooth'
+Done
+
+
+
+------------------------------------------------------------------------
+Running job #1
+------------------------------------------------------------------------
+Running 'Smooth'
+Done    'Smooth'
+Done
+
+
+
+------------------------------------------------------------------------
+Running job #1
+------------------------------------------------------------------------
+Running 'Smooth'
+Done    'Smooth'
+Done
+
+
+
+------------------------------------------------------------------------
+Running job #1
+------------------------------------------------------------------------
+Running 'fMRI model specification'
+[Warning: dialog is no longer supported when MATLAB is started with the
+-nodisplay or -noFigureWindows option or there is no display. For more
+information, see "Changes to -nodisplay and -noFigureWindows Startup Options"
+in the MATLAB Release Notes. To view the release note in your system browser,
+run web('www.mathworks.com/help/matlab/release-notes.html#br5ktrh-3',
+'-browser')] 
+[> In warnfiguredialog (line 21)
+  In dialog (line 35)
+  In questdlg (line 142)
+  In spm_input (line 1040)
+  In spm_run_fmri_spec (line 34)
+  In cfg_run_cm (line 29)
+  In cfg_util>local_runcj (line 1688)
+  In cfg_util (line 959)
+  In spm_jobman>fill_run_job (line 469)
+  In spm_jobman (line 247)
+  In lifetime180 (line 174)] 
+[Warning: uiwait is no longer supported when MATLAB is started with the
+-nodisplay or -noFigureWindows option or there is no display. For more
+information, see "Changes to -nodisplay and -noFigureWindows Startup Options"
+in the MATLAB Release Notes. To view the release note in your system browser,
+run web('www.mathworks.com/help/matlab/release-notes.html#br5ktrh-3',
+'-browser')] 
+[> In warnfiguredialog (line 21)
+  In uiwait (line 40)
+  In questdlg (line 407)
+  In spm_input (line 1040)
+  In spm_run_fmri_spec (line 34)
+  In cfg_run_cm (line 29)
+  In cfg_util>local_runcj (line 1688)
+  In cfg_util (line 959)
+  In spm_jobman>fill_run_job (line 469)
+  In spm_jobman (line 247)
+  In lifetime180 (line 174)] 
+Your MATLAB session has timed out.  All license keys have been returned.
+slurmstepd: error: *** JOB 15268309 ON gra1142 CANCELLED AT 2019-05-29T10:21:19 ***

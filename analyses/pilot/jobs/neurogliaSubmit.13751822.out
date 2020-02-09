@@ -1,0 +1,27 @@
+SINGULARITY_IMG: /project/6007967/akhanf/singularity/akhanf-vasst-dev-master-v0.0.4g.simg
+CMD: matlab -nosplash -nodisplay -r addpath(genpath('/project/6007967/hyang336/matlab/')); lifetime180('/home/hyang336/projects/rrg-akhanf/cfmm-deriv/Kohler/PPC_MD/','/home/hyang336/projects/rrg-akhanf/cfmm-deriv/Kohler/PPC_MD/','sub-003',5,'fmriprep1.3.2_dual-echo-summed',1.65); exit;
+START_TIME: Mon Apr 15 15:35:44 EDT 2019
+Opening log file:  /home/hyang336/java.log.30444
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2017 The MathWorks, Inc.
+                   R2017a (9.2.0.556344) 64-bit (glnxa64)
+                               March 27, 2017
+
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+[Warning: Directory already exists.] 
+[> In lifetime180 (line 19)] 
+[Warning: Directory already exists.] 
+[> In lifetime180 (line 20)] 
+{Reference to non-existent field 'X'.
+
+Error in lifetime180 (line 109)
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(1).val =
+                substr.runconf{j}.X(expstart_vol:end);%need to consider dummy
+                scan
+} 
+>> RETURNVAL=0
+END_TIME: Mon Apr 15 15:40:32 EDT 2019

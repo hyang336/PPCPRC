@@ -1,0 +1,27 @@
+SINGULARITY_IMG: /project/6007967/akhanf/singularity/akhanf-vasst-dev-master-v0.0.4g.simg
+CMD: matlab -nosplash -nodisplay -r addpath(genpath('/project/6007967/hyang336/matlab/')); localizer('/home/hyang336/projects/rrg-akhanf/cfmm-deriv/Kohler/PPC_MD/','/home/hyang336/projects/rrg-akhanf/cfmm-deriv/Kohler/PPC_MD/','sub-003',3,'fmriprep1.3.2_dual-echo-summed',1.65); exit;
+START_TIME: Fri Apr 12 13:55:42 EDT 2019
+Opening log file:  /home/hyang336/java.log.29218
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2017 The MathWorks, Inc.
+                   R2017a (9.2.0.556344) 64-bit (glnxa64)
+                               March 27, 2017
+
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+[Warning: Directory already exists.] 
+[> In localizer (line 19)] 
+[Warning: Directory already exists.] 
+[> In localizer (line 20)] 
+{Error using tdfread (line 66)
+Unable to open file
+'/home/hyang336/projects/rrg-akhanf/cfmm-deriv/Kohler/PPC_MD//fmriprep1.3.2_dual-echo-summed/fmriprep/sub-003/func/sub-003_task-localizer_run-01_*confound*.tsv'.
+
+Error in localizer (line 62)
+                substr.runconf{j}=tdfread(conf_name,'tab');
+} 
+>> RETURNVAL=0
+END_TIME: Fri Apr 12 13:57:32 EDT 2019

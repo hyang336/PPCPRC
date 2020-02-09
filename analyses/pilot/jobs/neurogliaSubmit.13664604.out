@@ -1,0 +1,84 @@
+SINGULARITY_IMG: /project/6007967/akhanf/singularity/akhanf-vasst-dev-master-v0.0.4g.simg
+CMD: matlab -nosplash -nodisplay -r addpath(genpath('/project/6007967/hyang336/matlab/')); localizer('/home/hyang336/projects/rrg-akhanf/cfmm-deriv/Kohler/PPC_MD/','/home/hyang336/projects/rrg-akhanf/cfmm-deriv/Kohler/PPC_MD/','sub-003',3,'fmriprep1.3.2_dual-echo-summed',1.65); exit;
+START_TIME: Fri Apr 12 14:55:23 EDT 2019
+Opening log file:  /home/hyang336/java.log.29542
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2017 The MathWorks, Inc.
+                   R2017a (9.2.0.556344) 64-bit (glnxa64)
+                               March 27, 2017
+
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+[Warning: Directory already exists.] 
+[> In localizer (line 19)] 
+[Warning: Directory already exists.] 
+[> In localizer (line 20)] 
+[Warning: Directory already exists.] 
+[> In localizer (line 52)] 
+
+
+------------------------------------------------------------------------
+Running job #1
+------------------------------------------------------------------------
+Running 'fMRI model specification'
+
+SPM12: spm_fMRI_design (v7210)                     18:57:46 - 12/04/2019
+========================================================================
+Saving fMRI design                      :               ...SPM.mat saved
+
+SPM12: spm_fmri_spm_ui (v7018)                     18:57:47 - 12/04/2019
+========================================================================
+Mapping files                           :                        ...done
+Calculating globals                     :                        ...done
+Saving SPM configuration                :               ...SPM.mat saved
+Saving SPM configuration                :               ...SPM.mat saved
+Completed                               :          18:57:55 - 12/04/2019
+Done    'fMRI model specification'
+Running 'Model estimation'
+
+SPM12: spm_spm (v7120)                             18:57:56 - 12/04/2019
+========================================================================
+
+SPM12: spm_est_non_sphericity (v6913)              18:57:57 - 12/04/2019
+========================================================================
+Chunk   1/4                             :                  ...processing                       ...doneChunk   2/4                             :                  ...processing                       ...doneChunk   3/4                             :                  ...processing                       ...doneChunk   4/4                             :                  ...processing                       ...done
+Temporal non-sphericity (29409 voxels)  :             ...ReML estimation
+  ReML Block 1                
+  ReML Iteration 1                      :        ...2.122737e+01 [+4.25]
+  ReML Iteration 2                      :        ...7.940511e-01 [+4.50]
+  ReML Iteration 3                      :        ...3.603556e-02 [+4.75]
+
+SPM12: spm_spm (v7120)                             18:58:09 - 12/04/2019
+========================================================================
+Chunk   1/4                             :                  ...processing                       ...doneChunk   2/4                             :                  ...processing                       ...doneChunk   3/4                             :                  ...processing                       ...doneChunk   4/4                             :                  ...processing                       ...done
+Spatial non-sphericity (over scans)     :      ...estimating derivatives ...writing resels/voxel image                       ...done
+Saving SPM.mat                          :                     ...writing                       ...done
+Completed                               :          18:58:33 - 12/04/2019
+Done
+Done    'Model estimation'
+Running 'Contrast Manager'
+
+SPM12: spm_contrasts.m                             18:58:33 - 12/04/2019
+========================================================================
+Contrasts folder                        :   ./temp/task-localizer_run-01
+	contrast image  1               :                   ...computing       ...written con_0001.nii
+	spm{T} image  1                 :                   ...computing      ...written spmT_0001.nii
+	Saving SPM.mat                  :                     ...writing              ...SPM.mat saved
+Completed                               :          18:58:34 - 12/04/2019
+Done    'Contrast Manager'
+Running 'Results Report'
+
+SPM12: spm_results_ui (v7204)                      18:58:35 - 12/04/2019
+========================================================================
+	SPM computation                 :                ...initialising           ...height threshold           ...extent threshold                       ...done
+Printing 'Graphics' figure to:
+  /project/6007967/cfmm-deriv/Kohler/PPC_MD/pilot_localizer/sub-003/temp/task-localizer_run-01/spm_2019Apr12.ps
+Written /project/6007967/cfmm-deriv/Kohler/PPC_MD/pilot_localizer/sub-003/temp/task-localizer_run-01/spmT_0001_face-place.nii
+Done    'Results Report'
+Done
+
+RETURNVAL=0
+END_TIME: Fri Apr 12 14:58:55 EDT 2019

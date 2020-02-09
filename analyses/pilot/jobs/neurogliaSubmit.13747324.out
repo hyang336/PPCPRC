@@ -1,0 +1,31 @@
+SINGULARITY_IMG: /project/6007967/akhanf/singularity/akhanf-vasst-dev-master-v0.0.4g.simg
+CMD: matlab -nosplash -nodisplay -r addpath(genpath('/project/6007967/hyang336/matlab/')); localizer('/home/hyang336/projects/rrg-akhanf/cfmm-deriv/Kohler/PPC_MD/','/home/hyang336/projects/rrg-akhanf/cfmm-deriv/Kohler/PPC_MD/','sub-004',3,'fmriprep1.3.2_s004_multi-echo_loc2',1.65); exit;
+START_TIME: Mon Apr 15 13:29:51 EDT 2019
+Opening log file:  /home/hyang336/java.log.4690
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2017 The MathWorks, Inc.
+                   R2017a (9.2.0.556344) 64-bit (glnxa64)
+                               March 27, 2017
+
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+[Warning: Directory already exists.] 
+[> In localizer (line 19)] 
+[Warning: Directory already exists.] 
+[> In localizer (line 20)] 
+{Index exceeds matrix dimensions.
+
+Error in extractfield>cellType (line 80)
+classType = class(S(1).(name));
+
+Error in extractfield (line 44)
+   if cellType(S,name)
+
+Error in localizer (line 29)
+            substr.run=extractfield(runfile,'name');
+} 
+>> RETURNVAL=0
+END_TIME: Mon Apr 15 13:30:23 EDT 2019

@@ -1,0 +1,36 @@
+SINGULARITY_IMG: /project/6007967/akhanf/singularity/akhanf-vasst-dev-master-v0.0.4g.simg
+CMD: matlab -nosplash -nodisplay -r addpath(genpath('/project/6007967/hyang336/matlab/')); localizer('/home/hyang336/projects/rrg-akhanf/cfmm-deriv/Kohler/PPC_MD/','/home/hyang336/projects/rrg-akhanf/cfmm-deriv/Kohler/PPC_MD/','sub-003',3,'fmriprep1.3.2_dual-echo-summed',1.65); exit;
+START_TIME: Fri Apr 12 13:25:31 EDT 2019
+Opening log file:  /home/hyang336/java.log.29258
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2017 The MathWorks, Inc.
+                   R2017a (9.2.0.556344) 64-bit (glnxa64)
+                               March 27, 2017
+
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+[Warning: Could not start Excel server for export.
+XLSWRITE will attempt to write file in CSV format.] 
+[> In xlswrite (line 181)
+  In load_event (line 58)
+  In localizer (line 49)] 
+{Error using xlswrite (line 194)
+An error occurred on data export in CSV format.
+
+Error in load_event (line 58)
+xlswrite(strcat(project_derivative,'/behavioral/pilot/',filetosave),eventh);
+
+Error in localizer (line 49)
+                substr.runevent{j}=load_event(project_derivative,sub,'localizer',runum);%store
+                the loaded event files in sub.runevent, only one event file is
+                needed since all localizer runs has the same block sequency
+
+Caused by:
+    Error using dlmwrite (line 104)
+    The input cell array cannot be converted to a matrix.
+} 
+>> RETURNVAL=0
+END_TIME: Fri Apr 12 13:27:26 EDT 2019

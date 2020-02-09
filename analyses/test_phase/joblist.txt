@@ -1,0 +1,1 @@
+matlab -nosplash -nodisplay -r "addpath(genpath('/project/6007967/hyang336/matlab/')); test_resp_1stlvl('/home/hyang336/projects/rrg-akhanf/cfmm-deriv/Kohler/PPC_MD/','/home/hyang336/projects/rrg-akhanf/cfmm-deriv/Kohler/PPC_MD/GLM/','sub-001',5,'fmriprep_1.5.4_all',2.5,'regress'); exit;"

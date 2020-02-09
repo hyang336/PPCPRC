@@ -1,0 +1,26 @@
+SINGULARITY_IMG: /project/6007967/akhanf/singularity/akhanf-vasst-dev-master-v0.0.4g.simg
+CMD: matlab -nosplash -nodisplay -r addpath(genpath('/project/6007967/hyang336/matlab/')); lifetime180('/home/hyang336/projects/rrg-akhanf/cfmm-deriv/Kohler/PPC_MD/','/home/hyang336/projects/rrg-akhanf/cfmm-deriv/Kohler/PPC_MD/','sub-003',5,'fmriprep1.3.2_dual-echo-summed',1.65); exit;
+START_TIME: Mon Apr 15 15:23:49 EDT 2019
+Opening log file:  /home/hyang336/java.log.3783
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2017 The MathWorks, Inc.
+                   R2017a (9.2.0.556344) 64-bit (glnxa64)
+                               March 27, 2017
+
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+{Error using getArchiveEntries (line 91)
+File
+"/home/hyang336/projects/rrg-akhanf/cfmm-deriv/Kohler/PPC_MD/fmriprep/sub-003/func/sub-003_task-lifetime_run-01_space-MNI152NLin2009cAsym_desc-preproc_bold.nii.gz"
+does not exist.
+
+Error in gunzip (line 63)
+   entries = getArchiveEntries(files, rootDir, mfilename);
+
+Error in lifetime180 (line 33)
+            gunzip(strcat(project_derivative,'/fmriprep/',sub,'/func/',substr.run),temp_dir);} 
+>> RETURNVAL=0
+END_TIME: Mon Apr 15 15:24:18 EDT 2019
