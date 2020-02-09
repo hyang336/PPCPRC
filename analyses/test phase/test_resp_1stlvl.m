@@ -36,13 +36,11 @@ sub_dir=strcat(output,'/test_1stlvl/',sub);
             %get #runs from each /fmriprep/subject/func/ folder, search for task
             %"lifetime" for pilot subjects
             
-            %% 20190929 change the task name to
-            %% "test" for participants 002 and onward
-            if strcmp(sub,'sub-001')
-                runkey=fullfile(strcat(project_derivative,'/',fmriprep_foldername,'/fmriprep/',sub,'/func/'),'*lifetime*_space-MNI152NLin2009cAsym*preproc*.nii.gz');
-            else
-                runkey=fullfile(strcat(project_derivative,'/',fmriprep_foldername,'/fmriprep/',sub,'/func/'),'*test*_space-MNI152NLin2009cAsym*preproc*.nii.gz');
-            end
+            %% 20200208 all subjects now have consistent task names, thus the if statement is no longer needed
+            % also changed search pattern since we are now
+            % ouptputing to T1w space for ASHS
+            runkey=fullfile(strcat(project_derivative,'/',fmriprep_foldername,'/fmriprep/',sub,'/func/'),'*test*_space-T1w*preproc*.nii.gz');
+
             runfile=dir(runkey);
             substr=struct();
             substr.run=extractfield(runfile,'name');
@@ -54,6 +52,8 @@ sub_dir=strcat(output,'/test_1stlvl/',sub);
             %load the nii files, primarily to get the number of time points
             substr.runexp=spm_vol(strcat(temp_dir,erase(substr.run,'.gz')));
             
+            %call smooth function, which is in
+            %analyses/pilot/
             %smooth the unzipped .nii files, return smoothed
             %.nii as 1-by-run cells to a field in substr
             substr.runsmooth=crapsmoothspm(temp_dir,erase(substr.run,'.gz'),[4 4 4]);
@@ -87,18 +87,19 @@ switch noresp_opt
               
                 %change these to what types of block you
                 %have, the column numbers are *hard-coded*
+                %% 20200208 the resp column is character-type not int-type
                 freq_trials=substr.runevent{j}(strcmp(substr.runevent{j}(:,4),'recent'),:);
                 fam_trials=substr.runevent{j}(strcmp(substr.runevent{j}(:,4),'lifetime'),:);
-                recent_1=freq_trials(cellfun(@(x)x==1,freq_trials(:,6)),:);
-                recent_2=freq_trials(cellfun(@(x)x==2,freq_trials(:,6)),:);
-                recent_3=freq_trials(cellfun(@(x)x==3,freq_trials(:,6)),:);
-                recent_4=freq_trials(cellfun(@(x)x==4,freq_trials(:,6)),:);
-                recent_5=freq_trials(cellfun(@(x)x==5,freq_trials(:,6)),:);
-                lifetime_1=fam_trials(cellfun(@(x)x==1,fam_trials(:,6)),:);
-                lifetime_2=fam_trials(cellfun(@(x)x==2,fam_trials(:,6)),:);
-                lifetime_3=fam_trials(cellfun(@(x)x==3,fam_trials(:,6)),:);
-                lifetime_4=fam_trials(cellfun(@(x)x==4,fam_trials(:,6)),:);
-                lifetime_5=fam_trials(cellfun(@(x)x==5,fam_trials(:,6)),:);
+                recent_1=freq_trials(cellfun(@(x)x=='1',freq_trials(:,6)),:);
+                recent_2=freq_trials(cellfun(@(x)x=='2',freq_trials(:,6)),:);
+                recent_3=freq_trials(cellfun(@(x)x=='3',freq_trials(:,6)),:);
+                recent_4=freq_trials(cellfun(@(x)x=='4',freq_trials(:,6)),:);
+                recent_5=freq_trials(cellfun(@(x)x=='5',freq_trials(:,6)),:);
+                lifetime_1=fam_trials(cellfun(@(x)x=='1',fam_trials(:,6)),:);
+                lifetime_2=fam_trials(cellfun(@(x)x=='2',fam_trials(:,6)),:);
+                lifetime_3=fam_trials(cellfun(@(x)x=='3',fam_trials(:,6)),:);
+                lifetime_4=fam_trials(cellfun(@(x)x=='4',fam_trials(:,6)),:);
+                lifetime_5=fam_trials(cellfun(@(x)x=='5',fam_trials(:,6)),:);
                 noresp=substr.runevent{j}(cellfun(@(x)isnan(x),substr.runevent{j}(:,6)),:);
                 
                 
@@ -267,6 +268,7 @@ switch noresp_opt
             
    %% replacing noresp trials with norm_fam or obj_freq
    %% 2019-10-21 line run in sub-P005_script.mat
+   %% the 'replace' code below are not finished!!!
     case 'replace'
         
         test_1stlvl_template_job;
