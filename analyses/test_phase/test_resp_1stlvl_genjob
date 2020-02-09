@@ -17,7 +17,7 @@ TR=$7
 if [ "$#" -eq 7 ]; then
 	mkdir -p $output_dir/test_resp_1stlvl
 	for sub in $subs; do
-	echo 'module load matlab; matlab -nosplash -nodisplay -r "addpath(genpath('"'/project/6007967/hyang336/matlab/'"')); test_resp_1stlvl('"'$project_derivatives'"','"'$output_dir'"','"'$sub'"','"$expstart_vol"','"'$fmriprep_fn'"','"$TR"','"'regress'"'); exit;"' 
+	echo 'module load matlab ; matlab -nosplash -nodisplay -r "addpath(genpath('"'/project/6007967/hyang336/matlab/'"')); test_resp_1stlvl('"'$project_derivatives'"','"'$output_dir'"','"'$sub'"','"$expstart_vol"','"'$fmriprep_fn'"','"$TR"','"'regress'"'); exit;"' 
 	done
 else
 usage
