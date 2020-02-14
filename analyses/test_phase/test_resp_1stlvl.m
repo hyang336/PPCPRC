@@ -77,7 +77,7 @@ switch noresp_opt
                                                 
                 %get design onset, duration, conditions, and confound regressors
                 run=regexp(substr.run{j},'run-\d\d_','match');%find corresponding run number to load the events.tsv
-                %runum=erase(run{1},'_');
+
                 substr.runevent{j}=load_event_test(project_derivative,sub,task,run);%store the loaded event files in sub.runevent; sub-xxx, task-xxx_, run-xx
                 %the event output has no headers, they are in order of {'onset','obj_freq','norm_fam','task','duration','resp','RT'};
          
@@ -90,6 +90,8 @@ switch noresp_opt
                 %% 20200208 the resp column is character-type not int-type
                 freq_trials=substr.runevent{j}(strcmp(substr.runevent{j}(:,4),'recent'),:);
                 fam_trials=substr.runevent{j}(strcmp(substr.runevent{j}(:,4),'lifetime'),:);
+                %column 9 is the dichotomous feat_over to be
+                %used as parametric modulator
                 recent_1=freq_trials(cellfun(@(x)x=='1',freq_trials(:,6)),:);
                 recent_2=freq_trials(cellfun(@(x)x=='2',freq_trials(:,6)),:);
                 recent_3=freq_trials(cellfun(@(x)x=='3',freq_trials(:,6)),:);
@@ -101,6 +103,13 @@ switch noresp_opt
                 lifetime_4=fam_trials(cellfun(@(x)x=='4',fam_trials(:,6)),:);
                 lifetime_5=fam_trials(cellfun(@(x)x=='5',fam_trials(:,6)),:);
                 noresp=substr.runevent{j}(cellfun(@(x)isnan(x),substr.runevent{j}(:,6)),:);
+                %The parametric modulator needs to have the
+                %same onsets as each condition regressors,
+                %see SPM12 manual figure 31.16. Since they
+                %have same onsets as resp regressors, they
+                %need to be entered as parametric modulator
+                %and be demeaned so that they are orthogonal with
+                %respect to previous regressors.
                 
                 
                 conf_name=strcat(project_derivative,'/',fmriprep_foldername,'/fmriprep/',sub,'/func/',sub,'_',task{1},run{1},'*confound*.tsv');%use task{1} and run{1} since it's iteratively defined
@@ -142,7 +151,7 @@ switch noresp_opt
                     matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).duration = cell2mat(cond{2,have_cond(k)}(:,5));
                     %gotta fill these fields too
                     matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).tmod = 0;
-                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).pmod = struct('name', {}, 'param', {}, 'poly', {});
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).pmod = struct('name', 'feat_over', 'param', cell2mat(cond{2,have_cond(k)}(:,8)), 'poly', 1);%the 8th column of a cond cell array is the feat_over para_modulator, using dichotomized value then to result in some conditions having all same feat_over value in a given run, which means the design matrix becomes rand deficient and requiring the contrast vector involving that column to add up to 1.
                     matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).orth = 1;
                 end
                 %always have 6 motion regressors
@@ -168,85 +177,177 @@ switch noresp_opt
                 %estimate the specified lvl-1 model
                 matlabbatch{2}.spm.stats.fmri_est.spmmat = {strcat(temp_dir,'SPM.mat')};
                 
-                %% setup the two contrast, lifetime and recent. Note that "as long as all of the contrasts are derived from the same GLM model, then you can have as many as you want in a single SPM.mat" ---Suzanne Witt
+                            
+                
+            %initil setup for SPM
+            spm('defaults', 'FMRI');
+            spm_jobman('initcfg');
+            
+            %run here to generate SPM.mat
+            spm_jobman('run',matlabbatch(1:2));
+%% load SPM.mat and use the design matrix info to define contrasts
+                spmmat=load(strcat(temp_dir,'SPM.mat'));
+                
+                %hopefully the column headers are
+                %consistently named, better not update SPM
+                %the below lines should return a single
+                %number each
+                
+                %for condition/modulated-condition (separate design columns)
+                %main effect, convec should sum to 0, for
+                %parametric modulator main effect, convec
+                %should sum to 1
+                
+                interact_col=cell(1); %a cell array saving all the design-column numbers for later check
+                interact_col(1,2:11,1)={'life1_fo_col_in_spmmat','life2_fo_col_in_spmmat','life3_fo_col_in_spmmat','life4_fo_col_in_spmmat','life5_fo_col_in_spmmat','recent1_fo_col_in_spmmat','recent2_fo_col_in_spmmat','recent3_fo_col_in_spmmat','recent4_fo_col_in_spmmat','recent5_fo_col_in_spmmat'};
+                empty_col=cell(1);
+                for l=1:length(substr.run)
+                    interact_col(l+1,1,1)={strcat('run',num2str(l))};
+                    [~,interact_col{l+1,2,1}]=find(strcmp(strcat('Sn(',num2str(l),') lifetime_1xfeat_over^1*bf(1)'),spmmat.SPM.xX.name(1,:)));
+                    [~,interact_col{l+1,3,1}]=find(strcmp(strcat('Sn(',num2str(l),') lifetime_2xfeat_over^1*bf(1)'),spmmat.SPM.xX.name(1,:)));
+                    [~,interact_col{l+1,4,1}]=find(strcmp(strcat('Sn(',num2str(l),') lifetime_3xfeat_over^1*bf(1)'),spmmat.SPM.xX.name(1,:)));
+                    [~,interact_col{l+1,5,1}]=find(strcmp(strcat('Sn(',num2str(l),') lifetime_4xfeat_over^1*bf(1)'),spmmat.SPM.xX.name(1,:)));
+                    [~,interact_col{l+1,6,1}]=find(strcmp(strcat('Sn(',num2str(l),') lifetime_5xfeat_over^1*bf(1)'),spmmat.SPM.xX.name(1,:)));
+                    
+                    [~,interact_col{l+1,7,1}]=find(strcmp(strcat('Sn(',num2str(l),') recent_1xfeat_over^1*bf(1)'),spmmat.SPM.xX.name(1,:)));
+                    [~,interact_col{l+1,8,1}]=find(strcmp(strcat('Sn(',num2str(l),') recent_2xfeat_over^1*bf(1)'),spmmat.SPM.xX.name(1,:)));
+                    [~,interact_col{l+1,9,1}]=find(strcmp(strcat('Sn(',num2str(l),') recent_3xfeat_over^1*bf(1)'),spmmat.SPM.xX.name(1,:)));
+                    [~,interact_col{l+1,10,1}]=find(strcmp(strcat('Sn(',num2str(l),') recent_4xfeat_over^1*bf(1)'),spmmat.SPM.xX.name(1,:)));
+                    [~,interact_col{l+1,11,1}]=find(strcmp(strcat('Sn(',num2str(l),') recent_5xfeat_over^1*bf(1)'),spmmat.SPM.xX.name(1,:)));
+                    
+                    %indicate in the 3rd dimension if any of
+                    %the above columns are all zeros
+                    for m=2:11%hard-coded
+                        interact_col{l+1,m,2}=sum(spmmat.SPM.xX.X(:,interact_col{l+1,m,1}))==0;
+                        if interact_col{l+1,m,2}==1
+                            empty_col=[empty_col,interact_col{l+1,m,1}];%save the index (cells of interact_col) of all-zero columns
+                        end
+                    end
+                end
+                empty_col=empty_col(~cellfun('isempty',empty_col));%remove the leading empty cell
+                
+                %% setup lifetime linear main effect. Note that "as long as all of the contrasts are derived from the same GLM model, then you can have as many as you want in a single SPM.mat" ---Suzanne Witt
                 %setup linear contrast for lifetime
                 %conditions
                 matlabbatch{3}.spm.stats.con.spmmat = {strcat(temp_dir,'SPM.mat')};
                 matlabbatch{3}.spm.stats.con.consess{1}.tcon.name = 'linear inc lifetime';
-                %use runbycond to construct appropriate contrast vector
-                %lifetime conditions
-                [lifetime1_runrow,lifetime1_designcol]=find(cellfun(@(x)strcmp(x,'lifetime_1'),runbycond));
-                [lifetime2_runrow,lifetime2_designcol]=find(cellfun(@(x)strcmp(x,'lifetime_2'),runbycond));
-                [lifetime3_runrow,lifetime3_designcol]=find(cellfun(@(x)strcmp(x,'lifetime_3'),runbycond));
-                [lifetime4_runrow,lifetime4_designcol]=find(cellfun(@(x)strcmp(x,'lifetime_4'),runbycond));
-                [lifetime5_runrow,lifetime5_designcol]=find(cellfun(@(x)strcmp(x,'lifetime_5'),runbycond));
-                %need to pull recent conditions as well to
-                %give them 0 weights instead of NaN
-                [recent1_runrow,recent1_designcol]=find(cellfun(@(x)strcmp(x,'recent_1'),runbycond));
-                [recent2_runrow,recent2_designcol]=find(cellfun(@(x)strcmp(x,'recent_2'),runbycond));
-                [recent3_runrow,recent3_designcol]=find(cellfun(@(x)strcmp(x,'recent_3'),runbycond));
-                [recent4_runrow,recent4_designcol]=find(cellfun(@(x)strcmp(x,'recent_4'),runbycond));
-                [recent5_runrow,recent5_designcol]=find(cellfun(@(x)strcmp(x,'recent_5'),runbycond));
-                
-                [noresp_runrow,noresp_designcol]=find(cellfun(@(x)strcmp(x,'noresp'),runbycond));%although not included in the contrast, need to account for all conditions that may differ between runs since they affect column numbers in the design matrix
-                motionzero=zeros(size(runbycond,1),6);%6 motion regressors
-                
-                conmat=nan(size(runbycond));%can't use 0 since noresp is given 0 weight
-                %lifetime condition index
-                l1ind=sub2ind(size(conmat),lifetime1_runrow,lifetime1_designcol);
-                l2ind=sub2ind(size(conmat),lifetime2_runrow,lifetime2_designcol);
-                l3ind=sub2ind(size(conmat),lifetime3_runrow,lifetime3_designcol);
-                l4ind=sub2ind(size(conmat),lifetime4_runrow,lifetime4_designcol);
-                l5ind=sub2ind(size(conmat),lifetime5_runrow,lifetime5_designcol);
-                %recent condition index
-                r1ind=sub2ind(size(conmat),recent1_runrow,recent1_designcol);
-                r2ind=sub2ind(size(conmat),recent2_runrow,recent2_designcol);
-                r3ind=sub2ind(size(conmat),recent3_runrow,recent3_designcol);
-                r4ind=sub2ind(size(conmat),recent4_runrow,recent4_designcol);
-                r5ind=sub2ind(size(conmat),recent5_runrow,recent5_designcol);
-                %noresp index
-                nrind=sub2ind(size(conmat),noresp_runrow,noresp_designcol);
-                %linear increase lifetime
-                conmat(l1ind)=-2/length(lifetime1_runrow);
-                conmat(l2ind)=-1/length(lifetime2_runrow);
-                conmat(l3ind)=0;
-                conmat(l4ind)=1/length(lifetime4_runrow);
-                conmat(l5ind)=2/length(lifetime5_runrow);
-                
-                conmat(r1ind)=0;
-                conmat(r2ind)=0;
-                conmat(r3ind)=0;
-                conmat(r4ind)=0;
-                conmat(r5ind)=0;
-                conmat(nrind)=0;
-                                
-                conmat=[conmat motionzero];%attach motion regressor weights (i.e. 0)
-                convec=reshape(conmat',1,numel(conmat));%unroll the matrix into a vector
-                convec=convec(~isnan(convec));                
+                %use spmmat.SPM.xX.name header to find the
+                %right columns
+                [~,life1_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_1*bf(1)'));
+                [~,life2_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_2*bf(1)'));
+                [~,life3_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_3*bf(1)'));
+                [~,life4_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_4*bf(1)'));
+                [~,life5_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_5*bf(1)'));
+                convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
+                convec(1,life1_main_col)=-2/length(life1_main_col);
+                convec(1,life2_main_col)=-1/length(life2_main_col);
+                convec(1,life3_main_col)=0;
+                convec(1,life4_main_col)=1/length(life4_main_col);
+                convec(1,life5_main_col)=2/length(life5_main_col);
                 matlabbatch{3}.spm.stats.con.consess{1}.tcon.weights = convec;
-                                           
-                %% recent linear contrast (put it in a different consess)
-                matlabbatch{3}.spm.stats.con.spmmat = {strcat(temp_dir,'SPM.mat')};
+                
+                %% recent linear main contrast (put it in a different consess)
                 matlabbatch{3}.spm.stats.con.consess{2}.tcon.name = 'linear dec recent';
-                
-                conmat=nan(size(runbycond));%can't use 0 since noresp is given 0 weight
-                conmat(r1ind)=2/length(recent1_runrow);
-                conmat(r2ind)=1/length(recent2_runrow);
-                conmat(r3ind)=0;
-                conmat(r4ind)=-1/length(recent4_runrow);
-                conmat(r5ind)=-2/length(recent5_runrow);
-                
-                conmat(l1ind)=0;
-                conmat(l2ind)=0;
-                conmat(l3ind)=0;
-                conmat(l4ind)=0;
-                conmat(l5ind)=0;
-                conmat(nrind)=0;
-                                
-                conmat=[conmat motionzero];%attach motion regressor weights (i.e. 0)
-                convec=reshape(conmat',1,numel(conmat));%unroll the matrix into a vector
-                convec=convec(~isnan(convec));                
+                [~,recent1_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'recent_1*bf(1)'));
+                [~,recent2_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'recent_2*bf(1)'));
+                [~,recent3_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'recent_3*bf(1)'));
+                [~,recent4_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'recent_4*bf(1)'));
+                [~,recent5_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'recent_5*bf(1)'));
+                convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
+                convec(1,recent1_main_col)=2/length(recent1_main_col);
+                convec(1,recent2_main_col)=1/length(recent2_main_col);
+                convec(1,recent3_main_col)=0;
+                convec(1,recent4_main_col)=-1/length(recent4_main_col);
+                convec(1,recent5_main_col)=-2/length(recent5_main_col);
                 matlabbatch{3}.spm.stats.con.consess{2}.tcon.weights = convec;
+                
+                %% contrast for lifetime interacting with feat_over
+                matlabbatch{3}.spm.stats.con.consess{3}.tcon.name = 'linear inc lifetime with feat_over';
+                [~,life1_fomod_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_1xfeat_over^1*bf(1)'));
+                [~,life2_fomod_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_2xfeat_over^1*bf(1)'));
+                [~,life3_fomod_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_3xfeat_over^1*bf(1)'));
+                [~,life4_fomod_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_4xfeat_over^1*bf(1)'));
+                [~,life5_fomod_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_5xfeat_over^1*bf(1)'));
+                %remove all zero columns
+                for n=1:length(empty_col)
+                   life1_fomod_col=life1_fomod_col(life1_fomod_col~=empty_col{n});
+                   life2_fomod_col=life2_fomod_col(life2_fomod_col~=empty_col{n});
+                   life3_fomod_col=life3_fomod_col(life3_fomod_col~=empty_col{n});
+                   life4_fomod_col=life4_fomod_col(life4_fomod_col~=empty_col{n});
+                   life5_fomod_col=life5_fomod_col(life5_fomod_col~=empty_col{n});
+                end
+                convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
+                convec(1,life1_fomod_col)=-2/length(life1_fomod_col);
+                convec(1,life2_fomod_col)=-1/length(life2_fomod_col);
+                convec(1,life3_fomod_col)=0;
+                convec(1,life4_fomod_col)=1/length(life4_fomod_col);
+                convec(1,life5_fomod_col)=2/length(life5_fomod_col);
+                matlabbatch{3}.spm.stats.con.consess{3}.tcon.weights = convec;
+                
+                %% contrast for recent interacting with feat_over.
+                matlabbatch{3}.spm.stats.con.consess{4}.tcon.name = 'linear dec recent with feat_over';
+                [~,recent1_fomod_col]=find(contains(spmmat.SPM.xX.name(1,:),'recent_1xfeat_over^1*bf(1)'));
+                [~,recent2_fomod_col]=find(contains(spmmat.SPM.xX.name(1,:),'recent_2xfeat_over^1*bf(1)'));
+                [~,recent3_fomod_col]=find(contains(spmmat.SPM.xX.name(1,:),'recent_3xfeat_over^1*bf(1)'));
+                [~,recent4_fomod_col]=find(contains(spmmat.SPM.xX.name(1,:),'recent_4xfeat_over^1*bf(1)'));
+                [~,recent5_fomod_col]=find(contains(spmmat.SPM.xX.name(1,:),'recent_5xfeat_over^1*bf(1)'));
+                %remove all zero columns
+                for n=1:length(empty_col)
+                   recent1_fomod_col=recent1_fomod_col(recent1_fomod_col~=empty_col{n});
+                   recent2_fomod_col=recent2_fomod_col(recent2_fomod_col~=empty_col{n});
+                   recent3_fomod_col=recent3_fomod_col(recent3_fomod_col~=empty_col{n});
+                   recent4_fomod_col=recent4_fomod_col(recent4_fomod_col~=empty_col{n});
+                   recent5_fomod_col=recent5_fomod_col(recent5_fomod_col~=empty_col{n});
+                end
+                convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
+                convec(1,recent1_fomod_col)=2/length(recent1_fomod_col);
+                convec(1,recent2_fomod_col)=1/length(recent2_fomod_col);
+                convec(1,recent3_fomod_col)=0;
+                convec(1,recent4_fomod_col)=-1/length(recent4_fomod_col);
+                convec(1,recent5_fomod_col)=-2/length(recent5_fomod_col);
+                matlabbatch{3}.spm.stats.con.consess{4}.tcon.weights = convec;
+                
+                %% main effect of feat_over in each task, all-zero interecation columns are removed when defining previous contrasts, making this part easy
+                matlabbatch{3}.spm.stats.con.consess{5}.tcon.name = 'positive feat_over in lifetime';
+                %total number of modulated lifetime conditions across runs
+                sum_life_mod=length(life1_fomod_col)+length(life2_fomod_col)+length(life3_fomod_col)+length(life4_fomod_col)+length(life5_fomod_col);
+                convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
+                convec(1,life1_fomod_col)=1/sum_life_mod;
+                convec(1,life2_fomod_col)=1/sum_life_mod;
+                convec(1,life3_fomod_col)=1/sum_life_mod;
+                convec(1,life4_fomod_col)=1/sum_life_mod;
+                convec(1,life5_fomod_col)=1/sum_life_mod;
+                matlabbatch{3}.spm.stats.con.consess{5}.tcon.weights = convec;
+                
+                matlabbatch{3}.spm.stats.con.consess{6}.tcon.name = 'positive feat_over in recent';
+                %total number of modulated recent conditions across
+                %runs
+                sum_recent_mod=length(recent1_fomod_col)+length(recent2_fomod_col)+length(recent3_fomod_col)+length(recent4_fomod_col)+length(recent5_fomod_col);
+                convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
+                convec(1,recent1_fomod_col)=1/sum_recent_mod;
+                convec(1,recent2_fomod_col)=1/sum_recent_mod;
+                convec(1,recent3_fomod_col)=1/sum_recent_mod;
+                convec(1,recent4_fomod_col)=1/sum_recent_mod;
+                convec(1,recent5_fomod_col)=1/sum_recent_mod;
+                matlabbatch{3}.spm.stats.con.consess{6}.tcon.weights = convec;
+                
+                %% main effect of feat_over overall
+                matlabbatch{3}.spm.stats.con.consess{7}.tcon.name = 'positive feat_over in test';
+                %total number of modulated conditions across
+                %runs
+                sum_all_mod=sum_life_mod+sum_recent_mod;
+                convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
+                convec(1,life1_fomod_col)=1/sum_all_mod;
+                convec(1,life2_fomod_col)=1/sum_all_mod;
+                convec(1,life3_fomod_col)=1/sum_all_mod;
+                convec(1,life4_fomod_col)=1/sum_all_mod;
+                convec(1,life5_fomod_col)=1/sum_all_mod;
+                convec(1,recent1_fomod_col)=1/sum_all_mod;
+                convec(1,recent2_fomod_col)=1/sum_all_mod;
+                convec(1,recent3_fomod_col)=1/sum_all_mod;
+                convec(1,recent4_fomod_col)=1/sum_all_mod;
+                convec(1,recent5_fomod_col)=1/sum_all_mod;
+                matlabbatch{3}.spm.stats.con.consess{7}.tcon.weights = convec;
                 
                 %% results (thresholded)
                 matlabbatch{4}.spm.stats.results.spmmat = {strcat(temp_dir,'SPM.mat')};
@@ -258,13 +359,9 @@ switch noresp_opt
                 matlabbatch{4}.spm.stats.results.conspec(2).titlestr = 'linear dec recent fwe';
                 matlabbatch{4}.spm.stats.results.conspec(2).contrasts = 2;               
             
-                
-            %initil setup for SPM
-            spm('defaults', 'FMRI');
-            spm_jobman('initcfg');
             
-            %run after specifying all matlabbatch fields for all runs
-            spm_jobman('run',matlabbatch);
+            %run the contrast and thresholding jobs
+            spm_jobman('run',matlabbatch(3:4));
             
    %% replacing noresp trials with norm_fam or obj_freq
    %% 2019-10-21 line run in sub-P005_script.mat
