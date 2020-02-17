@@ -1,0 +1,7 @@
+20200217
+Several issues with the current procedure:
+1) Once the ASHS is done for each subject, registering the segmentation to the MNI space results in them being fractured. For now the solution is to run ASHS directly on MNI template
+2) Registering BOLD to MNI reslice the BOLD into 1mm-isotropic resolution, this doesn't seem right...Maybe I should run the analyses in using the fmriprep output in MNI space in the first place
+3) 2nd level scripts not finished, the results generated so far are through the GUI
+4) Should probably switch to single-trial GLM for the ease of testing interactions
+5) Could I do the 1st-level in native T1 space, and not register them to a template for the 2nd level but just focusing on PRC (e.g. do most subjects have some activation in PRC > 0)?
