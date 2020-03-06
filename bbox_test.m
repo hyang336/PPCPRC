@@ -11,7 +11,7 @@ scan_trig=KbName('5%');
 ins_done=KbName('2@');
 experimenter_pass=KbName('e');
 pausekey=KbName('p');
-termkey=KbName('t');
+termkey=KbName('t');1
 
 %define key list to only accept response keys (in hand struct)
 %and pause key in the KbQueue
