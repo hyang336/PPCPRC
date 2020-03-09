@@ -852,14 +852,16 @@ output=data;
     Eyelink('CloseFile');
 
     % download data file
-    try
-        fprintf('Receiving data file ''%s''\n' ,edfFile);
-        status=Eyelink('ReceiveFile', edfFile,strcat(pathdata,'/',SSID,'/'),1);
-        if status > 0
-            fprintf('ReceiveFile status %d\n', status);
+    if strcmp(p.Results.Eyetracking,'yes')
+        try
+            fprintf('Receiving data file ''%s''\n' ,edfFile);
+            status=Eyelink('ReceiveFile', edfFile,strcat(pathdata,'/',SSID,'/'),1);
+            if status > 0
+                fprintf('ReceiveFile status %d\n', status);
+            end
+        catch
+            fprintf('Problem receiving data file ''%s''\n', edfFile );
         end
-    catch
-        fprintf('Problem receiving data file ''%s''\n', edfFile );
     end
 catch ME
         Screen('CloseAll');
