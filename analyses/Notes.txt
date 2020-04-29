@@ -5,3 +5,4 @@ Several issues with the current procedure:
 3) 2nd level scripts not finished, the results generated so far are through the GUI
 4) Should probably switch to single-trial GLM for the ease of testing interactions
 5) Could I do the 1st-level in native T1 space, and not register them to a template for the 2nd level but just focusing on PRC (e.g. do most subjects have some activation in PRC > 0)?
+6) should use fmriprep MNI-space BOLD if I want to do 2nd level GLM, since those are elastically registered using ANTS. In addition, I should increase the smoothing kernal to 8mm following Devin, to better align subjects anatomy.

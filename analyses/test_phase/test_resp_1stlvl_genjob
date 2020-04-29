@@ -1,13 +1,15 @@
 #!/bin/bash
 usage(){
 echo "Create joblist to be run with joblistSubmit
- usage: lifetime180_GLM_submit <bids_dir> <project_derivatives> <output_dir> <sub> <exp_start volume> <fmriprep_foldername> <TR> > <joblist.txt>"
+ usage: test_resp_1stlvl_genjob <bids_dir> <project_derivatives> <output_dir> <sub> <exp_start volume> <fmriprep_foldername> <TR> > <joblist.txt>"
 }
 bids_dir=$1
 project_derivatives=$2
 output_dir=$3
+suffix="sub-"
 if [ "$4" = 'all' ];then #all the space in [ ] are necessary, fuck bash
-	subs=$(cut -f 1 $bids_dir/participants.tsv|tail -n +2)
+	subs=$(cat ~/projects/rrg-akhanf/cfmm-deriv/Kohler/PPC_MD/sub_list.txt)
+	#subs=$(cut -f 1 $bids_dir/participants.tsv|tail -n +2)
 else
 	subs=$4
 fi
@@ -16,7 +18,7 @@ fmriprep_fn=$6
 TR=$7
 if [ "$#" -eq 7 ]; then
 	for sub in $subs; do
-	echo 'matlab -nosplash -nodisplay -r "addpath(genpath('"'/project/6007967/hyang336/matlab/'"')); test_resp_1stlvl('"'$project_derivatives'"','"'$output_dir'"','"'$sub'"','"$expstart_vol"','"'$fmriprep_fn'"','"$TR"','"'regress'"'); exit;"' 
+	echo 'matlab -nosplash -nodisplay -r "addpath(genpath('"'/project/6007967/hyang336/matlab/'"')); test_resp_1stlvl('"'$project_derivatives'"','"'$output_dir'"','"'$suffix$sub'"','"$expstart_vol"','"'$fmriprep_fn'"','"$TR"','"'regress'"'); exit;"' 
 	done
 else
 usage
