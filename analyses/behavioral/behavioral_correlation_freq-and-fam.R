@@ -71,11 +71,11 @@ library(ggplot2)
 #generate ggplots, using ERP data as background
 freq.plot=ggplot(data=background_ERP,aes(x=freq)) +
   geom_histogram(fill='grey',binwidth = bsize)+
-  geom_histogram(data=freq_frame,aes(x=pearson_R),binwidth = bsize)+labs(y="participant count", x="frequency correlation")+theme(axis.text=element_text(size=(15)),axis.title=element_text(size=(15)))
+  geom_histogram(data=freq_frame,aes(x=pearson_R),binwidth = bsize)+labs(y="participant count", x="frequency correlation")+theme(axis.text=element_text(size=(30)),axis.title=element_text(size=(30)))
 
 fam.plot=ggplot(data=background_ERP,aes(x=fam)) +
   geom_histogram(fill='grey',binwidth = bsize)+
-  geom_histogram(data=fam_frame,aes(x=pearson_R),binwidth=bsize)+labs(y="participant count", x="familiarity correlation")+theme(axis.text=element_text(size=(15)),axis.title=element_text(size=(15)))
+  geom_histogram(data=fam_frame,aes(x=pearson_R),binwidth=bsize)+labs(y="participant count", x="familiarity correlation")+theme(axis.text=element_text(size=(30)),axis.title=element_text(size=(30)))
 
 #generate barplots as in Devin's paper using freqavg and famavg
 library(dplyr)
@@ -83,9 +83,9 @@ library(dplyr)
 freq.sum=freqavg %>%
   group_by(obj_freq) %>%
   summarise(sub_mean=mean(mean_resp),sub_sd=sd(mean_resp),sub_se=sd(mean_resp)/sqrt(n()))
-freq.bar=ggplot(freq.sum,aes(x=obj_freq,y=sub_mean))+geom_col()+geom_errorbar(aes(ymin=sub_mean-sub_se,ymax=sub_mean+sub_se),width=0.2)+theme(axis.text=element_text(size=(15)),axis.title=element_text(size=(15)))
+freq.bar=ggplot(freq.sum,aes(x=obj_freq,y=sub_mean))+geom_col()+geom_errorbar(aes(ymin=sub_mean-sub_se,ymax=sub_mean+sub_se),width=0.2)+theme(axis.text=element_text(size=(30)),axis.title=element_text(size=(30)))
 
 fam.sum=famavg %>%
   group_by(norm_fam) %>%
   summarise(sub_mean=mean(mean_resp),sub_sd=sd(mean_resp),sub_se=sd(mean_resp)/sqrt(n()))
-fam.bar=ggplot(fam.sum,aes(x=norm_fam,y=sub_mean))+geom_col()+geom_errorbar(aes(ymin=sub_mean-sub_se,ymax=sub_mean+sub_se),width=0.2)+theme(axis.text=element_text(size=(15)),axis.title=element_text(size=(15)))
+fam.bar=ggplot(fam.sum,aes(x=norm_fam,y=sub_mean))+geom_col()+geom_errorbar(aes(ymin=sub_mean-sub_se,ymax=sub_mean+sub_se),width=0.2)+theme(axis.text=element_text(size=(30)),axis.title=element_text(size=(30)))

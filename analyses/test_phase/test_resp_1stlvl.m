@@ -39,7 +39,7 @@ sub_dir=strcat(output,'/test_1stlvl/',sub);
             %% 20200208 all subjects now have consistent task names, thus the if statement is no longer needed
             % also changed search pattern since we are now
             % ouptputing to T1w space for ASHS
-            runkey=fullfile(strcat(project_derivative,'/',fmriprep_foldername,'/fmriprep/',sub,'/func/'),'*test*_space-T1w*preproc*.nii.gz');
+            runkey=fullfile(strcat(project_derivative,'/',fmriprep_foldername,'/fmriprep/',sub,'/func/'),'*test*_space-MNI152*preproc*.nii.gz');
 
             runfile=dir(runkey);
             substr=struct();
@@ -56,7 +56,7 @@ sub_dir=strcat(output,'/test_1stlvl/',sub);
             %analyses/pilot/
             %smooth the unzipped .nii files, return smoothed
             %.nii as 1-by-run cells to a field in substr
-            substr.runsmooth=crapsmoothspm(temp_dir,erase(substr.run,'.gz'),[4 4 4]);
+            substr.runsmooth=crapsmoothspm(temp_dir,erase(substr.run,'.gz'),[8 8 8]);
             
 switch noresp_opt
     case 'regress'
