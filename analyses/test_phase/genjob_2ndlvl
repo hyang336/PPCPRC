@@ -8,7 +8,7 @@ output_dir=$2
 sub_list=$3
 if [ "$#" -eq 3 ]; then
 	for sub in $subs; do
-	echo 'matlab -nosplash -nodisplay -r "addpath(genpath('"'/project/6007967/hyang336/matlab/'"')); test_resp_2ndlvl('"'$con_dir'"','"'$output_dir'"','"'$sub_list'"'); exit;"' 
+	echo 'matlab -nosplash -nodisplay -r "addpath(genpath('"'/project/6007967/hyang336/matlab/'"')); addpath(genpath('"'/home/hyang336/PPCPRC/'"')); test_resp_2ndlvl('"'$con_dir'"','"'$output_dir'"','"'$sub_list'"'); exit;"' 
 	done
 else
 usage
