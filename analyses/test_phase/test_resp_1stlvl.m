@@ -37,8 +37,6 @@ sub_dir=strcat(output,'/test_1stlvl/',sub);
             %"lifetime" for pilot subjects
             
             %% 20200208 all subjects now have consistent task names, thus the if statement is no longer needed
-            % also changed search pattern since we are now
-            % ouptputing to T1w space for ASHS
             runkey=fullfile(strcat(project_derivative,'/',fmriprep_foldername,'/fmriprep/',sub,'/func/'),'*test*_space-MNI152*preproc*.nii.gz');
 
             runfile=dir(runkey);
@@ -78,7 +76,7 @@ switch noresp_opt
                 %get design onset, duration, conditions, and confound regressors
                 run=regexp(substr.run{j},'run-\d\d_','match');%find corresponding run number to load the events.tsv
 
-                substr.runevent{j}=load_event_test(project_derivative,sub,task,run);%store the loaded event files in sub.runevent; sub-xxx, task-xxx_, run-xx
+                substr.runevent{j}=load_event_test(project_derivative,sub,task,run,expstart_vol,TR);%store the loaded event files in sub.runevent; sub-xxx, task-xxx_, run-xx
                 %the event output has no headers, they are in order of {'onset','obj_freq','norm_fam','task','duration','resp','RT'};
          
 %                 %make task-xxx_run-specific dir
@@ -88,10 +86,12 @@ switch noresp_opt
                 %change these to what types of block you
                 %have, the column numbers are *hard-coded*
                 %% 20200208 the resp column is character-type not int-type
+                %pull out all columns in the current run's
+                %event file
                 freq_trials=substr.runevent{j}(strcmp(substr.runevent{j}(:,4),'recent'),:);
                 fam_trials=substr.runevent{j}(strcmp(substr.runevent{j}(:,4),'lifetime'),:);
-                %column 9 is the dichotomous feat_over to be
-                %used as parametric modulator
+                %column 8 and column 9 are the raw and dichotomous feat_over to be
+                %used as parametric modulator, respectively
                 recent_1=freq_trials(cellfun(@(x)x=='1',freq_trials(:,6)),:);
                 recent_2=freq_trials(cellfun(@(x)x=='2',freq_trials(:,6)),:);
                 recent_3=freq_trials(cellfun(@(x)x=='3',freq_trials(:,6)),:);
@@ -116,12 +116,13 @@ switch noresp_opt
                 confstruct=dir(conf_name);
                 conffile=strcat(confstruct.folder,'/',confstruct.name);
                 substr.runconf{j}=tdfread(conffile,'tab');
-                            
+                
+                %% 2020-07-15 changed expstart_vol to 1 since now we are loading in all TRs in the nifti file and adjusting the trial onsets with dummy TRs in mind (i.e. load_event_test.m)
                 %build the cell structure for loading each TR into matlabbatch
-                slice=(expstart_vol:length(substr.runexp{j}));
+                slice=(1:length(substr.runexp{j}));
                 slice=cellstr(num2str(slice'));
                 slice=cellfun(@strtrim,slice,'UniformOutput',false);%get rid of the white spaces
-                comma=repmat(',',(length(substr.runexp{j})-expstart_vol+1),1);
+                comma=repmat(',',(length(substr.runexp{j})-1+1),1);
                 comma=cellstr(comma);
                 prefix=cell(length(slice),1);
                 prefix(:)={substr.runsmooth{j}};%should be a unique run name (using smoothed data)
@@ -154,20 +155,80 @@ switch noresp_opt
                     matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).pmod = struct('name', 'feat_over', 'param', cell2mat(cond{2,have_cond(k)}(:,8)), 'poly', 1);%the 8th column of a cond cell array is the feat_over para_modulator, using dichotomized value then to result in some conditions having all same feat_over value in a given run, which means the design matrix becomes rand deficient and requiring the contrast vector involving that column to add up to 1.
                     matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).orth = 1;
                 end
+                
                 %always have 6 motion regressors
                 matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(1).name = 'x_move';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(1).val = substr.runconf{j}.trans_x(expstart_vol:end);%need to consider dummy scan
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(1).val = substr.runconf{j}.trans_x(1:end);%2020-07-15 dummy scans now corrected in trial onsets
                 matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(2).name = 'y_move';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(2).val = substr.runconf{j}.trans_y(expstart_vol:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(2).val = substr.runconf{j}.trans_y(1:end);
                 matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(3).name = 'z_move';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(3).val = substr.runconf{j}.trans_z(expstart_vol:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(3).val = substr.runconf{j}.trans_z(1:end);
                 matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(4).name = 'x_rot';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(4).val = substr.runconf{j}.rot_x(expstart_vol:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(4).val = substr.runconf{j}.rot_x(1:end);
                 matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(5).name = 'y_rot';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(5).val = substr.runconf{j}.rot_y(expstart_vol:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(5).val = substr.runconf{j}.rot_y(1:end);
                 matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(6).name = 'z_rot';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(6).val = substr.runconf{j}.rot_z(expstart_vol:end);
-                        
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(6).val = substr.runconf{j}.rot_z(1:end);
+                
+                %6 acompcor for WM and CSF, this part
+                %assumes that the confounds in the json
+                %file are ordered in terms of variance
+                %explained
+                json_name=strcat(project_derivative,'/',fmriprep_foldername,'/fmriprep/',sub,'/func/',sub,'_',task{1},run{1},'*confound*.json');%use task{1} and run{1} since it's iteratively defined
+                jsonstruct=dir(json_name);
+                jsonfile=strcat(jsonstruct.folder,'/',jsonstruct.name);
+                ref = jsondecode(fileread(jsonfile));
+                fn=fieldnames(ref);
+                acomps=~cellfun(@isempty,strfind(fn,'a_comp_cor'));%find all entries of a_comp_cor
+                fn=fn(acomps);
+                masks=cell(0);
+                for k=1:numel(fn)
+                    masks{k}=ref.(fn{k}).Mask;
+                end
+                %find the index for the first 6 occurance of WM and CSF in masks
+                WM_ind=find(cellfun(@(x)strcmp(x,'WM'),masks));
+                WM_1=fn{WM_ind(1)};
+                WM_2=fn{WM_ind(2)};
+                WM_3=fn{WM_ind(3)};
+                WM_4=fn{WM_ind(4)};
+                WM_5=fn{WM_ind(5)};
+                WM_6=fn{WM_ind(6)};
+                
+                CSF_ind=find(cellfun(@(x)strcmp(x,'CSF'),masks));
+                CSF_1=fn{CSF_ind(1)};
+                CSF_2=fn{CSF_ind(2)};
+                CSF_3=fn{CSF_ind(3)};
+                CSF_4=fn{CSF_ind(4)};
+                CSF_5=fn{CSF_ind(5)};
+                CSF_6=fn{CSF_ind(6)};
+                
+                %add these components as regressors into the
+                %GLM
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(7).name = 'acomp_WM1';
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(7).val = substr.runconf{j}.(WM_1)(1:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(8).name = 'acomp_WM2';
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(8).val = substr.runconf{j}.(WM_2)(1:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(9).name = 'acomp_WM3';
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(9).val = substr.runconf{j}.(WM_3)(1:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(10).name = 'acomp_WM4';
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(10).val = substr.runconf{j}.(WM_4)(1:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(11).name = 'acomp_WM5';
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(11).val = substr.runconf{j}.(WM_5)(1:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(12).name = 'acomp_WM6';
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(12).val = substr.runconf{j}.(WM_6)(1:end);
+                
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(13).name = 'acomp_CSF1';
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(13).val = substr.runconf{j}.(CSF_1)(1:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(14).name = 'acomp_CSF2';
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(14).val = substr.runconf{j}.(CSF_2)(1:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(15).name = 'acomp_CSF3';
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(15).val = substr.runconf{j}.(CSF_3)(1:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(16).name = 'acomp_CSF4';
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(16).val = substr.runconf{j}.(CSF_4)(1:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(17).name = 'acomp_CSF5';
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(17).val = substr.runconf{j}.(CSF_5)(1:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(18).name = 'acomp_CSF6';
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(18).val = substr.runconf{j}.(CSF_6)(1:end);                
             end
                 
                 %specify run-agnostic fields
@@ -349,7 +410,7 @@ switch noresp_opt
                 convec(1,recent5_fomod_col)=1/sum_all_mod;
                 matlabbatch{3}.spm.stats.con.consess{7}.tcon.weights = convec;
                 
-                %% results (thresholded)
+                %% 1st lvl results (thresholded)
                 matlabbatch{4}.spm.stats.results.spmmat = {strcat(temp_dir,'SPM.mat')};
                 matlabbatch{4}.spm.stats.results.export{2}.tspm.basename = 'test resp fwe';%for details about threshold and correction, see xxx_template_job.m
                 %first contrast

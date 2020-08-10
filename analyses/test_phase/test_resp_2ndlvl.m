@@ -1,15 +1,26 @@
 %% incomplete
-%2nd level analyses, all subjects contrast images needs to
-%be registered and resampled to the the MNI space before
+%2nd level analyses, make sure all subjects contrast images are registered and resampled to the the MNI space before
 %running this
 
-function test_resp_2ndlvl(con_dir,output_dir,sub-list,test)
+
+function test_resp_2ndlvl(con_dir,output_dir,sublist)
+
+%read in subject IDs
+fid=fopen(sublist,'r');
+tline=fgetl(fid);
+SSID=cell(0,1);
+while ischar(tline)
+    SSID{end+1,1}=tline;
+    tline=fgetl(fid);
+end
+fclose(fid);
+
 
 if ~exist(strcat(output_dir,'/lifetime_main'),'dir')
     mkdir (output_dir,'lifetime_main');
 end
-if ~exist(strcat(output_dir,'/rec_main'),'dir')
-    mkdir (output_dir,'rec_main');
+if ~exist(strcat(output_dir,'/recent_main'),'dir')
+    mkdir (output_dir,'recent_main');
 end
 if ~exist(strcat(output_dir,'/lifetime_pmod'),'dir')
     mkdir (output_dir,'lifetime_pmod');
@@ -17,15 +28,22 @@ end
 if ~exist(strcat(output_dir,'/recent_pmod'),'dir')
     mkdir (output_dir,'recent_pmod');
 end
+% if ~exist(strcat(output_dir,'/featmain_lifetime'),'dir')
+%     mkdir (output_dir,'featmain_lifetime');
+% end
+% if ~exist(strcat(output_dir,'/featmain_recent'),'dir')
+%     mkdir (output_dir,'featmain_recent');
+% end
+% if ~exist(strcat(output_dir,'/featmain_overall'),'dir')
+%     mkdir (output_dir,'featmain_overall');
+% end
 
-%load job template
-test_resp_2ndlvl_job;
 
 %initil setup for SPM
 spm('defaults', 'FMRI');
 spm_jobman('initcfg');
 
-%contrast image are:
+%% contrast image are:
 % 0001: lifetime linear inc main effect
 % 0002: recent linear dec main effect
 % 0003: lifetime linear inc para_moded
@@ -34,19 +52,83 @@ spm_jobman('initcfg');
 % 0006: feat_over main effect in recent trials
 % 0007: feat_over main effect in all trials
 
-switch test
-    case 'single_t'%contrast 0001 and 0002       
-        matlabbatch{1}.spm.stats.factorial_design.dir = strcat(output_dir,'/lifetime_main/SPM.mat');
-        matlabbatch{1}.spm.stats.factorial_design.des.t1.scans = '<UNDEFINED>';
-        matlabbatch{2}.spm.stats.fmri_est.spmmat = '<UNDEFINED>';
-        matlabbatch{3}.spm.stats.results.spmmat = '<UNDEFINED>';
-        matlabbatch{4}.spm.stats.factorial_design.dir = '<UNDEFINED>';
-        matlabbatch{4}.spm.stats.factorial_design.des.t1.scans = '<UNDEFINED>';
-        matlabbatch{5}.spm.stats.fmri_est.spmmat = '<UNDEFINED>';
-        matlabbatch{6}.spm.stats.results.spmmat = '<UNDEFINED>';
-        
-        spm_jobman('run',matlabbatch(1:6));
-    case 'pair_t'%contrast 0003>0001, contrast 0004>0002
+% To test whether parametric modulation effect (interaction)
+% is significant, we need to use the tmaps to compare
+% whether the model fit in the first-level is better for the
+% modulated design columns
 
+% 2020-05-06 Currently we run 4 tests, main effet of lifetime and
+% recent exposure with a contrast vector of [1 0] run on contrast 0001 and 0002;
+% interaction with feature-overlap within each task, with
+% contrast vector [1 -1] on t-maps for 0003 and 0001, and
+% 0004 and 0002, respectively for lifetime and recent
+% exposure.
 
+%%   
+%load job template
+test_resp_2ndlvl_job;
+
+% main effect of lifetime and recent exposure, one-sample t-tests 
+file_cell=cell(0,1);
+for i=1:length(SSID)
+    file_cell{i,1}=strcat(con_dir,'/sub-',SSID{i,1},'/temp/con_0001.nii');
+end
+matlabbatch{1}.spm.stats.factorial_design.dir = {strcat(output_dir,'/lifetime_main')};%specify
+matlabbatch{1}.spm.stats.factorial_design.des.t1.scans = file_cell;
+matlabbatch{2}.spm.stats.fmri_est.spmmat = {strcat(output_dir,'/lifetime_main/SPM.mat')};%estimate
+matlabbatch{3}.spm.stats.con.spmmat = {strcat(output_dir,'/lifetime_main/SPM.mat')};%contrast
+matlabbatch{3}.spm.stats.con.consess{1}.tcon.name = 'lifetime_main';
+matlabbatch{3}.spm.stats.con.consess{1}.tcon.weights = 1;
+matlabbatch{4}.spm.stats.results.spmmat = {strcat(output_dir,'/lifetime_main/SPM.mat')};%threshold
+matlabbatch{4}.spm.stats.results.conspec(1).titlestr = 'lifetime_main';
+
+file_cell=cell(0,1);
+for i=1:length(SSID)
+    file_cell{i,1}=strcat(con_dir,'/sub-',SSID{i,1},'/temp/con_0002.nii');
+end
+matlabbatch{5}.spm.stats.factorial_design.dir = {strcat(output_dir,'/recent_main')};%specify
+matlabbatch{5}.spm.stats.factorial_design.des.t1.scans = file_cell;
+matlabbatch{6}.spm.stats.fmri_est.spmmat = {strcat(output_dir,'/recent_main/SPM.mat')};%estimate
+matlabbatch{7}.spm.stats.con.spmmat = {strcat(output_dir,'/recent_main/SPM.mat')};%contrast
+matlabbatch{7}.spm.stats.con.consess{1}.tcon.name = 'recent_main';
+matlabbatch{7}.spm.stats.con.consess{1}.tcon.weights = 1;
+matlabbatch{8}.spm.stats.results.spmmat = {strcat(output_dir,'/recent_main/SPM.mat')};%threshold
+matlabbatch{8}.spm.stats.results.conspec(1).titlestr = 'recent_main';
+
+%paired t-test between modulated and unmodulated contrasts
+file_cell=cell(0,2);
+for i=1:length(SSID)
+    file_cell{i,1}=strcat(con_dir,'/sub-',SSID{i,1},'/temp/spmT_0003.nii');
+    file_cell{i,2}=strcat(con_dir,'/sub-',SSID{i,1},'/temp/spmT_0001.nii');
+    matlabbatch{9}.spm.stats.factorial_design.des.pt.pair(i).scans=file_cell(i,:)';
+end
+matlabbatch{9}.spm.stats.factorial_design.dir = {strcat(output_dir,'/lifetime_pmod')};%specify
+matlabbatch{10}.spm.stats.fmri_est.spmmat = {strcat(output_dir,'/lifetime_pmod/SPM.mat')};%estimate
+matlabbatch{11}.spm.stats.con.spmmat = {strcat(output_dir,'/lifetime_pmod/SPM.mat')};%contrast
+matlabbatch{11}.spm.stats.con.consess{1}.tcon.name = 'lifetime_pmod';
+matlabbatch{11}.spm.stats.con.consess{1}.tcon.weights = [1,-1];
+matlabbatch{12}.spm.stats.results.spmmat = {strcat(output_dir,'/lifetime_pmod/SPM.mat')};%threshold
+matlabbatch{12}.spm.stats.results.conspec(1).titlestr = 'lifetime_pmod';
+
+file_cell=cell(0,2);
+for i=1:length(SSID)
+    file_cell{i,1}=strcat(con_dir,'/sub-',SSID{i,1},'/temp/spmT_0004.nii');
+    file_cell{i,2}=strcat(con_dir,'/sub-',SSID{i,1},'/temp/spmT_0002.nii');
+    matlabbatch{13}.spm.stats.factorial_design.des.pt.pair(i).scans=file_cell(i,:)';
+end
+matlabbatch{13}.spm.stats.factorial_design.dir = {strcat(output_dir,'/recent_pmod')};%specify
+matlabbatch{14}.spm.stats.fmri_est.spmmat = {strcat(output_dir,'/recent_pmod/SPM.mat')};%estimate
+matlabbatch{15}.spm.stats.con.spmmat = {strcat(output_dir,'/recent_pmod/SPM.mat')};%contrast
+matlabbatch{15}.spm.stats.con.consess{1}.tcon.name = 'recent_pmod';
+matlabbatch{15}.spm.stats.con.consess{1}.tcon.weights = [1,-1];
+matlabbatch{16}.spm.stats.results.spmmat = {strcat(output_dir,'/recent_pmod/SPM.mat')};%threshold
+matlabbatch{16}.spm.stats.results.conspec(1).titlestr = 'recent_pmod';
+
+%skip the results part since it will get stuck. Will need to
+%find another way to threshold
+spm_jobman('run',matlabbatch);
+%spm_jobman('run',matlabbatch(1:3));
+%spm_jobman('run',matlabbatch(5:7));
+%spm_jobman('run',matlabbatch(9:11));
+%spm_jobman('run',matlabbatch(13:15));
 end
