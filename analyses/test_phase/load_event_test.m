@@ -3,7 +3,7 @@
 % reference spreadsheet, one column with feature-overlap
 % calculated with 541 items in the database, the other
 % column with binary (high/low) feature overlap
-function eventout=load_event_test(project_derivative,sub,task,run)
+function eventout=load_event_test(project_derivative,sub,task,run,expstart_vol,TR)
 lifetime_events=fullfile(strcat(project_derivative,'/behavioral/',sub,'/',sub,'_',task,run,'data','.xlsx'));
 % run and task would be in a cell created by the outer
 % script, otherwise the next line won't work. Check help
@@ -26,7 +26,8 @@ event(1,1:10)={'onset','obj_freq','norm_fam','task','duration','resp','RT','feat
 [~,RTcol]=find(cellfun(@(x)strcmp(x,'RespTime'),raw(1,1:end)));
 [~,stimcol]=find(cellfun(@(x)strcmp(x,'Stimuli'),raw(1,1:end)));
 
-event(2:end,1)=num2cell(cellfun(@(x,y)x-y,raw(2:end,onsetcol),raw(2:end,startcol)));%onset corrected for exp start time
+onset_temp=num2cell(cellfun(@(x,y)x-y,raw(2:end,onsetcol),raw(2:end,startcol)));%onset corrected for exp start time
+event(2:end,1)=num2cell(cellfun(@(x) x+(expstart_vol-1)*TR, onset_temp));%corrected for dummy TRs
 event(2:end,2)=raw(2:end,obj_freq_col);
 event(2:end,3)=raw(2:end,norm_fam_col);
 event(2:end,4)=raw(2:end,task_col);
