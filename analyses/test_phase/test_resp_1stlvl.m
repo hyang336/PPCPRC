@@ -7,7 +7,7 @@
 %with norm_fam and obj_freq "replace")
 
 
-function test_resp_1stlvl(project_derivative,output,sub,expstart_vol,fmriprep_foldername,TR,noresp_opt)
+function test_resp_1stlvl(project_derivative,output,sub,expstart_vol,fmriprep_foldername,TR,noresp_opt,maskfile)
 %(i.e. if there are 4 dummy scans, the experiment starts at the 5th
 %TR/trigger/volume). In this version every participant in every run has to have the same number of
 %dummy scans. 
@@ -46,7 +46,7 @@ sub_dir=strcat(output,'/test_1stlvl/',sub);
             
             %unzip the nii.gz files into the temp directory
             gunzip(strcat(project_derivative,'/',fmriprep_foldername,'/fmriprep/',sub,'/func/',substr.run),temp_dir);
-            
+            gunzip(maskfile,temp_dir);
             %load the nii files, primarily to get the number of time points
             substr.runexp=spm_vol(strcat(temp_dir,erase(substr.run,'.gz')));
             
@@ -235,6 +235,7 @@ switch noresp_opt
                 matlabbatch{1}.spm.stats.fmri_spec.dir = {temp_dir};%all runs are combined into one
                 matlabbatch{1}.spm.stats.fmri_spec.timing.units = 'secs';
                 matlabbatch{1}.spm.stats.fmri_spec.timing.RT = TR;%remember to change this according to actual TR in second
+                matlabbatch{1}.spm.stats.fmri_spec.mask = {strcat(temp_dir,'bin_1-13_mask.nii')};
                 %estimate the specified lvl-1 model
                 matlabbatch{2}.spm.stats.fmri_est.spmmat = {strcat(temp_dir,'SPM.mat')};
                 
