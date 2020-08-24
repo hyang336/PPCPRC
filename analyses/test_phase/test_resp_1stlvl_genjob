@@ -1,7 +1,7 @@
 #!/bin/bash
 usage(){
 echo "Create joblist to be run with joblistSubmit
- usage: test_resp_1stlvl_genjob <bids_dir> <project_derivatives> <output_dir> <sub> <exp_start volume> <fmriprep_foldername> <TR> > <joblist.txt>"
+ usage: test_resp_1stlvl_genjob <bids_dir> <project_derivatives> <output_dir> <sub> <exp_start volume> <fmriprep_foldername> <TR> <maskfile> > <joblist.txt>"
 }
 bids_dir=$1
 project_derivatives=$2
@@ -16,9 +16,10 @@ fi
 expstart_vol=$5
 fmriprep_fn=$6
 TR=$7
-if [ "$#" -eq 7 ]; then
+maskfile=$8
+if [ "$#" -eq 8 ]; then
 	for sub in $subs; do
-	echo 'matlab -nosplash -nodisplay -r "addpath(genpath('"'/project/6007967/hyang336/matlab/'"')); addpath(genpath('"'/home/hyang336/PPCPRC/'"')); test_resp_1stlvl('"'$project_derivatives'"','"'$output_dir'"','"'$suffix$sub'"','"$expstart_vol"','"'$fmriprep_fn'"','"$TR"','"'regress'"'); exit;"' 
+	echo 'matlab -nosplash -nodisplay -r "addpath(genpath('"'/project/6007967/hyang336/matlab/'"')); addpath(genpath('"'/home/hyang336/PPCPRC/'"')); test_resp_1stlvl('"'$project_derivatives'"','"'$output_dir'"','"'$suffix$sub'"','"$expstart_vol"','"'$fmriprep_fn'"','"$TR"','"'$maskfile'"','"'regress'"'); exit;"' 
 	done
 else
 usage
