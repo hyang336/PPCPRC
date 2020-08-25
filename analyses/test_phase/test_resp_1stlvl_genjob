@@ -19,7 +19,7 @@ TR=$7
 maskfile=$8
 if [ "$#" -eq 8 ]; then
 	for sub in $subs; do
-	echo 'matlab -nosplash -nodisplay -r "addpath(genpath('"'/project/6007967/hyang336/matlab/'"')); addpath(genpath('"'/home/hyang336/PPCPRC/'"')); test_resp_1stlvl('"'$project_derivatives'"','"'$output_dir'"','"'$suffix$sub'"','"$expstart_vol"','"'$fmriprep_fn'"','"$TR"','"'$maskfile'"','"'regress'"'); exit;"' 
+	echo 'matlab -nosplash -nodisplay -r "addpath(genpath('"'/project/6007967/hyang336/matlab/'"')); addpath(genpath('"'/home/hyang336/PPCPRC/'"')); test_resp_1stlvl('"'$project_derivatives'"','"'$output_dir'"','"'$suffix$sub'"','"$expstart_vol"','"'$fmriprep_fn'"','"$TR"','"'regress'"','"'$maskfile'"'); exit;"' 
 	done
 else
 usage
