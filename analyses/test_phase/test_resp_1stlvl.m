@@ -152,7 +152,7 @@ switch noresp_opt
                     matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).duration = cell2mat(cond{2,have_cond(k)}(:,5));
                     %gotta fill these fields too
                     matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).tmod = 0;
-                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).pmod = struct('name', 'feat_over', 'param', cell2mat(cond{2,have_cond(k)}(:,8)), 'poly', 1);%the 8th column of a cond cell array is the feat_over para_modulator, using dichotomized value then to result in some conditions having all same feat_over value in a given run, which means the design matrix becomes rand deficient and requiring the contrast vector involving that column to add up to 1.
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).pmod = struct('name', 'feat_over', 'param', cell2mat(cond{2,have_cond(k)}(:,8)), 'poly', 1);%the 8th column of a cond cell array is the feat_over para_modulator, using dichotomized value then to result in some conditions having all same feat_over value in a given run, which means the design matrix becomes rank deficient and requiring the contrast vector involving that column to add up to 1.
                     matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).orth = 1;
                 end
                 
@@ -260,7 +260,7 @@ switch noresp_opt
                 %parametric modulator main effect, convec
                 %should sum to 1
                 
-                interact_col=cell(1); %a cell array saving all the design-column numbers for later check
+                interact_col=cell(1,1,1); %a cell array saving all the design-column numbers for later check
                 interact_col(1,2:11,1)={'life1_fo_col_in_spmmat','life2_fo_col_in_spmmat','life3_fo_col_in_spmmat','life4_fo_col_in_spmmat','life5_fo_col_in_spmmat','recent1_fo_col_in_spmmat','recent2_fo_col_in_spmmat','recent3_fo_col_in_spmmat','recent4_fo_col_in_spmmat','recent5_fo_col_in_spmmat'};
                 empty_col=cell(1);
                 for l=1:length(substr.run)
@@ -280,8 +280,8 @@ switch noresp_opt
                     %indicate in the 3rd dimension if any of
                     %the above columns are all zeros
                     for m=2:11%hard-coded
-                        interact_col{l+1,m,2}=sum(spmmat.SPM.xX.X(:,interact_col{l+1,m,1}))==0;
-                        if interact_col{l+1,m,2}==1
+                        interact_col{l+1,m,2}=sum(spmmat.SPM.xX.X(:,interact_col{l+1,m,1}))==0;%logic to check if the sum is 0
+                        if interact_col{l+1,m,2}
                             empty_col=[empty_col,interact_col{l+1,m,1}];%save the index (cells of interact_col) of all-zero columns
                         end
                     end
