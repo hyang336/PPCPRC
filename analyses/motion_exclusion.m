@@ -18,7 +18,7 @@ for a=1:length(sublist)
         for c=1:length(FD)
             FD_array(c,1)=str2double(FD(c,:));
         end
-        FD_over_1=FD_array>1;
+        FD_over_1=FD_array>2;%2 mm is the voxel size
         if sum(FD_over_1,1)>0
             Bad_run_1(a,b)=cellstr(strcat('sub-',s,'_task-',runlist{b}));
         end
