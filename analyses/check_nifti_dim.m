@@ -1,3 +1,4 @@
+%% check if all runs from all subjects in the MNI space have the same first 3 dimensions so that we can register the avg brain mask to any functional run
 fmriprep_dir='~/scratch/working_dir/PPC_MD/fmriprep_1.5.4_corrected';
 fid = fopen('~/scratch/working_dir/PPC_MD/sub_list_test_2mmMotionCor.txt');
 sublist = textscan(fid,'%s');

@@ -235,7 +235,7 @@ switch noresp_opt
                 matlabbatch{1}.spm.stats.fmri_spec.dir = {temp_dir};%all runs are combined into one
                 matlabbatch{1}.spm.stats.fmri_spec.timing.units = 'secs';
                 matlabbatch{1}.spm.stats.fmri_spec.timing.RT = TR;%remember to change this according to actual TR in second
-                matlabbatch{1}.spm.stats.fmri_spec.mask = {strcat(temp_dir,'bin_1-13_mask.nii')};
+                matlabbatch{1}.spm.stats.fmri_spec.mask = {strcat(temp_dir,'bin_1-13_mask.nii')};%specify explicit mask, using avg whole-brain mask
                 %estimate the specified lvl-1 model
                 matlabbatch{2}.spm.stats.fmri_est.spmmat = {strcat(temp_dir,'SPM.mat')};
                 
