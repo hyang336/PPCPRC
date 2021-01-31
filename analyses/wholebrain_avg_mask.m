@@ -21,9 +21,10 @@ for a=1:length(sublist)
         sum_str=strcat(sum_str,'i',num2str(a));
     end
 end
-
+matlabbatch{1}.spm.util.imcalc.outdir = {output_dir};
 %average
 matlabbatch{1}.spm.util.imcalc.expression = strcat('(',sum_str,')/',num2str(length(sublist)));
 
+spm_jobman('run',matlabbatch);
 
 
