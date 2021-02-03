@@ -1,3 +1,4 @@
+%% DOESNT WORK, just use neuroglia fslmaths
 %% generate avg wholebrain mask in funtional space (MNI)
 
 fmriprep_dir='~/scratch/working_dir/PPC_MD/fmriprep_1.5.4_corrected';
