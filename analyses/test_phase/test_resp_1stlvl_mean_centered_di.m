@@ -62,11 +62,11 @@ switch noresp_opt
     case 'regress'
             %make the matlabbatch struct outside of the run-loop since it has separate
             %fields for each run
-            test_1stlvl_template_job;%initialized matlabbatch template MUST HAVE ALL THE NECESSARY FIELDS
+            test_1stlvl_mean_centered_di_template_job;%initialized matlabbatch template MUST HAVE ALL THE NECESSARY FIELDS
             
             %record which condtions each run has, useful for specifying design matrix at
             %the end
-            runbycond=cell(length(substr.run),11);%maximam 11 condtions (5 in each task + noresp) that may differ between runs.
+            runbycond=cell(length(substr.run),5);%maximam 5 condtions (2 in each task + noresp) that may differ between runs.
             
             %load events for all runs and calculate mean
             %rating for each task
