@@ -80,8 +80,15 @@ switch noresp_opt
             %find the mean ratings of lifetime and recent tasks
             recent_trials=catevents(strcmp(catevents(:,4),'recent'),:);
             lifetime_trials=catevents(strcmp(catevents(:,4),'lifetime'),:);
-            lifetime_mean=mean(str2num(cell2mat(lifetime_trials(:,6))));
-            recent_mean=mean(str2num(cell2mat(recent_trials(:,6))));
+            %remove NaN so cell2mat can work
+            lifetime_trials_resp=~cellfun(@isnan,lifetime_trials(:,6));
+            recent_trials_resp=~cellfun(@isnan,recent_trials(:,6));
+            
+            lifetime_ratings=lifetime_trials(lifetime_trials_resp,6);
+            recent_ratings=recent_trials(recent_trials_resp,6);
+            %calculate mean
+            lifetime_mean=mean(str2num(cell2mat(lifetime_ratings)));
+            recent_mean=mean(str2num(cell2mat(recent_ratings)));
             
             
             %loop through runs
@@ -110,10 +117,13 @@ switch noresp_opt
                 fam_trials=substr.runevent{j}(strcmp(substr.runevent{j}(:,4),'lifetime'),:);
                 %column 8 and column 9 are the raw and dichotomous feat_over to be
                 %used as parametric modulator, respectively
-                recent_low=freq_trials(str2num(cell2mat(freq_trials(:,6)))<recent_mean,:);
-                recent_high=freq_trials(str2num(cell2mat(freq_trials(:,6)))>=recent_mean,:);
-                lifetime_low=fam_trials(str2num(cell2mat(fam_trials(:,6)))<lifetime_mean,:);
-                lifetime_high=fam_trials(str2num(cell2mat(fam_trials(:,6)))>=lifetime_mean,:);
+                freq_resp=freq_trials(~cellfun(@isnan,freq_trials(:,6)),:);
+                fam_resp=fam_trials(~cellfun(@isnan,fam_trials(:,6)),:);
+                
+                recent_low=freq_resp(str2num(cell2mat(freq_resp(:,6)))<recent_mean,:);
+                recent_high=freq_resp(str2num(cell2mat(freq_resp(:,6)))>=recent_mean,:);
+                lifetime_low=fam_resp(str2num(cell2mat(fam_resp(:,6)))<lifetime_mean,:);
+                lifetime_high=fam_resp(str2num(cell2mat(fam_resp(:,6)))>=lifetime_mean,:);
                 noresp=substr.runevent{j}(cellfun(@(x)isnan(x),substr.runevent{j}(:,6)),:);
                 %The parametric modulator needs to have the
                 %same onsets as each condition regressors,
