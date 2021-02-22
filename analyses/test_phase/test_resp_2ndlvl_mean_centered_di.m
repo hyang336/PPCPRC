@@ -3,7 +3,7 @@
 %running this
 
 
-function test_resp_2ndlvl(con_dir,output_dir,sublist)
+function test_resp_2ndlvl_mean_centered_di(con_dir,output_dir,sublist)
 
 %read in subject IDs
 fid=fopen(sublist,'r');
@@ -16,16 +16,16 @@ end
 fclose(fid);
 
 
-if ~exist(strcat(output_dir,'/lifetime_main'),'dir')
+if ~exist(strcat(output_dir,'/lifetime_main_mean_centered_di'),'dir')
     mkdir (output_dir,'lifetime_main');
 end
-if ~exist(strcat(output_dir,'/recent_main'),'dir')
+if ~exist(strcat(output_dir,'/recent_main_mean_centered_di'),'dir')
     mkdir (output_dir,'recent_main');
 end
-if ~exist(strcat(output_dir,'/lifetime_pmod'),'dir')
+if ~exist(strcat(output_dir,'/lifetime_pmod_mean_centered_di'),'dir')
     mkdir (output_dir,'lifetime_pmod');
 end
-if ~exist(strcat(output_dir,'/recent_pmod'),'dir')
+if ~exist(strcat(output_dir,'/recent_pmod_mean_centered_di'),'dir')
     mkdir (output_dir,'recent_pmod');
 end
 % if ~exist(strcat(output_dir,'/featmain_lifetime'),'dir')
@@ -44,10 +44,10 @@ spm('defaults', 'FMRI');
 spm_jobman('initcfg');
 
 %% contrast image are:
-% 0001: lifetime linear inc main effect
-% 0002: recent linear dec main effect
-% 0003: lifetime linear inc para_moded
-% 0004: recent linear dec para_moded
+% 0001: lifetime main effect
+% 0002: recent main effect
+% 0003: lifetime para_moded
+% 0004: recent para_moded
 % 0005: feat_over main effect in lifetime trials
 % 0006: feat_over main effect in recent trials
 % 0007: feat_over main effect in all trials
@@ -65,7 +65,9 @@ spm_jobman('initcfg');
 % exposure.
 
 %%   
-%load job template
+%load job template, should be able to use the same job
+%template since the number of contrasts and the type are the
+%same on the 2nd level
 test_resp_2ndlvl_job;
 
 % main effect of lifetime and recent exposure, one-sample t-tests 
@@ -73,27 +75,27 @@ file_cell=cell(0,1);
 for i=1:length(SSID)
     file_cell{i,1}=strcat(con_dir,'/sub-',SSID{i,1},'/temp/con_0001.nii');
 end
-matlabbatch{1}.spm.stats.factorial_design.dir = {strcat(output_dir,'/lifetime_main')};%specify
+matlabbatch{1}.spm.stats.factorial_design.dir = {strcat(output_dir,'/lifetime_main_mean_centered_di')};%specify
 matlabbatch{1}.spm.stats.factorial_design.des.t1.scans = file_cell;
-matlabbatch{2}.spm.stats.fmri_est.spmmat = {strcat(output_dir,'/lifetime_main/SPM.mat')};%estimate
-matlabbatch{3}.spm.stats.con.spmmat = {strcat(output_dir,'/lifetime_main/SPM.mat')};%contrast
-matlabbatch{3}.spm.stats.con.consess{1}.tcon.name = 'lifetime_main';
+matlabbatch{2}.spm.stats.fmri_est.spmmat = {strcat(output_dir,'/lifetime_main_mean_centered_di/SPM.mat')};%estimate
+matlabbatch{3}.spm.stats.con.spmmat = {strcat(output_dir,'/lifetime_main_mean_centered_di/SPM.mat')};%contrast
+matlabbatch{3}.spm.stats.con.consess{1}.tcon.name = 'lifetime_main_mean_centered_di';
 matlabbatch{3}.spm.stats.con.consess{1}.tcon.weights = 1;
-matlabbatch{4}.spm.stats.results.spmmat = {strcat(output_dir,'/lifetime_main/SPM.mat')};%threshold
-matlabbatch{4}.spm.stats.results.conspec(1).titlestr = 'lifetime_main';
+matlabbatch{4}.spm.stats.results.spmmat = {strcat(output_dir,'/lifetime_main_mean_centered_di/SPM.mat')};%threshold
+matlabbatch{4}.spm.stats.results.conspec(1).titlestr = 'lifetime_main_mean_centered_di';
 
 file_cell=cell(0,1);
 for i=1:length(SSID)
     file_cell{i,1}=strcat(con_dir,'/sub-',SSID{i,1},'/temp/con_0002.nii');
 end
-matlabbatch{5}.spm.stats.factorial_design.dir = {strcat(output_dir,'/recent_main')};%specify
+matlabbatch{5}.spm.stats.factorial_design.dir = {strcat(output_dir,'/recent_main_mean_centered_di')};%specify
 matlabbatch{5}.spm.stats.factorial_design.des.t1.scans = file_cell;
-matlabbatch{6}.spm.stats.fmri_est.spmmat = {strcat(output_dir,'/recent_main/SPM.mat')};%estimate
-matlabbatch{7}.spm.stats.con.spmmat = {strcat(output_dir,'/recent_main/SPM.mat')};%contrast
-matlabbatch{7}.spm.stats.con.consess{1}.tcon.name = 'recent_main';
+matlabbatch{6}.spm.stats.fmri_est.spmmat = {strcat(output_dir,'/recent_main_mean_centered_di/SPM.mat')};%estimate
+matlabbatch{7}.spm.stats.con.spmmat = {strcat(output_dir,'/recent_main_mean_centered_di/SPM.mat')};%contrast
+matlabbatch{7}.spm.stats.con.consess{1}.tcon.name = 'recent_main_mean_centered_di';
 matlabbatch{7}.spm.stats.con.consess{1}.tcon.weights = 1;
-matlabbatch{8}.spm.stats.results.spmmat = {strcat(output_dir,'/recent_main/SPM.mat')};%threshold
-matlabbatch{8}.spm.stats.results.conspec(1).titlestr = 'recent_main';
+matlabbatch{8}.spm.stats.results.spmmat = {strcat(output_dir,'/recent_main_mean_centered_di/SPM.mat')};%threshold
+matlabbatch{8}.spm.stats.results.conspec(1).titlestr = 'recent_main_mean_centered_di';
 
 %paired t-test between modulated and unmodulated contrasts
 file_cell=cell(0,2);
@@ -102,13 +104,13 @@ for i=1:length(SSID)
     file_cell{i,2}=strcat(con_dir,'/sub-',SSID{i,1},'/temp/spmT_0001.nii');
     matlabbatch{9}.spm.stats.factorial_design.des.pt.pair(i).scans=file_cell(i,:)';
 end
-matlabbatch{9}.spm.stats.factorial_design.dir = {strcat(output_dir,'/lifetime_pmod')};%specify
-matlabbatch{10}.spm.stats.fmri_est.spmmat = {strcat(output_dir,'/lifetime_pmod/SPM.mat')};%estimate
-matlabbatch{11}.spm.stats.con.spmmat = {strcat(output_dir,'/lifetime_pmod/SPM.mat')};%contrast
-matlabbatch{11}.spm.stats.con.consess{1}.tcon.name = 'lifetime_pmod';
+matlabbatch{9}.spm.stats.factorial_design.dir = {strcat(output_dir,'/lifetime_pmod_mean_centered_di')};%specify
+matlabbatch{10}.spm.stats.fmri_est.spmmat = {strcat(output_dir,'/lifetime_pmod_mean_centered_di/SPM.mat')};%estimate
+matlabbatch{11}.spm.stats.con.spmmat = {strcat(output_dir,'/lifetime_pmod_mean_centered_di/SPM.mat')};%contrast
+matlabbatch{11}.spm.stats.con.consess{1}.tcon.name = 'lifetime_pmod_mean_centered_di';
 matlabbatch{11}.spm.stats.con.consess{1}.tcon.weights = [1,-1];
-matlabbatch{12}.spm.stats.results.spmmat = {strcat(output_dir,'/lifetime_pmod/SPM.mat')};%threshold
-matlabbatch{12}.spm.stats.results.conspec(1).titlestr = 'lifetime_pmod';
+matlabbatch{12}.spm.stats.results.spmmat = {strcat(output_dir,'/lifetime_pmod_mean_centered_di/SPM.mat')};%threshold
+matlabbatch{12}.spm.stats.results.conspec(1).titlestr = 'lifetime_pmod_mean_centered_di';
 
 file_cell=cell(0,2);
 for i=1:length(SSID)
@@ -116,13 +118,13 @@ for i=1:length(SSID)
     file_cell{i,2}=strcat(con_dir,'/sub-',SSID{i,1},'/temp/spmT_0002.nii');
     matlabbatch{13}.spm.stats.factorial_design.des.pt.pair(i).scans=file_cell(i,:)';
 end
-matlabbatch{13}.spm.stats.factorial_design.dir = {strcat(output_dir,'/recent_pmod')};%specify
-matlabbatch{14}.spm.stats.fmri_est.spmmat = {strcat(output_dir,'/recent_pmod/SPM.mat')};%estimate
-matlabbatch{15}.spm.stats.con.spmmat = {strcat(output_dir,'/recent_pmod/SPM.mat')};%contrast
-matlabbatch{15}.spm.stats.con.consess{1}.tcon.name = 'recent_pmod';
+matlabbatch{13}.spm.stats.factorial_design.dir = {strcat(output_dir,'/recent_pmod_mean_centered_di')};%specify
+matlabbatch{14}.spm.stats.fmri_est.spmmat = {strcat(output_dir,'/recent_pmod_mean_centered_di/SPM.mat')};%estimate
+matlabbatch{15}.spm.stats.con.spmmat = {strcat(output_dir,'/recent_pmod_mean_centered_di/SPM.mat')};%contrast
+matlabbatch{15}.spm.stats.con.consess{1}.tcon.name = 'recent_pmod_mean_centered_di';
 matlabbatch{15}.spm.stats.con.consess{1}.tcon.weights = [1,-1];
-matlabbatch{16}.spm.stats.results.spmmat = {strcat(output_dir,'/recent_pmod/SPM.mat')};%threshold
-matlabbatch{16}.spm.stats.results.conspec(1).titlestr = 'recent_pmod';
+matlabbatch{16}.spm.stats.results.spmmat = {strcat(output_dir,'/recent_pmod_mean_centered_di/SPM.mat')};%threshold
+matlabbatch{16}.spm.stats.results.conspec(1).titlestr = 'recent_pmod_mean_centered_di';
 
 %skip the results part since it will get stuck. Will need to
 %find another way to threshold

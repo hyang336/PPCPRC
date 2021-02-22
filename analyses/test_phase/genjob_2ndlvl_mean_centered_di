@@ -1,0 +1,15 @@
+#!/bin/bash
+usage(){
+echo "generate 2nd-lvl MATLAB script
+ usage: genjob_2ndlvl_mean_centered_di <con_dir> <output_dir> <sub_list> > <joblist.txt>"
+}
+con_dir=$1
+output_dir=$2
+sub_list=$3
+if [ "$#" -eq 3 ]; then
+echo 'matlab -nosplash -nodisplay -r "addpath(genpath('"'/home/hyang336/matlab/'"')); addpath(genpath('"'/home/hyang336/PPCPRC/'"')); test_resp_2ndlvl_mean_centered_di('"'$con_dir'"','"'$output_dir'"','"'$sub_list'"'); exit;"' 
+else
+usage
+exit 1
+fi
+
