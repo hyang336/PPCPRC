@@ -17,16 +17,16 @@ fclose(fid);
 
 
 if ~exist(strcat(output_dir,'/lifetime_main_mean_centered_di'),'dir')
-    mkdir (output_dir,'lifetime_main');
+    mkdir (output_dir,'lifetime_main_mean_centered_di');
 end
 if ~exist(strcat(output_dir,'/recent_main_mean_centered_di'),'dir')
-    mkdir (output_dir,'recent_main');
+    mkdir (output_dir,'recent_main_mean_centered_di');
 end
 if ~exist(strcat(output_dir,'/lifetime_pmod_mean_centered_di'),'dir')
-    mkdir (output_dir,'lifetime_pmod');
+    mkdir (output_dir,'lifetime_pmod_mean_centered_di');
 end
 if ~exist(strcat(output_dir,'/recent_pmod_mean_centered_di'),'dir')
-    mkdir (output_dir,'recent_pmod');
+    mkdir (output_dir,'recent_pmod_mean_centered_di');
 end
 % if ~exist(strcat(output_dir,'/featmain_lifetime'),'dir')
 %     mkdir (output_dir,'featmain_lifetime');
