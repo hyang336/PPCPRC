@@ -6,7 +6,8 @@ library(psych)
 library(readxl)
 background_ERP=read_excel(paste(datapath,"resource from ERP study\\only_Pearson_R.xlsx",sep=""), sheet = "transposed")
 
-ss_list=c('001','002','003','004','005','006','007','008')
+#ss_list=c('001','002','003','004','005','006','007','008','010','011','012','013','014','016','017','018','019','020','021','022','024','095','026','027','028')
+ss_list=c('001','002','003','004','005','006','007','008','011','013','014','016','020','021','022','095','026')
 #create empty dataframes to store the correlation values
 freq_frame=data.frame(matrix(ncol = 3, nrow = length(ss_list)))
 x <- c("pearson_R","SSID","task")

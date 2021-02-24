@@ -20,9 +20,9 @@ for a=1:length(sublist)
         end
         FD_over_1=FD_array>2;%2 mm is the voxel size
         if sum(FD_over_1,1)>0
-            Bad_run_1(a,b)=cellstr(strcat('sub-',s,'_task-',runlist{b}));
+            Bad_run(a,b)=cellstr(strcat('sub-',s,'_task-',runlist{b}));
         end
         
     end
 end
-save(output_dir,'Bad_run_1');
+save(output_dir,'Bad_run');
