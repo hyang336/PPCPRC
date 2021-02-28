@@ -19,8 +19,12 @@ sub_dir=strcat(output,'/singletrial_GLM/',sub);
 %% step 1 generate alltrial regressor and noise regressor
         %assume BIDS folder structure
         %temp_dir now under sub_dir
-        mkdir (sub_dir,'output');
-        mkdir (sub_dir,'temp');
+        if ~exist(strcat(sub_dir,'output'),'dir')
+         mkdir (sub_dir,'output');
+        end
+        if ~exist(strcat(sub_dir,'temp'),'dir')
+         mkdir (sub_dir,'temp');
+        end
         output_dir=strcat(sub_dir,'/output/');
         temp_dir=strcat(sub_dir,'/temp/');
        
