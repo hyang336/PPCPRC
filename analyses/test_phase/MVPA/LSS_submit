@@ -1,0 +1,29 @@
+#!/bin/bash
+usage(){
+echo "Create joblist to run least-square single. usage: LSS_submit <project_derivative> <fmriprep_folder> <output_dir> <exp_start volume> <sub> > <joblist>"
+}
+project_derivative=$1
+fmriprep_folder=$2
+output_dir=$3
+expstart_vol=$4
+suffix="sub-"
+if [ "$5" = 'all' ];then #all the space in [ ] are necessary, fuck bash
+	subs=$(cat ~/scratch/working_dir/PPC_MD/sub_list_test_2mmMotionCor.txt)
+	#subs=$(cut -f 1 $bids_dir/participants.tsv|tail -n +2)
+else
+	subs=$5
+fi
+if [ "$#" -eq 5 ]
+then
+	mkdir -p $output_dir/singletrial_GLM
+	for sub in $subs;do
+	sub_dir="$output_dir/singletrial_GLM/$sub"
+	mkdir -p $sub_dir 
+	echo 'matlab -nosplash -nodisplay -r "addpath(genpath('"'/home/hyang336/matlab/'"')); test_resp_1stlvl_LSS('"'$project_derivative'"','"'$fmriprep_folder'"','"'$output_dir'"','"'$sub'"','"$expstart_vol"'); exit;"' 
+	sleep 3
+	done
+else
+usage
+exit 1
+fi
+
