@@ -1,6 +1,6 @@
 #!/bin/bash
 usage(){
-echo "Create joblist to run least-square single. usage: LSS_submit <project_derivative> <fmriprep_folder> <output_dir> <exp_start volume> <sub> > <joblist>"
+echo "Create joblist to run least-square single. usage: LSS_genjob <project_derivative> <fmriprep_folder> <output_dir> <exp_start volume> <sub> > <joblist>"
 }
 project_derivative=$1
 fmriprep_folder=$2
@@ -19,7 +19,7 @@ then
 	for sub in $subs;do
 	sub_dir="$output_dir/singletrial_GLM/$sub"
 	mkdir -p $sub_dir 
-	echo 'matlab -nosplash -nodisplay -r "addpath(genpath('"'/home/hyang336/matlab/'"')); test_resp_1stlvl_LSS('"'$project_derivative'"','"'$fmriprep_folder'"','"'$output_dir'"','"'$sub'"','"$expstart_vol"'); exit;"' 
+	echo 'matlab -nosplash -nodisplay -r "addpath(genpath('"'/home/hyang336/matlab/'"')); addpath(genpath('"'/home/hyang336/PPCPRC/'"'));test_resp_1stlvl_LSS('"'$project_derivative'"','"'$fmriprep_folder'"','"'$output_dir'"','"'$sub'"','"$expstart_vol"'); exit;"' 
 	sleep 3
 	done
 else
