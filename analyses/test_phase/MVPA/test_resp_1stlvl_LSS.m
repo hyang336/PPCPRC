@@ -83,7 +83,7 @@ sub_dir=strcat(output,'/singletrial_GLM/',sub);
                 prefix=cell(length(slice),1);
                 prefix(:)={substr.runexp{j}.fname};%should be a unique run name 
                 sliceinfo=cellfun(@strcat,prefix,comma,slice,'UniformOutput',false);
-            
+                              
             %load nii files into job    
             matlabbatch{1}.spm.stats.fmri_spec.sess.scans=[];
             matlabbatch{1}.spm.stats.fmri_spec.sess.scans=sliceinfo;

@@ -1,0 +1,26 @@
+#!/bin/bash
+usage(){
+echo "Create joblist to run PrC_SVMs. usage: PrC_SVM_genjob <project_derivative> <GLM_dir> <ASHS_dir> <output_dir> <sub> <classification_type> > <joblist>"
+}
+project_derivative=$1
+GLM_dir=$2
+ASHS_dir=$3
+output_dir=$4
+suffix="sub-"
+if [ "$5" = 'all' ];then #all the space in [ ] are necessary, fuck bash
+	subs=$(cat ~/scratch/working_dir/PPC_MD/sub_list_test_2mmMotionCor.txt)
+	#subs=$(cut -f 1 $bids_dir/participants.tsv|tail -n +2)
+else
+	subs=$5
+fi
+classification_type=$6
+if [ "$#" -eq 6 ]
+then
+	for sub in $subs;do
+	echo 'matlab -nosplash -nodisplay -r "addpath(genpath('"'/home/hyang336/matlab/'"')); addpath(genpath('"'/home/hyang336/PPCPRC/'"'));PrC_SVMs('"'$project_derivative'"','"'$GLM_dir'"','"'$ASHS_dir'"','"'$output_dir'"','"'$suffix$sub'"','"'$classification_type'"',); exit;"' 
+	sleep 3
+	done
+else
+usage
+exit 1
+fi
