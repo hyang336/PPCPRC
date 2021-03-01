@@ -17,7 +17,7 @@ classification_type=$6
 if [ "$#" -eq 6 ]
 then
 	for sub in $subs;do
-	echo 'matlab -nosplash -nodisplay -r "addpath(genpath('"'/home/hyang336/matlab/'"')); addpath(genpath('"'/home/hyang336/PPCPRC/'"'));PrC_SVMs('"'$project_derivative'"','"'$GLM_dir'"','"'$ASHS_dir'"','"'$output_dir'"','"'$suffix$sub'"','"'$classification_type'"',); exit;"' 
+	echo 'matlab -nosplash -nodisplay -r "addpath(genpath('"'/home/hyang336/matlab/'"')); addpath(genpath('"'/home/hyang336/PPCPRC/'"'));PrC_SVMs('"'$project_derivative'"','"'$GLM_dir'"','"'$ASHS_dir'"','"'$output_dir'"','"'$suffix$sub'"','"'$classification_type'"'); exit;"' 
 	sleep 3
 	done
 else
