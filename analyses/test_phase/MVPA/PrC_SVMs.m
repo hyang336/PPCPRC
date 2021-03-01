@@ -27,6 +27,10 @@ for i=1:length(runs)
         %load the beta img which is in subject T1 space with functional resolution, beta_0001.nii is the trial of
         %interest
         beta_img=niftiread(strcat(GLM_dir,'/',sub,'/temp/',runs{i},'/trial_',num2str(j),'/beta_0001.nii'));
+        %check image size, if not equal,throw an error
+        if any(size(beta_img)~=size(PrC))            
+            error('beta_img has a size different from the PrC mask!');
+        end
         %apply PrC mask
         prc_beta=beta_img(find(PrC));
         features((i-1)*num_trials{i}+j,:)=prc_beta';
@@ -40,7 +44,8 @@ end
 %% process PrC beta maps and event files
 % I'm still getting NaNs in the beta images even without any
 % masking (see template_AvsB.mat, matlabbatch{1,
-% 1}.spm.stats.fmri_spec.mthresh)
+% 1}.spm.stats.fmri_spec.mthresh). These should be voxels
+% outside of FOV with constant timecourse
 % Moreover, the NaNs appear at different locations across
 % runs, indicating registration error.
 
