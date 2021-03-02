@@ -8,7 +8,7 @@ project_derivatives=$2
 output_dir=$3
 suffix="sub-"
 if [ "$4" = 'all' ];then #all the space in [ ] are necessary, fuck bash
-	subs=$(cat ~/scratch/working_dir/PPC_MD/sub_list_test_2mmMotionCor.txt)
+	subs=$(cat /scratch-deleted-2021-mar-20/hyang336/working_dir/PPC_MD/sub_list_test_2mmMotionCor.txt)
 	#subs=$(cut -f 1 $bids_dir/participants.tsv|tail -n +2)
 else
 	subs=$4
