@@ -1,7 +1,7 @@
 %% 2nd level all trial vs. baseline contrast
 
 
-function test_resp_2ndlvl_mean_centered_di(con_dir,output_dir,sublist)
+function test_resp_2ndlvl_allvsnone(con_dir,output_dir,sublist)
 
 %read in subject IDs
 fid=fopen(sublist,'r');
