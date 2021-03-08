@@ -68,7 +68,7 @@ sub_dir=strcat(output,'/repetition_suppression/',sub);
                 %get design onset, duration, conditions, and confound regressors
                 run=regexp(substr.run{j},'run-\d\d_','match');%find corresponding run number to load the events.tsv
                    
-                %this should still work for study phase
+                %% the duration in load_event_test is hard-coded to 2.5, which is only correct for test-phase, but otherwise it should work
                 substr.runevent{j}=load_event_test(project_derivative,sub,task,run,expstart_vol,TR);%store the loaded event files in sub.runevent; sub-xxx, task-xxx_, run-xx
                 %the event output has no headers, they are in order of {'onset','obj_freq','norm_fam','task','duration','resp','RT'};
 
@@ -149,7 +149,7 @@ sub_dir=strcat(output,'/repetition_suppression/',sub);
                 for k=1:length(have_cond)%again the column number here is *hard-coded*
                     matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).name = cond{1,have_cond(k)};
                     matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).onset = cell2mat(cond{2,have_cond(k)}(:,1));
-                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).duration = cell2mat(cond{2,have_cond(k)}(:,5));
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).duration = 1.5; %the duration in load_event_test is hard-coded to 2.5, which is only correct for test-phase
                     % ignore feat_over for now
 %                     matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).tmod = 0;
 %                     matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).pmod = struct('name', 'feat_over', 'param', cell2mat(cond{2,have_cond(k)}(:,8)), 'poly', 1);%the 8th column of a cond cell array is the feat_over para_modulator, using dichotomized value then to result in some conditions having all same feat_over value in a given run, which means the design matrix becomes rank deficient and requiring the contrast vector involving that column to add up to 1.
