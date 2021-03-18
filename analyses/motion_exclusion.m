@@ -1,7 +1,7 @@
 output_dir='C:/Users/haozi/Desktop/PhD/fMRI_PrC-PPC_data/';
-fmriprep_dir='I:/scratch/working_dir/PPC_MD/fmriprep_1.5.4_corrected';
+fmriprep_dir='I:/elusive_scratch/working_dir/PPC_MD/fmriprep_1.5.4_corrected';
 
-fid = fopen('I:/scratch/working_dir/PPC_MD/sub_list.txt');
+fid = fopen('I:/elusive_scratch/working_dir/PPC_MD/sub_list.txt');
 sublist = textscan(fid,'%s');
 fclose(fid);
 sublist=sublist{1,1};
@@ -18,9 +18,12 @@ for a=1:length(sublist)
         for c=1:length(FD)
             FD_array(c,1)=str2double(FD(c,:));
         end
-        FD_over_1=FD_array>2;%2 mm is the voxel size
-        if sum(FD_over_1,1)>0
+        FD_over=FD_array>2;%2 mm is the voxel size
+        if sum(FD_over,1)>0
             Bad_run(a,b)=cellstr(strcat('sub-',s,'_task-',runlist{b}));
+            %now also save the frames that have diplacement
+            %over threshold
+            Bad_run_movement{a,b}=FD_array(FD_over);
         end
         
     end
