@@ -54,7 +54,7 @@ sub_dir=strcat(output,'/test_1stlvl/',sub);
             %analyses/pilot/
             %smooth the unzipped .nii files, return smoothed
             %.nii as 1-by-run cells to a field in substr
-            substr.runsmooth=crapsmoothspm(temp_dir,erase(substr.run,'.gz'),[8 8 8]);
+            substr.runsmooth=crapsmoothspm(temp_dir,erase(substr.run,'.gz'),[4 4 4]);
             
 switch noresp_opt
     case 'regress'
