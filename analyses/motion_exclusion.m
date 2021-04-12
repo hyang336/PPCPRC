@@ -1,7 +1,7 @@
-output_dir='~/elusive_scratch/working_dir/PPC_MD/';
-fmriprep_dir='~/elusive_scratch/working_dir/PPC_MD/fmriprep_1.5.4_corrected';
+output_dir='~/scratch/working_dir/PPC_MD/';
+fmriprep_dir='~/scratch/working_dir/PPC_MD/fmriprep_1.5.4_AROMA';
 
-fid = fopen('~/elusive_scratch/working_dir/PPC_MD/sub_list.txt');
+fid = fopen('~/scratch/working_dir/PPC_MD/sub_list.txt');
 sublist = textscan(fid,'%s');
 fclose(fid);
 sublist=sublist{1,1};
