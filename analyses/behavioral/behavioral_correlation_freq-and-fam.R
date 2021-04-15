@@ -144,7 +144,7 @@ library(dplyr)
 freq.sum=freqavg %>%
   group_by(obj_freq) %>%
   summarise(sub_mean=mean(mean_resp),sub_sd=sd(mean_resp),sub_se=sd(mean_resp)/sqrt(n()))
-freq.bar=ggplot(freq.sum,aes(x=obj_freq,y=sub_mean))+geom_col()+geom_errorbar(aes(ymin=sub_mean-sub_se,ymax=sub_mean+sub_se),width=0.2)+theme(axis.text=element_text(size=(15)),axis.title=element_text(size=(15)))
+freq.bar=ggplot(freq.sum,aes(x=obj_freq,y=sub_mean))+geom_col()+geom_errorbar(aes(ymin=sub_mean-sub_se,ymax=sub_mean+sub_se),width=0.2)+theme(axis.text=element_text(size=(15)),axis.title=element_text(size=(15)))+geom_smooth(data=freq.sum,aes(x = obj_freq, y = sub_mean),method = "lm", se= FALSE, color = "firebrick1", size = 1)
 ggsave(filename='freq_bar.png',path=paste(datapath,'interim_summary\\',sep=''),plot=freq.bar,dpi=300,scale = 0.9)
 
 fam.sum=famavg %>%
