@@ -162,50 +162,73 @@ sub_dir=strcat(output,'/test_1stlvl_softAROMA/',sub);
                 for k=1:numel(fn)
                     masks{k}=ref.(fn{k}).Mask;
                 end
-                %find the index for the first 6 occurance of WM and CSF in masks
+                
+                %find the index for the first 6 occurance of
+                %WM and CSF in masks, also account for the
+                %posssibility that there might be fewer than
+                %6
                 WM_ind=find(cellfun(@(x)strcmp(x,'WM'),masks));
-                WM_1=fn{WM_ind(1)};
-                WM_2=fn{WM_ind(2)};
-                WM_3=fn{WM_ind(3)};
-                WM_4=fn{WM_ind(4)};
-                WM_5=fn{WM_ind(5)};
-                WM_6=fn{WM_ind(6)};
+                if length(WM_ind)>=6
+                    WM_1=fn{WM_ind(1)};
+                    WM_2=fn{WM_ind(2)};
+                    WM_3=fn{WM_ind(3)};
+                    WM_4=fn{WM_ind(4)};
+                    WM_5=fn{WM_ind(5)};
+                    WM_6=fn{WM_ind(6)};
+                    
+                    %add these components as regressors into the
+                    %GLM
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(1).name = 'acomp_WM1';
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(1).val = substr.runconf{j}.(WM_1)(1:end);
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(2).name = 'acomp_WM2';
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(2).val = substr.runconf{j}.(WM_2)(1:end);
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(3).name = 'acomp_WM3';
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(3).val = substr.runconf{j}.(WM_3)(1:end);
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(4).name = 'acomp_WM4';
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(4).val = substr.runconf{j}.(WM_4)(1:end);
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(5).name = 'acomp_WM5';
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(5).val = substr.runconf{j}.(WM_5)(1:end);
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(6).name = 'acomp_WM6';
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(6).val = substr.runconf{j}.(WM_6)(1:end);
+                    
+                    w=6;%how many WM regressors we have
+                else
+                    for w=1:length(WM_ind)
+                        WM=fn{WM_ind(w)};
+                        matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(w).name = strcat('acomp_WM',num2str(w));
+                        matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(w).val = substr.runconf{j}.(WM)(1:end);
+                    end
+                end 
                 
                 CSF_ind=find(cellfun(@(x)strcmp(x,'CSF'),masks));
-                CSF_1=fn{CSF_ind(1)};
-                CSF_2=fn{CSF_ind(2)};
-                CSF_3=fn{CSF_ind(3)};
-                CSF_4=fn{CSF_ind(4)};
-                CSF_5=fn{CSF_ind(5)};
-                CSF_6=fn{CSF_ind(6)};
+                if length(CSF_ind)>=6
+                    CSF_1=fn{CSF_ind(1)};
+                    CSF_2=fn{CSF_ind(2)};
+                    CSF_3=fn{CSF_ind(3)};
+                    CSF_4=fn{CSF_ind(4)};
+                    CSF_5=fn{CSF_ind(5)};
+                    CSF_6=fn{CSF_ind(6)};
+                       
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(w+1).name = 'acomp_CSF1';
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(w+1).val = substr.runconf{j}.(CSF_1)(1:end);
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(w+2).name = 'acomp_CSF2';
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(w+2).val = substr.runconf{j}.(CSF_2)(1:end);
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(w+3).name = 'acomp_CSF3';
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(w+3).val = substr.runconf{j}.(CSF_3)(1:end);
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(w+4).name = 'acomp_CSF4';
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(w+4).val = substr.runconf{j}.(CSF_4)(1:end);
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(w+5).name = 'acomp_CSF5';
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(w+5).val = substr.runconf{j}.(CSF_5)(1:end);
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(w+6).name = 'acomp_CSF6';
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(w+6).val = substr.runconf{j}.(CSF_6)(1:end);                
+                else
+                    for c=1:length(CSF_ind)
+                        CSF=fn{CSF_ind(c)};
+                        matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(w+c).name = strcat('acomp_CSF',num2str(c));
+                        matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(w+c).val = substr.runconf{j}.(CSF)(1:end);
+                    end
+                end
                 
-                %add these components as regressors into the
-                %GLM
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(1).name = 'acomp_WM1';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(1).val = substr.runconf{j}.(WM_1)(1:end);
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(2).name = 'acomp_WM2';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(2).val = substr.runconf{j}.(WM_2)(1:end);
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(3).name = 'acomp_WM3';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(3).val = substr.runconf{j}.(WM_3)(1:end);
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(4).name = 'acomp_WM4';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(4).val = substr.runconf{j}.(WM_4)(1:end);
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(5).name = 'acomp_WM5';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(5).val = substr.runconf{j}.(WM_5)(1:end);
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(6).name = 'acomp_WM6';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(6).val = substr.runconf{j}.(WM_6)(1:end);
-                
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(7).name = 'acomp_CSF1';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(7).val = substr.runconf{j}.(CSF_1)(1:end);
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(8).name = 'acomp_CSF2';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(8).val = substr.runconf{j}.(CSF_2)(1:end);
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(9).name = 'acomp_CSF3';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(9).val = substr.runconf{j}.(CSF_3)(1:end);
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(10).name = 'acomp_CSF4';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(10).val = substr.runconf{j}.(CSF_4)(1:end);
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(11).name = 'acomp_CSF5';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(11).val = substr.runconf{j}.(CSF_5)(1:end);
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(12).name = 'acomp_CSF6';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(12).val = substr.runconf{j}.(CSF_6)(1:end);                
             end
                 
                 %specify run-agnostic fields
