@@ -8,6 +8,8 @@ sublist=sublist{1,1};
 
 runlist={'keyprac_run-01','study_run-01','study_run-02','study_run-03','study_run-04','study_run-05','test_run-01','test_run-02','test_run-03','test_run-04'};
 
+Bad_run=cell(length(sublist),length(runlist));
+Bad_run_movement=cell(length(sublist),length(runlist));
 for a=1:length(sublist)
     s=sublist{a};
 
@@ -28,4 +30,4 @@ for a=1:length(sublist)
         
     end
 end
-save(output_dir,'Bad_run');
+save(strcat(output_dir,'motion.mat'),'Bad_run');
