@@ -150,13 +150,13 @@ ggsave(filename='freq_bar.png',path=paste(datapath,'interim_summary\\',sep=''),p
 fam.sum=famavg %>%
   group_by(norm_fam) %>%
   summarise(sub_mean=mean(mean_resp),sub_sd=sd(mean_resp),sub_se=sd(mean_resp)/sqrt(n()))
-fam.bar=ggplot(fam.sum,aes(x=norm_fam,y=sub_mean))+geom_col()+geom_errorbar(aes(ymin=sub_mean-sub_se,ymax=sub_mean+sub_se),width=0.2)+theme(axis.text=element_text(size=(15)),axis.title=element_text(size=(15)))
+fam.bar=ggplot(fam.sum,aes(x=norm_fam,y=sub_mean))+geom_col()+geom_errorbar(aes(ymin=sub_mean-sub_se,ymax=sub_mean+sub_se),width=0.2)+theme(axis.text=element_text(size=(15)),axis.title=element_text(size=(15)))+geom_smooth(data=fam.sum,aes(x = norm_fam, y = sub_mean),method = "lm", se= FALSE, color = "firebrick1", size = 1)
 ggsave(filename='fam_bar.png',path=paste(datapath,'interim_summary\\',sep=''),plot=fam.bar,dpi=300,scale = 0.9)
 
 postscan.sum=postscanavg %>%
   group_by(norm_fam) %>%
   summarise(sub_mean=mean(mean_resp),sub_sd=sd(mean_resp),sub_se=sd(mean_resp)/sqrt(n()))
-postscan.bar=ggplot(postscan.sum,aes(x=norm_fam,y=sub_mean))+geom_col()+geom_errorbar(aes(ymin=sub_mean-sub_se,ymax=sub_mean+sub_se),width=0.2)+theme(axis.text=element_text(size=(15)),axis.title=element_text(size=(15)))
+postscan.bar=ggplot(postscan.sum,aes(x=norm_fam,y=sub_mean))+geom_col()+geom_errorbar(aes(ymin=sub_mean-sub_se,ymax=sub_mean+sub_se),width=0.2)+theme(axis.text=element_text(size=(15)),axis.title=element_text(size=(15)))+geom_smooth(data=postscan.sum,aes(x = norm_fam, y = sub_mean),method = "lm", se= FALSE, color = "firebrick1", size = 1)
 ggsave(filename='postscan_bar.png',path=paste(datapath,'interim_summary\\',sep=''),plot=postscan.bar,dpi=300,scale = 0.9)
 
 #t-test compare the correlations with normfam between lifetime task and post_scan

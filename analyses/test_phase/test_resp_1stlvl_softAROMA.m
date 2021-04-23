@@ -411,6 +411,21 @@ sub_dir=strcat(output,'/test_1stlvl_softAROMA/',sub);
                 convec(1,recent5_fomod_col)=1/sum_all_mod;
                 matlabbatch{3}.spm.stats.con.consess{7}.tcon.weights = convec;
                 
+                %% main effect of linear increase with recent (for PPC mainly)
+                matlabbatch{3}.spm.stats.con.consess{8}.tcon.name = 'linear inc recent';
+                [~,recent1_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'recent_1*bf(1)'));
+                [~,recent2_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'recent_2*bf(1)'));
+                [~,recent3_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'recent_3*bf(1)'));
+                [~,recent4_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'recent_4*bf(1)'));
+                [~,recent5_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'recent_5*bf(1)'));
+                convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
+                convec(1,recent1_main_col)=-2/length(recent1_main_col);
+                convec(1,recent2_main_col)=-1/length(recent2_main_col);
+                convec(1,recent3_main_col)=0;
+                convec(1,recent4_main_col)=1/length(recent4_main_col);
+                convec(1,recent5_main_col)=2/length(recent5_main_col);
+                matlabbatch{3}.spm.stats.con.consess{8}.tcon.weights = convec;
+                
                 %% 1st lvl results (thresholded)
                 matlabbatch{4}.spm.stats.results.spmmat = {strcat(temp_dir,'SPM.mat')};
                 matlabbatch{4}.spm.stats.results.export{2}.tspm.basename = 'test resp fwe';%for details about threshold and correction, see xxx_template_job.m
