@@ -288,6 +288,8 @@ sub_dir=strcat(output,'/test_1stlvl_softAROMA/',sub);
                 end
                 empty_col=empty_col(~cellfun('isempty',empty_col));%remove the leading empty cell
                 
+                %% sub-020 has a weird contrast issue 
+               if ~strcmp(sub,'sub-020')
                 %% setup lifetime linear main effect. Note that "as long as all of the contrasts are derived from the same GLM model, then you can have as many as you want in a single SPM.mat" ---Suzanne Witt
                 %setup linear contrast for lifetime
                 %conditions
@@ -426,6 +428,76 @@ sub_dir=strcat(output,'/test_1stlvl_softAROMA/',sub);
                 convec(1,recent5_main_col)=2/length(recent5_main_col);
                 matlabbatch{3}.spm.stats.con.consess{8}.tcon.weights = convec;
                 
+                %% main effect of linear decrease with lifetime (for PrC mainly)
+                matlabbatch{3}.spm.stats.con.consess{9}.tcon.name = 'linear dec recent';
+                [~,life1_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_1*bf(1)'));
+                [~,life2_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_2*bf(1)'));
+                [~,life3_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_3*bf(1)'));
+                [~,life4_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_4*bf(1)'));
+                [~,life5_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_5*bf(1)'));
+                convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
+                convec(1,life1_main_col)=2/length(life1_main_col);
+                convec(1,life2_main_col)=1/length(life2_main_col);
+                convec(1,life3_main_col)=0;
+                convec(1,life4_main_col)=-1/length(life4_main_col);
+                convec(1,life5_main_col)=-2/length(life5_main_col);
+                matlabbatch{3}.spm.stats.con.consess{9}.tcon.weights = convec;
+               else
+                %% setup lifetime linear main effect. Note that "as long as all of the contrasts are derived from the same GLM model, then you can have as many as you want in a single SPM.mat" ---Suzanne Witt
+                %setup linear contrast for lifetime
+                %conditions
+                matlabbatch{3}.spm.stats.con.spmmat = {strcat(temp_dir,'SPM.mat')};
+                matlabbatch{3}.spm.stats.con.consess{1}.tcon.name = 'linear inc lifetime';
+                %use spmmat.SPM.xX.name header to find the
+                %right columns
+                [~,life1_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_1*bf(1)'));
+                [~,life2_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_2*bf(1)'));
+                [~,life3_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_3*bf(1)'));
+                [~,life4_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_4*bf(1)'));
+                [~,life5_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_5*bf(1)'));
+                convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
+                convec(1,life1_main_col)=-2/length(life1_main_col);
+                convec(1,life2_main_col)=-1/length(life2_main_col);
+                convec(1,life3_main_col)=0;
+                convec(1,life4_main_col)=1/length(life4_main_col);
+                convec(1,life5_main_col)=2/length(life5_main_col);
+                matlabbatch{3}.spm.stats.con.consess{1}.tcon.weights = convec;
+                
+                %% recent linear main contrast (put it in a different consess)
+                matlabbatch{3}.spm.stats.con.consess{2}.tcon.name = 'linear dec recent';
+                [~,recent1_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'recent_1*bf(1)'));
+                [~,recent2_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'recent_2*bf(1)'));
+                [~,recent3_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'recent_3*bf(1)'));
+                [~,recent4_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'recent_4*bf(1)'));
+                [~,recent5_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'recent_5*bf(1)'));
+                convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
+                convec(1,recent1_main_col)=2/length(recent1_main_col);
+                convec(1,recent2_main_col)=1/length(recent2_main_col);
+                convec(1,recent3_main_col)=0;
+                convec(1,recent4_main_col)=-1/length(recent4_main_col);
+                convec(1,recent5_main_col)=-2/length(recent5_main_col);
+                matlabbatch{3}.spm.stats.con.consess{2}.tcon.weights = convec;
+                
+                %% main effect of linear increase with recent (for PPC mainly)
+                matlabbatch{3}.spm.stats.con.consess{3}.tcon.name = 'linear inc recent';
+                convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
+                convec(1,recent1_main_col)=-2/length(recent1_main_col);
+                convec(1,recent2_main_col)=-1/length(recent2_main_col);
+                convec(1,recent3_main_col)=0;
+                convec(1,recent4_main_col)=1/length(recent4_main_col);
+                convec(1,recent5_main_col)=2/length(recent5_main_col);
+                matlabbatch{3}.spm.stats.con.consess{3}.tcon.weights = convec;
+                
+                %% main effect of linear decrease with lifetime (for PrC mainly)
+                matlabbatch{3}.spm.stats.con.consess{4}.tcon.name = 'linear dec recent';
+                convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
+                convec(1,life1_main_col)=2/length(life1_main_col);
+                convec(1,life2_main_col)=1/length(life2_main_col);
+                convec(1,life3_main_col)=0;
+                convec(1,life4_main_col)=-1/length(life4_main_col);
+                convec(1,life5_main_col)=-2/length(life5_main_col);
+                matlabbatch{3}.spm.stats.con.consess{4}.tcon.weights = convec;
+               end
                 %% 1st lvl results (thresholded)
                 matlabbatch{4}.spm.stats.results.spmmat = {strcat(temp_dir,'SPM.mat')};
                 matlabbatch{4}.spm.stats.results.export{2}.tspm.basename = 'test resp fwe';%for details about threshold and correction, see xxx_template_job.m

@@ -20,6 +20,8 @@ spm('defaults', 'FMRI');
 spm_jobman('initcfg');
 
 %% contrast image are:
+% ###sub-020 only has contrast 0001,0002,0008(numbered as 0003),and 0009(numbered as 0004)###
+
 % 0001: lifetime linear inc main effect
 % 0002: recent linear dec main effect
 % 0003: lifetime linear inc para_moded
@@ -27,6 +29,8 @@ spm_jobman('initcfg');
 % 0005: feat_over main effect in lifetime trials
 % 0006: feat_over main effect in recent trials
 % 0007: feat_over main effect in all trials
+% 0008: recent linear inc main effect
+% 0009: lifetime linear dec main effect
 
 % To test whether parametric modulation effect (interaction)
 % is significant, we need to use the tmaps to compare
