@@ -3,7 +3,7 @@ output_dir='~/scratch/working_dir/PPC_MD';
 fmriprep_dir='~/scratch/working_dir/PPC_MD/fmriprep_1.5.4_AROMA';
 ASHS_dir='~/scratch/working_dir/PPC_MD/ASHS_raw2';
 
-fid = fopen('~/scratch/working_dir/PPC_MD/sub_list_test_libmotion.txt');
+fid = fopen('~/scratch/working_dir/PPC_MD/sub_list_libmotion.txt');
 sublist = textscan(fid,'%s');
 fclose(fid);
 sublist=sublist{1,1};
