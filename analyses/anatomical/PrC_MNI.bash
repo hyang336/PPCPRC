@@ -2,7 +2,7 @@
 
 #The PrC mask generated this way is not very good and covers some hippocampal tissues in some participants. But it is usable
 
-for s in 001 002 003 004 005 006 007 008 011 012 013 014 016 017 018 019 020 021 022 024 095 026 027 028 029 030 031 032; do
+for s in 001 002 003 004 005 006 007 008 011 012 013 014 015 016 017 018 019 020 021 022 023 024 095 026 027 028 029 030 031 032; do
 #register the PrC mask to MNI space using the .h5 file produced by fMRIprep
 neuroglia antsApplyTransforms -i /scratch/hyang336/working_dir/PPC_MD/ASHS_raw2/sub-"${s}"/final/sub-"${s}"_both_lfseg_heur.nii.gz -r /scratch/hyang336/working_dir/PPC_MD/fmriprep_1.5.4_AROMA/fmriprep/sub-"${s}"/anat/sub-"${s}"_space-MNI152NLin6Asym_desc-preproc_T1w.nii.gz -o /scratch/hyang336/working_dir/PPC_MD/ASHS_raw2/sub-"${s}"/final/sub-"${s}"_both_lfseg_heur_MNINLin6.nii -n NearestNeighbor -t /scratch/hyang336/working_dir/PPC_MD/fmriprep_1.5.4_AROMA/fmriprep/sub-"${s}"/anat/sub-"${s}"_from-T1w_to-MNI152NLin6Asym_mode-image_xfm.h5
 
@@ -19,7 +19,7 @@ cp /scratch/hyang336/working_dir/PPC_MD/ASHS_raw2/sub-001/final/sub-001_PRC_MNIN
 gzip /scratch/hyang336/working_dir/PPC_MD/masks/sum_PRC_MNINLin6_resampled.nii
 #get the union(sum) of all PrC masks in MNI space
 out_file=/scratch/hyang336/working_dir/PPC_MD/masks/sum_PRC_MNINLin6_resampled.nii.gz
-for s in 001 002 003 004 005 006 007 008 011 012 013 014 016 017 018 019 020 021 022 024 095 026 027 028 029 030 031 032; do
+for s in 001 002 003 004 005 006 007 008 011 012 013 014 015 016 017 018 019 020 021 022 023 024 095 026 027 028 029 030 031 032; do
   neuroglia fslmaths $out_file -add /scratch/hyang336/working_dir/PPC_MD/ASHS_raw2/sub-"${s}"/final/sub-"${s}"_PRC_MNINLin6_resampled.nii $out_file
 done  
 
