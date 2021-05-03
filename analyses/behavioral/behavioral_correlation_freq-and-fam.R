@@ -14,6 +14,15 @@ x <- c("pearson_R","SSID","task")
 colnames(freq_frame) <- x
 fam_frame=freq_frame
 postscan_frame=freq_frame
+freqpost_frame=freq_frame
+normobjfreq_frame=freq_frame
+freqnorm_frame=freq_frame
+objfreqpostscan_frame=freq_frame
+
+#create empty frame to store response counts in each task
+trialcount_frame=data.frame(matrix(ncol=11,nrow=length(ss_list)))
+x=c("SSID","freq1_count","freq2_count","freq3_count","freq4_count","freq5_count","fam1_count","fam2_count","fam3_count","fam4_count","fam5_count")
+colnames(trialcount_frame)=x
 
 #creat empty dataframes to store the mean resp for each level of freq and fam for each ss
 freqavg=data.frame(matrix(ncol=3,nrow=length(ss_list)*5))
@@ -49,6 +58,7 @@ data_postscan=data[data$task=="post_scan",]
 #calculate normfam for frequency items to be compared with post_scan response
 data_freq.match=data_freq[match(data_postscan$Stimuli,data_freq$Stimuli),]#match item order
 data_postscan$norm_fam=data_freq.match$norm_fam
+data_postscan$objective_freq=data_freq.match$objective_freq
 norm_fam_freq_qt=quantcut(data_postscan$norm_fam,q=5,labels=FALSE)
 data_postscan$norm_fam_qt=norm_fam_freq_qt
 #cut the normative fam ratings into 5 levels
@@ -101,24 +111,67 @@ famRTavg$mean_RT[5*(i-1)+3]=mean(as.numeric(data_fam$RespTime[data_fam$Response=
 famRTavg$mean_RT[5*(i-1)+4]=mean(as.numeric(data_fam$RespTime[data_fam$Response==4]),na.rm=TRUE)
 famRTavg$mean_RT[5*(i-1)+5]=mean(as.numeric(data_fam$RespTime[data_fam$Response==5]),na.rm=TRUE)
 
-#correlation
+##########################trial counts/scale usage#####################
+trialcount_frame$freq1_count[i]=sum(as.numeric(data_freq$Response)==1,na.rm = TRUE)
+trialcount_frame$freq2_count[i]=sum(as.numeric(data_freq$Response)==2,na.rm = TRUE)
+trialcount_frame$freq3_count[i]=sum(as.numeric(data_freq$Response)==3,na.rm = TRUE)
+trialcount_frame$freq4_count[i]=sum(as.numeric(data_freq$Response)==4,na.rm = TRUE)
+trialcount_frame$freq5_count[i]=sum(as.numeric(data_freq$Response)==5,na.rm = TRUE)
+trialcount_frame$fam1_count[i]=sum(as.numeric(data_fam$Response)==1,na.rm = TRUE)
+trialcount_frame$fam2_count[i]=sum(as.numeric(data_fam$Response)==2,na.rm = TRUE)
+trialcount_frame$fam3_count[i]=sum(as.numeric(data_fam$Response)==3,na.rm = TRUE)
+trialcount_frame$fam4_count[i]=sum(as.numeric(data_fam$Response)==4,na.rm = TRUE)
+trialcount_frame$fam5_count[i]=sum(as.numeric(data_fam$Response)==5,na.rm = TRUE)
+
+trialcount_frame$SSID[i]=ss_list[i]
+##############################correlation#####################
 corr_freq=corr.test(as.numeric(data_freq$Response),data_freq$objective_freq,method="pearson")
 freq_frame$SSID[i]=ss_list[i]
 freq_frame$task[i]="recent"
 freq_frame$pearson_R[i]=corr_freq[1]
+
 corr_fam=corr.test(as.numeric(data_fam$Response),data_fam$norm_fam,method="pearson")
 fam_frame$SSID[i]=ss_list[i]
 fam_frame$task[i]="lifetime"
 fam_frame$pearson_R[i]=corr_fam[1]
+
 corr_postscan=corr.test(as.numeric(data_postscan$Response),data_postscan$norm_fam,method="pearson")
 postscan_frame$SSID[i]=ss_list[i]
 postscan_frame$task[i]="post_scan"
 postscan_frame$pearson_R[i]=corr_postscan[1]
+
+#also correlate freq judgement with post-scan lifetime (useful in determining whether to model them in the same GLM)
+corr_freqpost=corr.test(as.numeric(data_freq.match$Response),as.numeric(data_postscan$Response),method="pearson")
+freqpost_frame$SSID[i]=ss_list[i]
+freqpost_frame$task[i]="freq_and_postscan"
+freqpost_frame$pearson_R[i]=corr_freqpost[1]
+
+#and the correlation between normfam and objective frequency 
+corr_normobjfreq=corr.test(as.numeric(data_postscan$objective_freq),as.numeric(data_postscan$norm_fam),method="pearson")
+normobjfreq_frame$SSID[i]=ss_list[i]
+normobjfreq_frame$task[i]="N/A"
+normobjfreq_frame$pearson_R[i]=corr_normobjfreq[1]
+
+#aaaaand the correlation between frequency response and normfam
+corr_freqnorm=corr.test(as.numeric(data_freq$norm_fam),as.numeric(data_freq$Response),method="pearson")
+freqnorm_frame$SSID[i]=ss_list[i]
+freqnorm_frame$task[i]="freq"
+freqnorm_frame$pearson_R[i]=corr_freqnorm[1]
+
+
+#AAAAAAAND the correlation between postscan judgement and objective frequency (should be nonsignificant if they are doing the task)
+corr_objfreqpostscan=corr.test(as.numeric(data_postscan$objective_freq),as.numeric(data_postscan$Response),method="pearson")
+objfreqpostscan_frame$SSID[i]=ss_list[i]
+objfreqpostscan_frame$task[i]="postscan"
+objfreqpostscan_frame$pearson_R[i]=corr_objfreqpostscan[1]
 }
 
 fam_frame$pearson_R=as.numeric(fam_frame$pearson_R)
 freq_frame$pearson_R=as.numeric(freq_frame$pearson_R)
 postscan_frame$pearson_R=as.numeric(postscan_frame$pearson_R)
+
+
+######################plots#######################
 bsize=0.1
 library(ggplot2)
 #generate ggplots, using ERP data as background
@@ -182,4 +235,32 @@ famRT.sum=famRTavg %>%
   summarise(sub_mean_RT=mean(mean_RT),sub_sd=sd(mean_RT),sub_se=sd(mean_RT)/sqrt(n()))
 famRT.bar=ggplot(famRT.sum,aes(x=resp,y=sub_mean_RT))+geom_col()+geom_errorbar(aes(ymin=sub_mean_RT-sub_se,ymax=sub_mean_RT+sub_se),width=0.2)+theme(axis.text=element_text(size=(15)),axis.title=element_text(size=(15)))
 ggsave(filename='famRT_bar.png',path=paste(datapath,'interim_summary\\',sep=''),plot=famRT.bar,dpi=300,scale = 0.9)
+
+######response histogram#######
+library(ggpubr)
+library(tidyr)
+#convert to long
+trialcount_frame_long=gather(trialcount_frame,"trial_type","trial_count",-SSID)
+#use shorter trial type labels
+trialcount_frame_long$trial_type[trialcount_frame_long$trial_type=="freq1_count"]='r1'
+trialcount_frame_long$trial_type[trialcount_frame_long$trial_type=="freq2_count"]='r2'
+trialcount_frame_long$trial_type[trialcount_frame_long$trial_type=="freq3_count"]='r3'
+trialcount_frame_long$trial_type[trialcount_frame_long$trial_type=="freq4_count"]='r4'
+trialcount_frame_long$trial_type[trialcount_frame_long$trial_type=="freq5_count"]='r5'
+trialcount_frame_long$trial_type[trialcount_frame_long$trial_type=="fam1_count"]='l1'
+trialcount_frame_long$trial_type[trialcount_frame_long$trial_type=="fam2_count"]='l2'
+trialcount_frame_long$trial_type[trialcount_frame_long$trial_type=="fam3_count"]='l3'
+trialcount_frame_long$trial_type[trialcount_frame_long$trial_type=="fam4_count"]='l4'
+trialcount_frame_long$trial_type[trialcount_frame_long$trial_type=="fam5_count"]='l5'
+histolist=list()
+#loop over subjects to generate freq and fam histogram
+for (i in c(1:length(ss_list))){
+  chunk=trialcount_frame_long[trialcount_frame_long$SSID==ss_list[i],]
+  p = ggplot(data=chunk, aes(x=trial_type, y=trial_count)) +
+    geom_bar(stat='identity')+theme(axis.title.x = element_blank())
+  histolist[[i]] = p
+}
+histo_collect=ggarrange(plotlist=histolist, 
+          labels = ss_list,font.label = list(size = 15),hjust=-1.5,vjust=0.75)
+histo_collect
 

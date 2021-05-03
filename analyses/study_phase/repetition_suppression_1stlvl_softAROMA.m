@@ -1,21 +1,18 @@
-%% generating constrast of repetition suppression in the study phase using presentation 1, 2, and 3
-%% if we use one t-contrast, then the contrast weight for the 2nd presentation would be 0 (i.e. [1 0 -1])
-%% which means it doesn't matter what betas the 2nd presentations have. So we are specifying two binary contrasts
-%% testing pres_1 vs. pres_2, and pres_2 vs. pres_3.
+%% generating constrast of repetition suppression in the study phase using 1st and 2nd presentations
 
 %% F-contrast are non-directional (i.e. they only test the difference between two conditions, not which one has higher activation)
 %% We can construct a directional OR test with conjunction analyses on multiple t-contrasts using the "global null" option in conjunction analysis
 %% And we can construct a directional AND test with conjunction analyses with the "conjunction null" option
 %% See Friston et al. (2005) "Conjunction revisited"
 
-function repetition_suppression_1stlvl(project_derivative,output,sub,expstart_vol,fmriprep_foldername,TR,maskfile)
+function repetition_suppression_1stlvl_softAROMA(project_derivative,output,sub,expstart_vol,fmriprep_foldername,TR,maskfile)
     
 %(i.e. if there are 4 dummy scans, the experiment starts at the 5th
 %TR/trigger/volume). In this version every participant in every run has to have the same number of
 %dummy scans. 
 
 %sub needs to be in the format of 'sub-xxx'
-sub_dir=strcat(output,'/repetition_suppression/',sub);
+sub_dir=strcat(output,'/repetition_suppression_softAROMA/',sub);
 
 %% step 1 generate alltrial regressor and noise regressor
         %assume BIDS folder structure
@@ -30,7 +27,7 @@ sub_dir=strcat(output,'/repetition_suppression/',sub);
         temp_dir=strcat(sub_dir,'/temp/');
         
         %% 20200208 all subjects now have consistent task names, thus the if statement is no longer needed
-        runkey=fullfile(strcat(project_derivative,'/',fmriprep_foldername,'/fmriprep/',sub,'/func/'),'*study*_space-MNI152*preproc*.nii.gz');
+        runkey=fullfile(strcat(project_derivative,'/',fmriprep_foldername,'/fmriprep/',sub,'/func/'),'*study*_space-MNI152*smoothAROMAnonaggr*.nii.gz');
 
         runfile=dir(runkey);
         substr=struct();
@@ -47,7 +44,7 @@ sub_dir=strcat(output,'/repetition_suppression/',sub);
         %analyses/pilot/
         %smooth the unzipped .nii files, return smoothed
         %.nii as 1-by-run cells to a field in substr
-        substr.runsmooth=crapsmoothspm(temp_dir,erase(substr.run,'.gz'),[8 8 8]);
+        substr.runsmooth=crapsmoothspm(temp_dir,erase(substr.run,'.gz'),[4 4 4]);
 
 
         %make the matlabbatch struct outside of the run-loop since it has separate
@@ -156,19 +153,8 @@ sub_dir=strcat(output,'/repetition_suppression/',sub);
 %                     matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).orth = 1;
                 end
                 
-                %always have 6 motion regressors
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(1).name = 'x_move';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(1).val = substr.runconf{j}.trans_x(1:end);%2020-07-15 dummy scans now corrected in trial onsets
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(2).name = 'y_move';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(2).val = substr.runconf{j}.trans_y(1:end);
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(3).name = 'z_move';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(3).val = substr.runconf{j}.trans_z(1:end);
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(4).name = 'x_rot';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(4).val = substr.runconf{j}.rot_x(1:end);
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(5).name = 'y_rot';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(5).val = substr.runconf{j}.rot_y(1:end);
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(6).name = 'z_rot';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(6).val = substr.runconf{j}.rot_z(1:end);
+                %no longer include motion regressors since
+                %the ICA should have taken care of that
                 
                 %6 acompcor for WM and CSF, this part
                 %assumes that the confounds in the json
@@ -204,31 +190,31 @@ sub_dir=strcat(output,'/repetition_suppression/',sub);
                 
                 %add these components as regressors into the
                 %GLM
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(7).name = 'acomp_WM1';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(7).val = substr.runconf{j}.(WM_1)(1:end);
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(8).name = 'acomp_WM2';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(8).val = substr.runconf{j}.(WM_2)(1:end);
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(9).name = 'acomp_WM3';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(9).val = substr.runconf{j}.(WM_3)(1:end);
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(10).name = 'acomp_WM4';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(10).val = substr.runconf{j}.(WM_4)(1:end);
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(11).name = 'acomp_WM5';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(11).val = substr.runconf{j}.(WM_5)(1:end);
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(12).name = 'acomp_WM6';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(12).val = substr.runconf{j}.(WM_6)(1:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(1).name = 'acomp_WM1';
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(1).val = substr.runconf{j}.(WM_1)(1:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(2).name = 'acomp_WM2';
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(2).val = substr.runconf{j}.(WM_2)(1:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(3).name = 'acomp_WM3';
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(3).val = substr.runconf{j}.(WM_3)(1:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(4).name = 'acomp_WM4';
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(4).val = substr.runconf{j}.(WM_4)(1:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(5).name = 'acomp_WM5';
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(5).val = substr.runconf{j}.(WM_5)(1:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(6).name = 'acomp_WM6';
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(6).val = substr.runconf{j}.(WM_6)(1:end);
                 
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(13).name = 'acomp_CSF1';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(13).val = substr.runconf{j}.(CSF_1)(1:end);
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(14).name = 'acomp_CSF2';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(14).val = substr.runconf{j}.(CSF_2)(1:end);
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(15).name = 'acomp_CSF3';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(15).val = substr.runconf{j}.(CSF_3)(1:end);
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(16).name = 'acomp_CSF4';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(16).val = substr.runconf{j}.(CSF_4)(1:end);
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(17).name = 'acomp_CSF5';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(17).val = substr.runconf{j}.(CSF_5)(1:end);
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(18).name = 'acomp_CSF6';
-                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(18).val = substr.runconf{j}.(CSF_6)(1:end);                
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(7).name = 'acomp_CSF1';
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(7).val = substr.runconf{j}.(CSF_1)(1:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(8).name = 'acomp_CSF2';
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(8).val = substr.runconf{j}.(CSF_2)(1:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(9).name = 'acomp_CSF3';
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(9).val = substr.runconf{j}.(CSF_3)(1:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(10).name = 'acomp_CSF4';
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(10).val = substr.runconf{j}.(CSF_4)(1:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(11).name = 'acomp_CSF5';
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(11).val = substr.runconf{j}.(CSF_5)(1:end);
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(12).name = 'acomp_CSF6';
+                matlabbatch{1}.spm.stats.fmri_spec.sess(j).regress(12).val = substr.runconf{j}.(CSF_6)(1:end);                
             end
                 
                 %specify run-agnostic fields
@@ -271,30 +257,27 @@ sub_dir=strcat(output,'/repetition_suppression/',sub);
                 
                 matlabbatch{3}.spm.stats.con.consess{1}.tcon.weights = convec;
                 
-                %% pres_2 vs. pres_3 t-contrast
-                matlabbatch{3}.spm.stats.con.consess{2}.tcon.name = 'pres_2 > pres_3';
-                
-                [~,pres3_col]=find(contains(spmmat.SPM.xX.name(1,:),'pres_3*bf(1)'));
+                %% pres_1 simple t-contrast
+                matlabbatch{3}.spm.stats.con.consess{2}.tcon.name = 'pres_1';
                 
                 convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
-                convec(1,pres2_col)=1/length(pres2_col);
-                convec(1,pres3_col)=-1/length(pres3_col);
+                convec(1,pres1_col)=1/length(pres1_col);
                 
                 matlabbatch{3}.spm.stats.con.consess{2}.tcon.weights = convec;
                 
-                %% 1st lvl results (thresholded)
-                matlabbatch{4}.spm.stats.results.spmmat = {strcat(temp_dir,'SPM.mat')};
-                matlabbatch{4}.spm.stats.results.export{2}.tspm.basename = 'repetition suppression fwe';%for details about threshold and correction, see xxx_template_job.m
-                %first contrast
-                matlabbatch{4}.spm.stats.results.conspec(1).titlestr = 'pres_1>pres_2 fwe';
-                matlabbatch{4}.spm.stats.results.conspec(1).contrasts = 1;               
-                %second contrast
-                matlabbatch{4}.spm.stats.results.conspec(2).titlestr = 'pres_2>pres_3 fwe';
-                matlabbatch{4}.spm.stats.results.conspec(2).contrasts = 2;               
+                %% pres_2 simple t_contrast
+                matlabbatch{3}.spm.stats.con.consess{3}.tcon.name = 'pres_2';
+                
+                convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
+                convec(1,pres2_col)=1/length(pres2_col);
+                
+                matlabbatch{3}.spm.stats.con.consess{3}.tcon.weights = convec;
+                
+                            
             
             
             %run the contrast and thresholding jobs
-            spm_jobman('run',matlabbatch(3:4));
+            spm_jobman('run',matlabbatch(3));
            
 
 end

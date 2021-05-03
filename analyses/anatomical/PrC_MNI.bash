@@ -25,3 +25,6 @@ done
 
 #binarize again
 neuroglia fslmaths ~/scratch/working_dir/PPC_MD/masks/sum_PRC_MNINLin6_resampled.nii.gz -thr 0 -bin ~/scratch/working_dir/PPC_MD/masks/bin_sum_PRC_MNINLin6_resampled.nii.gz
+
+#unzip to be used in SPM
+gzip -d ~/scratch/working_dir/PPC_MD/masks/bin_sum_PRC_MNINLin6_resampled.nii.gz

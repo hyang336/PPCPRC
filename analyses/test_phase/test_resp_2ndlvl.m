@@ -3,7 +3,7 @@
 %running this
 
 
-function test_resp_2ndlvl(con_dir,output_dir,sublist,contrast)
+function test_resp_2ndlvl(con_dir,output_dir,sublist,contrast,maskfile)
 
 %read in subject IDs
 fid=fopen(sublist,'r');
@@ -62,6 +62,7 @@ switch contrast
         end
         matlabbatch{1}.spm.stats.factorial_design.dir = {strcat(output_dir,'/lifetime_main')};%specify
         matlabbatch{1}.spm.stats.factorial_design.des.t1.scans = file_cell;
+        matlabbatch{1}.spm.stats.factorial_design.masking.em = {maskfile};
         matlabbatch{2}.spm.stats.fmri_est.spmmat = {strcat(output_dir,'/lifetime_main/SPM.mat')};%estimate
         matlabbatch{3}.spm.stats.con.spmmat = {strcat(output_dir,'/lifetime_main/SPM.mat')};%contrast
         matlabbatch{3}.spm.stats.con.consess{1}.tcon.name = 'lifetime_main';
@@ -81,6 +82,7 @@ switch contrast
         end
         matlabbatch{1}.spm.stats.factorial_design.dir = {strcat(output_dir,'/recent_main')};%specify
         matlabbatch{1}.spm.stats.factorial_design.des.t1.scans = file_cell;
+        matlabbatch{1}.spm.stats.factorial_design.masking.em = {maskfile};
         matlabbatch{2}.spm.stats.fmri_est.spmmat = {strcat(output_dir,'/recent_main/SPM.mat')};%estimate
         matlabbatch{3}.spm.stats.con.spmmat = {strcat(output_dir,'/recent_main/SPM.mat')};%contrast
         matlabbatch{3}.spm.stats.con.consess{1}.tcon.name = 'recent_main';
@@ -101,6 +103,7 @@ switch contrast
             matlabbatch{1}.spm.stats.factorial_design.des.pt.pair(i).scans=file_cell(i,:)';
         end
         matlabbatch{1}.spm.stats.factorial_design.dir = {strcat(output_dir,'/lifetime_pmod')};%specify
+        matlabbatch{1}.spm.stats.factorial_design.masking.em = {maskfile};
         matlabbatch{2}.spm.stats.fmri_est.spmmat = {strcat(output_dir,'/lifetime_pmod/SPM.mat')};%estimate
         matlabbatch{3}.spm.stats.con.spmmat = {strcat(output_dir,'/lifetime_pmod/SPM.mat')};%contrast
         matlabbatch{3}.spm.stats.con.consess{1}.tcon.name = 'lifetime_pmod';
@@ -121,6 +124,7 @@ switch contrast
             matlabbatch{1}.spm.stats.factorial_design.des.pt.pair(i).scans=file_cell(i,:)';
         end
         matlabbatch{1}.spm.stats.factorial_design.dir = {strcat(output_dir,'/recent_pmod')};%specify
+        matlabbatch{1}.spm.stats.factorial_design.masking.em = {maskfile};
         matlabbatch{2}.spm.stats.fmri_est.spmmat = {strcat(output_dir,'/recent_pmod/SPM.mat')};%estimate
         matlabbatch{3}.spm.stats.con.spmmat = {strcat(output_dir,'/recent_pmod/SPM.mat')};%contrast
         matlabbatch{3}.spm.stats.con.consess{1}.tcon.name = 'recent_pmod';
