@@ -56,14 +56,14 @@ for i=1:length(SSID)
     file_cell{i,2}=strcat(con_dir,'/sub-',SSID{i,1},'/temp/con_0003.nii');
     matlabbatch{1}.spm.stats.factorial_design.des.pt.pair(i).scans=file_cell(i,:)';
 end
-matlabbatch{1}.spm.stats.factorial_design.dir = {strcat(output_dir,'/pres1v2_diff')};%specify
-matlabbatch{1}.spm.stats.factorial_design.masking.em = {maskfile};
-matlabbatch{2}.spm.stats.fmri_est.spmmat = {strcat(output_dir,'/pres1v2_diff/SPM.mat')};%estimate
-matlabbatch{3}.spm.stats.con.spmmat = {strcat(output_dir,'/pres1v2_diff/SPM.mat')};%contrast
-matlabbatch{3}.spm.stats.con.consess{1}.tcon.name = 'pres_1>pres_2_diff';
-matlabbatch{3}.spm.stats.con.consess{1}.tcon.weights = [1,-1];
-matlabbatch{4}.spm.stats.results.spmmat = {strcat(output_dir,'/pres1v2_diff/SPM.mat')};%threshold
-matlabbatch{4}.spm.stats.results.conspec(1).titlestr = 'pres_1>pres_2_diff';
+matlabbatch{5}.spm.stats.factorial_design.dir = {strcat(output_dir,'/pres1v2_diff')};%specify
+matlabbatch{5}.spm.stats.factorial_design.masking.em = {maskfile};
+matlabbatch{6}.spm.stats.fmri_est.spmmat = {strcat(output_dir,'/pres1v2_diff/SPM.mat')};%estimate
+matlabbatch{7}.spm.stats.con.spmmat = {strcat(output_dir,'/pres1v2_diff/SPM.mat')};%contrast
+matlabbatch{7}.spm.stats.con.consess{1}.tcon.name = 'pres_1>pres_2_diff';
+matlabbatch{7}.spm.stats.con.consess{1}.tcon.weights = [1,-1];
+matlabbatch{8}.spm.stats.results.spmmat = {strcat(output_dir,'/pres1v2_diff/SPM.mat')};%threshold
+matlabbatch{8}.spm.stats.results.conspec(1).titlestr = 'pres_1>pres_2_diff';
 
 spm_jobman('run',matlabbatch);
 
