@@ -36,4 +36,4 @@ for a=1:length(sublist)
         tSNR_res{a+1,b+1}=PrC_tSNR;
     end
 end
-save(strcat(output_dir,'tSNR_after_motionEX.mat'),'tSNR_res');
+save(strcat(output_dir,'/tSNR_after_motionEX.mat'),'tSNR_res');
