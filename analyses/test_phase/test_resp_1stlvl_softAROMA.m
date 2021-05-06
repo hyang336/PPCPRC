@@ -429,7 +429,7 @@ sub_dir=strcat(output,'/test_1stlvl_softAROMA/',sub);
                 matlabbatch{3}.spm.stats.con.consess{8}.tcon.weights = convec;
                 
                 %% main effect of linear decrease with lifetime (for PrC mainly)
-                matlabbatch{3}.spm.stats.con.consess{9}.tcon.name = 'linear dec recent';
+                matlabbatch{3}.spm.stats.con.consess{9}.tcon.name = 'linear dec lifetime';
                 [~,life1_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_1*bf(1)'));
                 [~,life2_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_2*bf(1)'));
                 [~,life3_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_3*bf(1)'));
@@ -489,7 +489,7 @@ sub_dir=strcat(output,'/test_1stlvl_softAROMA/',sub);
                 matlabbatch{3}.spm.stats.con.consess{3}.tcon.weights = convec;
                 
                 %% main effect of linear decrease with lifetime (for PrC mainly)
-                matlabbatch{3}.spm.stats.con.consess{4}.tcon.name = 'linear dec recent';
+                matlabbatch{3}.spm.stats.con.consess{4}.tcon.name = 'linear dec lifetime';
                 convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
                 convec(1,life1_main_col)=2/length(life1_main_col);
                 convec(1,life2_main_col)=1/length(life2_main_col);
