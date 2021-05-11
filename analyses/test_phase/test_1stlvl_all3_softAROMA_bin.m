@@ -95,11 +95,21 @@ sub_dir=strcat(output,'/test_1stlvl_all3_softAROMA_bin/',sub);
                 %trials
                 [o,l]=ismember(freq_trials(:,10),substr.postscan(:,6));%find stimuli                
                 freq_trials(:,11)=substr.postscan(l,11);%fill in post-scan ratings
-                
-                lifetime_irr_low=freq_trials(cellfun(@(x)x=='1'||x=='2',freq_trials(:,11)),:);
-                lifetime_irr_mid=freq_trials(cellfun(@(x)x=='3',freq_trials(:,11)),:);
-                lifetime_irr_high=freq_trials(cellfun(@(x)x=='4'||x=='5',freq_trials(:,11)),:);
-                
+                if ~ismember(sub,{'sub-005','sub-020','sub-022'})
+                    %if not these 3 subjects, use postscan
+                    %ratings
+                    lifetime_irr_low=freq_trials(cellfun(@(x)x=='1'||x=='2',freq_trials(:,11)),:);
+                    lifetime_irr_mid=freq_trials(cellfun(@(x)x=='3',freq_trials(:,11)),:);
+                    lifetime_irr_high=freq_trials(cellfun(@(x)x=='4'||x=='5',freq_trials(:,11)),:);
+                else
+                    %otherwise use normative ratings
+                    %since it is on 9-point scale, below 3.6
+                    %is considered low, and above 5.4 is
+                    %considered high (5 quntiles)
+                    lifetime_irr_low=freq_trials(cellfun(@(x)x<=3.6,freq_trials(:,3)),:);
+                    lifetime_irr_mid=freq_trials(cellfun(@(x)x>3.6&&x<=5.4,freq_trials(:,3)),:);
+                    lifetime_irr_high=freq_trials(cellfun(@(x)x>5.4,freq_trials(:,3)),:);
+                end
                 %column 8 and column 9 are the raw and dichotomous feat_over to be
                 %used as parametric modulator, respectively
                 recent_low=freq_trials(cellfun(@(x)x=='1'||x=='2',freq_trials(:,6)),:);
@@ -490,15 +500,15 @@ sub_dir=strcat(output,'/test_1stlvl_all3_softAROMA_bin/',sub);
                 [~,life_irr_high_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_irr_high*bf(1)'));
                 matlabbatch{3}.spm.stats.con.consess{5}.tcon.name = 'high>low lifetime irr';
                 convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
-                convec(1,life_irr_low_main_col)=1/length(life_irr_low_main_col);
-                convec(1,life_irr_high_main_col)=-1/length(life_irr_high_main_col);
+                convec(1,life_irr_low_main_col)=-1/length(life_irr_low_main_col);
+                convec(1,life_irr_high_main_col)=1/length(life_irr_high_main_col);
 
                 matlabbatch{3}.spm.stats.con.consess{5}.tcon.weights = convec;
                 %% main effect of low>high dec-irr lifetime
-                matlabbatch{3}.spm.stats.con.consess{6}.tcon.name = 'high>low lifetime irr';
+                matlabbatch{3}.spm.stats.con.consess{6}.tcon.name = 'low>high lifetime irr';
                 convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
-                convec(1,life_irr_low_main_col)=-1/length(life_irr_low_main_col);
-                convec(1,life_irr_high_main_col)=1/length(life_irr_high_main_col);
+                convec(1,life_irr_low_main_col)=1/length(life_irr_low_main_col);
+                convec(1,life_irr_high_main_col)=-1/length(life_irr_high_main_col);
 
                 matlabbatch{3}.spm.stats.con.consess{6}.tcon.weights = convec;
 %                end

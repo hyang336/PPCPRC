@@ -20,8 +20,8 @@ freqnorm_frame=freq_frame
 objfreqpostscan_frame=freq_frame
 
 #create empty frame to store response counts in each task
-trialcount_frame=data.frame(matrix(ncol=11,nrow=length(ss_list)))
-x=c("SSID","freq1_count","freq2_count","freq3_count","freq4_count","freq5_count","fam1_count","fam2_count","fam3_count","fam4_count","fam5_count")
+trialcount_frame=data.frame(matrix(ncol=16,nrow=length(ss_list)))
+x=c("SSID","freq1_count","freq2_count","freq3_count","freq4_count","freq5_count","fam1_count","fam2_count","fam3_count","fam4_count","fam5_count","pscan1_count","pscan2_count","pscan3_count","pscan4_count","pscan5_count")
 colnames(trialcount_frame)=x
 
 #creat empty dataframes to store the mean resp for each level of freq and fam for each ss
@@ -122,6 +122,11 @@ trialcount_frame$fam2_count[i]=sum(as.numeric(data_fam$Response)==2,na.rm = TRUE
 trialcount_frame$fam3_count[i]=sum(as.numeric(data_fam$Response)==3,na.rm = TRUE)
 trialcount_frame$fam4_count[i]=sum(as.numeric(data_fam$Response)==4,na.rm = TRUE)
 trialcount_frame$fam5_count[i]=sum(as.numeric(data_fam$Response)==5,na.rm = TRUE)
+trialcount_frame$pscan1_count[i]=sum(as.numeric(data_postscan$Response)==1,na.rm = TRUE)
+trialcount_frame$pscan2_count[i]=sum(as.numeric(data_postscan$Response)==2,na.rm = TRUE)
+trialcount_frame$pscan3_count[i]=sum(as.numeric(data_postscan$Response)==3,na.rm = TRUE)
+trialcount_frame$pscan4_count[i]=sum(as.numeric(data_postscan$Response)==4,na.rm = TRUE)
+trialcount_frame$pscan5_count[i]=sum(as.numeric(data_postscan$Response)==5,na.rm = TRUE)
 
 trialcount_frame$SSID[i]=ss_list[i]
 ##############################correlation#####################

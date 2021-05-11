@@ -273,8 +273,23 @@ sub_dir=strcat(output,'/repetition_suppression_softAROMA/',sub);
                 
                 matlabbatch{3}.spm.stats.con.consess{3}.tcon.weights = convec;
                 
-                            
-            
+                %% pres_1 > pres_7,8,&9            
+                matlabbatch{3}.spm.stats.con.spmmat = {strcat(temp_dir,'SPM.mat')};
+                matlabbatch{3}.spm.stats.con.consess{4}.tcon.name = 'pres_1 > pres_789';
+                %use spmmat.SPM.xX.name header to find the
+                %right columns
+                [~,pres1_col]=find(contains(spmmat.SPM.xX.name(1,:),'pres_1*bf(1)'));
+                [~,pres7_col]=find(contains(spmmat.SPM.xX.name(1,:),'pres_7*bf(1)'));
+                [~,pres8_col]=find(contains(spmmat.SPM.xX.name(1,:),'pres_8*bf(1)'));
+                [~,pres9_col]=find(contains(spmmat.SPM.xX.name(1,:),'pres_9*bf(1)'));
+                
+                convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
+                convec(1,pres1_col)=1/length(pres1_col);
+                convec(1,pres7_col)=-1/(3*length(pres7_col));
+                convec(1,pres8_col)=-1/(3*length(pres8_col));
+                convec(1,pres9_col)=-1/(3*length(pres9_col));
+                
+                matlabbatch{3}.spm.stats.con.consess{4}.tcon.weights = convec;
             
             %run the contrast and thresholding jobs
             spm_jobman('run',matlabbatch(3));

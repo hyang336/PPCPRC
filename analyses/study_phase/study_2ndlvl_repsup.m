@@ -65,6 +65,21 @@ matlabbatch{7}.spm.stats.con.consess{1}.tcon.weights = [1,-1];
 matlabbatch{8}.spm.stats.results.spmmat = {strcat(output_dir,'/pres1v2_diff/SPM.mat')};%threshold
 matlabbatch{8}.spm.stats.results.conspec(1).titlestr = 'pres_1>pres_2_diff';
 
+% main effect pres_1>pres_789 as one simple t-test
+file_cell=cell(0,1);
+for i=1:length(SSID)
+    file_cell{i,1}=strcat(con_dir,'/sub-',SSID{i,1},'/temp/con_0004.nii');
+end
+matlabbatch{9}.spm.stats.factorial_design.dir = {strcat(output_dir,'/pres1v789_simple')};%specify
+matlabbatch{9}.spm.stats.factorial_design.des.t1.scans = file_cell;
+matlabbatch{9}.spm.stats.factorial_design.masking.em = {maskfile};
+matlabbatch{10}.spm.stats.fmri_est.spmmat = {strcat(output_dir,'/pres1v789_simple/SPM.mat')};%estimate
+matlabbatch{11}.spm.stats.con.spmmat = {strcat(output_dir,'/pres1v789_simple/SPM.mat')};%contrast
+matlabbatch{11}.spm.stats.con.consess{1}.tcon.name = 'pres_1>pres_789_simple';
+matlabbatch{11}.spm.stats.con.consess{1}.tcon.weights = 1;
+matlabbatch{12}.spm.stats.results.spmmat = {strcat(output_dir,'/pres1v789_simple/SPM.mat')};%threshold
+matlabbatch{12}.spm.stats.results.conspec(1).titlestr = 'pres_1>pres_789_simple';
+
 spm_jobman('run',matlabbatch);
 
 end
