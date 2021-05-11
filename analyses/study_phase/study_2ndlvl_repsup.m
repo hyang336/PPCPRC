@@ -22,7 +22,9 @@ end
 if ~exist(strcat(output_dir,'/pres1v2_diff'),'dir')
     mkdir (output_dir,'pres1v2_diff');
 end
-
+if ~exist(strcat(output_dir,'/pres1v789_simple'),'dir')
+    mkdir (output_dir,'pres1v789_simple');
+end
 
 %initil setup for SPM
 spm('defaults', 'FMRI');
