@@ -1,18 +1,8 @@
-%% generating constrast of repetition suppression in the study phase using 1st and 2nd presentations
+%% one design matrix for dec-rele and dec-irrele lifetime and recent exposure effects
 
-%% F-contrast are non-directional (i.e. they only test the difference between two conditions, not which one has higher activation)
-%% We can construct a directional OR test with conjunction analyses on multiple t-contrasts using the "global null" option in conjunction analysis
-%% And we can construct a directional AND test with conjunction analyses with the "conjunction null" option
-%% See Friston et al. (2005) "Conjunction revisited"
-
-function repetition_suppression_1stlvl_softAROMA(project_derivative,output,sub,expstart_vol,fmriprep_foldername,TR,maskfile)
-    
-%(i.e. if there are 4 dummy scans, the experiment starts at the 5th
-%TR/trigger/volume). In this version every participant in every run has to have the same number of
-%dummy scans. 
-
+function studytest_1stlvl_softAROMA_bin(project_derivative,output,sub,expstart_vol,fmriprep_foldername,TR,maskfile)
 %sub needs to be in the format of 'sub-xxx'
-sub_dir=strcat(output,'/repetition_suppression_softAROMA/',sub);
+sub_dir=strcat(output,'/studytest_1stlvl_softAROMA/',sub);
 
 %% step 1 generate alltrial regressor and noise regressor
         %assume BIDS folder structure
@@ -26,12 +16,15 @@ sub_dir=strcat(output,'/repetition_suppression_softAROMA/',sub);
         output_dir=strcat(sub_dir,'/output/');
         temp_dir=strcat(sub_dir,'/temp/');
         
-        %% 20200208 all subjects now have consistent task names, thus the if statement is no longer needed
-        runkey=fullfile(strcat(project_derivative,'/',fmriprep_foldername,'/fmriprep/',sub,'/func/'),'*study*_space-MNI152*smoothAROMAnonaggr*.nii.gz');
-
-        runfile=dir(runkey);
+        %% find both study and test runs
+        runkey_study=fullfile(strcat(project_derivative,'/',fmriprep_foldername,'/fmriprep/',sub,'/func/'),'*study*_space-MNI152*smoothAROMAnonaggr*.nii.gz');
+        runfile_study=dir(runkey_study);        
         substr=struct();
-        substr.run=extractfield(runfile,'name');
+        substr.run=extractfield(runfile_study,'name');
+        runkey_test=fullfile(strcat(project_derivative,'/',fmriprep_foldername,'/fmriprep/',sub,'/func/'),'*test*_space-MNI152*smoothAROMAnonaggr*.nii.gz');
+        runfile_test=dir(runkey_test); 
+        substr.run=[substr.run,extractfield(runfile_test,'name')];
+        
         substr.id=sub;
 
         %unzip the nii.gz files into the temp directory
@@ -45,15 +38,16 @@ sub_dir=strcat(output,'/repetition_suppression_softAROMA/',sub);
         %smooth the unzipped .nii files, return smoothed
         %.nii as 1-by-run cells to a field in substr
         substr.runsmooth=crapsmoothspm(temp_dir,erase(substr.run,'.gz'),[4 4 4]);
-
-
+        
         %make the matlabbatch struct outside of the run-loop since it has separate
         %fields for each run
-        study_1stlvl_repetition_suppression_job;%initialized matlabbatch template MUST HAVE ALL THE NECESSARY FIELDS
-
-        %record which condtions each run has, useful for specifying design matrix at
-        %the end
-        runbycond=cell(length(substr.run),45);%maximam 45 condtions (5 bins with presentation number 1 to 9) that may differ between runs.
+        studytest_1stlvl_softAROMA_job;%initialized matlabbatch template MUST HAVE ALL THE NECESSARY FIELDS
+        %load post-scan beh
+        [~,~,raw]=xlsread(strcat(project_derivative,'/behavioral/',sub,'/',erase(sub,'sub-'),'_task-pscan_data.xlsx'));
+        substr.postscan=raw;
+%         %record which condtions each run has, useful for specifying design matrix at
+%         %the end (depreciated)
+%         runbycond=cell(length(substr.run),45);%maximam 45 condtions (5 bins with presentation number 1, 3, 5, 7, 9) that may differ between runs.
             
             %loop through runs
             for j=1:length(substr.run)
@@ -69,45 +63,57 @@ sub_dir=strcat(output,'/repetition_suppression_softAROMA/',sub);
                 substr.runevent{j}=load_event_test(project_derivative,sub,task,run,expstart_vol,TR);%store the loaded event files in sub.runevent; sub-xxx, task-xxx_, run-xx
                 %the event output has no headers, they are in order of {'onset','obj_freq','norm_fam','task','duration','resp','RT'};
 
-                %% 20210306 the obj_freq column is numeric
-                %conditions are difined on the number of
-                %presentation of a trial, regardless of
-                %total number of presentations
-                pres_1=substr.runevent{j}(cellfun(@(x) x==11,substr.runevent{j}(:,2))|cellfun(@(x) x==31,substr.runevent{j}(:,2))|cellfun(@(x) x==51,substr.runevent{j}(:,2))|cellfun(@(x) x==71,substr.runevent{j}(:,2))|cellfun(@(x) x==91,substr.runevent{j}(:,2)),:);
-                pres_2=substr.runevent{j}(cellfun(@(x) x==32,substr.runevent{j}(:,2))|cellfun(@(x) x==52,substr.runevent{j}(:,2))|cellfun(@(x) x==72,substr.runevent{j}(:,2))|cellfun(@(x) x==92,substr.runevent{j}(:,2)),:);
-                pres_3=substr.runevent{j}(cellfun(@(x) x==33,substr.runevent{j}(:,2))|cellfun(@(x) x==53,substr.runevent{j}(:,2))|cellfun(@(x) x==73,substr.runevent{j}(:,2))|cellfun(@(x) x==93,substr.runevent{j}(:,2)),:);
-                pres_4=substr.runevent{j}(cellfun(@(x) x==54,substr.runevent{j}(:,2))|cellfun(@(x) x==74,substr.runevent{j}(:,2))|cellfun(@(x) x==94,substr.runevent{j}(:,2)),:);
-                pres_5=substr.runevent{j}(cellfun(@(x) x==55,substr.runevent{j}(:,2))|cellfun(@(x) x==75,substr.runevent{j}(:,2))|cellfun(@(x) x==95,substr.runevent{j}(:,2)),:);
-                pres_6=substr.runevent{j}(cellfun(@(x) x==76,substr.runevent{j}(:,2))|cellfun(@(x) x==96,substr.runevent{j}(:,2)),:);
-                pres_7=substr.runevent{j}(cellfun(@(x) x==77,substr.runevent{j}(:,2))|cellfun(@(x) x==97,substr.runevent{j}(:,2)),:);
-                pres_8=substr.runevent{j}(cellfun(@(x) x==98,substr.runevent{j}(:,2)),:);
-                pres_9=substr.runevent{j}(cellfun(@(x) x==99,substr.runevent{j}(:,2)),:);
-%                 trail_11=substr.runevent{j}(cellfun(@(x) x==11,substr.runevent{j}(:,2)),:);
-%                 trail_31=substr.runevent{j}(cellfun(@(x) x==31,substr.runevent{j}(:,2)),:);
-%                 trail_51=substr.runevent{j}(cellfun(@(x) x==51,substr.runevent{j}(:,2)),:);
-%                 trail_71=substr.runevent{j}(cellfun(@(x) x==71,substr.runevent{j}(:,2)),:);
-%                 trail_91=substr.runevent{j}(cellfun(@(x) x==91,substr.runevent{j}(:,2)),:);
-%                 trail_32=substr.runevent{j}(cellfun(@(x) x==32,substr.runevent{j}(:,2)),:);
-%                 trail_52=substr.runevent{j}(cellfun(@(x) x==52,substr.runevent{j}(:,2)),:);
-%                 trail_72=substr.runevent{j}(cellfun(@(x) x==72,substr.runevent{j}(:,2)),:);
-%                 trail_92=substr.runevent{j}(cellfun(@(x) x==92,substr.runevent{j}(:,2)),:);
-%                 trail_33=substr.runevent{j}(cellfun(@(x) x==33,substr.runevent{j}(:,2)),:);
-%                 trail_53=substr.runevent{j}(cellfun(@(x) x==53,substr.runevent{j}(:,2)),:);
-%                 trail_73=substr.runevent{j}(cellfun(@(x) x==73,substr.runevent{j}(:,2)),:);
-%                 trail_93=substr.runevent{j}(cellfun(@(x) x==93,substr.runevent{j}(:,2)),:);
-%                 trail_54=substr.runevent{j}(cellfun(@(x) x==54,substr.runevent{j}(:,2)),:);
-%                 trail_74=substr.runevent{j}(cellfun(@(x) x==74,substr.runevent{j}(:,2)),:);
-%                 trail_94=substr.runevent{j}(cellfun(@(x) x==94,substr.runevent{j}(:,2)),:);
-%                 trail_55=substr.runevent{j}(cellfun(@(x) x==55,substr.runevent{j}(:,2)),:);
-%                 trail_75=substr.runevent{j}(cellfun(@(x) x==75,substr.runevent{j}(:,2)),:);
-%                 trail_95=substr.runevent{j}(cellfun(@(x) x==95,substr.runevent{j}(:,2)),:);
-%                 trail_76=substr.runevent{j}(cellfun(@(x) x==76,substr.runevent{j}(:,2)),:);
-%                 trail_96=substr.runevent{j}(cellfun(@(x) x==96,substr.runevent{j}(:,2)),:);
-%                 trail_77=substr.runevent{j}(cellfun(@(x) x==77,substr.runevent{j}(:,2)),:);
-%                 trail_97=substr.runevent{j}(cellfun(@(x) x==97,substr.runevent{j}(:,2)),:);
-%                 trail_98=substr.runevent{j}(cellfun(@(x) x==98,substr.runevent{j}(:,2)),:);
-%                 trail_99=substr.runevent{j}(cellfun(@(x) x==99,substr.runevent{j}(:,2)),:);
-          
+                %% find different conditions
+                if contains(task,'study')%study phase
+                    pres_1=substr.runevent{j}(cellfun(@(x) x==11,substr.runevent{j}(:,2))|cellfun(@(x) x==31,substr.runevent{j}(:,2))|cellfun(@(x) x==51,substr.runevent{j}(:,2))|cellfun(@(x) x==71,substr.runevent{j}(:,2))|cellfun(@(x) x==91,substr.runevent{j}(:,2)),:);
+                    pres_2=substr.runevent{j}(cellfun(@(x) x==32,substr.runevent{j}(:,2))|cellfun(@(x) x==52,substr.runevent{j}(:,2))|cellfun(@(x) x==72,substr.runevent{j}(:,2))|cellfun(@(x) x==92,substr.runevent{j}(:,2)),:);
+                    pres_3=substr.runevent{j}(cellfun(@(x) x==33,substr.runevent{j}(:,2))|cellfun(@(x) x==53,substr.runevent{j}(:,2))|cellfun(@(x) x==73,substr.runevent{j}(:,2))|cellfun(@(x) x==93,substr.runevent{j}(:,2)),:);
+                    pres_4=substr.runevent{j}(cellfun(@(x) x==54,substr.runevent{j}(:,2))|cellfun(@(x) x==74,substr.runevent{j}(:,2))|cellfun(@(x) x==94,substr.runevent{j}(:,2)),:);
+                    pres_5=substr.runevent{j}(cellfun(@(x) x==55,substr.runevent{j}(:,2))|cellfun(@(x) x==75,substr.runevent{j}(:,2))|cellfun(@(x) x==95,substr.runevent{j}(:,2)),:);
+                    pres_6=substr.runevent{j}(cellfun(@(x) x==76,substr.runevent{j}(:,2))|cellfun(@(x) x==96,substr.runevent{j}(:,2)),:);
+                    pres_7=substr.runevent{j}(cellfun(@(x) x==77,substr.runevent{j}(:,2))|cellfun(@(x) x==97,substr.runevent{j}(:,2)),:);
+                    pres_8=substr.runevent{j}(cellfun(@(x) x==98,substr.runevent{j}(:,2)),:);
+                    pres_9=substr.runevent{j}(cellfun(@(x) x==99,substr.runevent{j}(:,2)),:);
+                elseif contains(task,'test')%test phase
+                    %no response trials
+                    noresp=substr.runevent{j}(cellfun(@(x)isnan(x),substr.runevent{j}(:,6)),:);
+                    resptrials=substr.runevent{j}(~cellfun(@(x)isnan(x),substr.runevent{j}(:,6)),:);
+                    %pull out all columns in the current run's
+                    %event file
+                    freq_trials=resptrials(strcmp(resptrials(:,4),'recent'),:);
+                    fam_trials=resptrials(strcmp(resptrials(:,4),'lifetime'),:);                
+
+                    %use post-scan ratings to mark frequency
+                    %trials
+                    [o,l]=ismember(freq_trials(:,10),substr.postscan(:,6));%find stimuli                
+                    freq_trials(:,11)=substr.postscan(l,11);%fill in post-scan ratings
+                    if ~ismember(sub,{'sub-005','sub-020','sub-022'})
+                        %if not these 3 subjects, use postscan
+                        %ratings
+                        lifetime_irr_low=freq_trials(cellfun(@(x)x=='1'||x=='2',freq_trials(:,11)),:);
+                        lifetime_irr_mid=freq_trials(cellfun(@(x)x=='3',freq_trials(:,11)),:);
+                        lifetime_irr_high=freq_trials(cellfun(@(x)x=='4'||x=='5',freq_trials(:,11)),:);
+                    else
+                        %otherwise use normative ratings
+                        %since it is on 9-point scale, below 3.6
+                        %is considered low, and above 5.4 is
+                        %considered high (5 quntiles)
+                        lifetime_irr_low=freq_trials(cellfun(@(x)x<=3.6,freq_trials(:,3)),:);
+                        lifetime_irr_mid=freq_trials(cellfun(@(x)x>3.6&&x<=5.4,freq_trials(:,3)),:);
+                        lifetime_irr_high=freq_trials(cellfun(@(x)x>5.4,freq_trials(:,3)),:);
+                    end
+                    %column 8 and column 9 are the raw and dichotomous feat_over to be
+                    %used as parametric modulator, respectively
+                    recent_low=freq_trials(cellfun(@(x)x=='1'||x=='2',freq_trials(:,6)),:);
+                    recent_mid=freq_trials(cellfun(@(x)x=='3',freq_trials(:,6)),:);
+                    recent_high=freq_trials(cellfun(@(x)x=='4'||x=='5',freq_trials(:,6)),:);
+
+                    lifetime_low=fam_trials(cellfun(@(x)x=='1'||x=='2',fam_trials(:,6)),:);
+                    lifetime_mid=fam_trials(cellfun(@(x)x=='3',fam_trials(:,6)),:);
+                    lifetime_high=fam_trials(cellfun(@(x)x=='4'||x=='5',fam_trials(:,6)),:);
+                end
+                
+                %load confunds
                 conf_name=strcat(project_derivative,'/',fmriprep_foldername,'/fmriprep/',sub,'/func/',sub,'_',task{1},run{1},'*confound*.tsv');%use task{1} and run{1} since it's iteratively defined
                 confstruct=dir(conf_name);
                 conffile=strcat(confstruct.folder,'/',confstruct.name);
@@ -127,18 +133,25 @@ sub_dir=strcat(output,'/repetition_suppression_softAROMA/',sub);
                 
                  %% since the 9th presentations are unlikely to happen in the first run, we need to account for this in our design matrix
                 %an indicator for which condition is missing in a given run
-                cond={'pres_1','pres_2','pres_3','pres_4','pres_5','pres_6','pres_7','pres_8','pres_9';pres_1,pres_2,pres_3,pres_4,pres_5,pres_6,pres_7,pres_8,pres_9};
-                [~,have_cond]=find(cellfun(@(x)~isempty(x),cond(2,:)));
-                miss_cond=find(cellfun(@(x)isempty(x),cond(2,:)));
-                remove_cond=length(miss_cond);%num of cond to be removed from matlabbatch
-                
-                %record condition order for each run
-                runbycond(j,1:length(have_cond))=cond(1,have_cond);
+                if contains(task,'study')
+                    cond={'pres_1','pres_2','pres_3','pres_4','pres_5','pres_6','pres_7','pres_8','pres_9';pres_1,pres_2,pres_3,pres_4,pres_5,pres_6,pres_7,pres_8,pres_9};
+                    [~,have_cond]=find(cellfun(@(x)~isempty(x),cond(2,:)));
+                    miss_cond=find(cellfun(@(x)isempty(x),cond(2,:)));
+                    remove_cond=length(miss_cond);%num of cond to be removed from matlabbatch
+                elseif contains(task,'test')
+                    cond={'recent_low','recent_mid','recent_high','lifetime_low','lifetime_mid','lifetime_high','lifetime_irr_low','lifetime_irr_mid','lifetime_irr_high','noresp';recent_low,recent_mid,recent_high,lifetime_low,lifetime_mid,lifetime_high,lifetime_irr_low,lifetime_irr_mid,lifetime_irr_high,noresp};
+                    [~,have_cond]=find(cellfun(@(x)~isempty(x),cond(2,:)));
+                    miss_cond=find(cellfun(@(x)isempty(x),cond(2,:)));
+                    remove_cond=length(miss_cond);
+                end
+%                 %record condition order for each run
+%                 (depreciated)
+%                 runbycond(j,1:length(have_cond))=cond(1,have_cond);
 
                 %specify the run-specific matlabbatch fields, "sess" means run in SPM
                 %need to account for missing conditions also in job_temlate.m
                 matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(end-remove_cond+1:end)=[];%adjust number of conditions in a given run
-                
+                %assign nii images to matlabbatch
                 matlabbatch{1}.spm.stats.fmri_spec.sess(j).scans = sliceinfo;
                 
                 %loop through conitions in a run to fill the
@@ -146,11 +159,14 @@ sub_dir=strcat(output,'/repetition_suppression_softAROMA/',sub);
                 for k=1:length(have_cond)%again the column number here is *hard-coded*
                     matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).name = cond{1,have_cond(k)};
                     matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).onset = cell2mat(cond{2,have_cond(k)}(:,1));
-                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).duration = 1.5; %the duration in load_event_test is hard-coded to 2.5, which is only correct for test-phase
-                    % ignore feat_over for now
-%                     matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).tmod = 0;
-%                     matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).pmod = struct('name', 'feat_over', 'param', cell2mat(cond{2,have_cond(k)}(:,8)), 'poly', 1);%the 8th column of a cond cell array is the feat_over para_modulator, using dichotomized value then to result in some conditions having all same feat_over value in a given run, which means the design matrix becomes rank deficient and requiring the contrast vector involving that column to add up to 1.
-%                     matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).orth = 1;
+                    if contains(task,'study')
+                        matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).duration = 1.5; %the duration in load_event_test is hard-coded to 2.5, which is only correct for test-phase
+                    elseif contains(task,'test')
+                        matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).duration = cell2mat(cond{2,have_cond(k)}(:,5));
+                    end
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).tmod = 0;
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).pmod = struct('name', {}, 'param', {}, 'poly', {});
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).orth = 1;
                 end
                 
                 %no longer include motion regressors since
@@ -233,7 +249,7 @@ sub_dir=strcat(output,'/repetition_suppression_softAROMA/',sub);
             
             %run here to generate SPM.mat
             spm_jobman('run',matlabbatch(1:2));
-%% load SPM.mat and use the design matrix info to define contrasts
+%% load SPM.mat and use the design matrix info to define contrasts, using t-contrasts to get the linear combination of betas, then use F-test on 2nd-lvl
                 spmmat=load(strcat(temp_dir,'SPM.mat'));
                 
                 %hopefully the column headers are
@@ -241,58 +257,77 @@ sub_dir=strcat(output,'/repetition_suppression_softAROMA/',sub);
                 %the below lines should return a single
                 %number each
               
-                %% setup pres_1 vs. pres_2 t-contrast
+                %% setup main effect of presentation frequency (high 789 vs. low 1 in study and high 45 vs low 12 in test)
                 %setup linear contrast for lifetime
                 %conditions
                 matlabbatch{3}.spm.stats.con.spmmat = {strcat(temp_dir,'SPM.mat')};
-                matlabbatch{3}.spm.stats.con.consess{1}.tcon.name = 'pres_1 > pres_2';
-                %use spmmat.SPM.xX.name header to find the
-                %right columns
-                [~,pres1_col]=find(contains(spmmat.SPM.xX.name(1,:),'pres_1*bf(1)'));
-                [~,pres2_col]=find(contains(spmmat.SPM.xX.name(1,:),'pres_2*bf(1)'));
-                
-                convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
-                convec(1,pres1_col)=1/length(pres1_col);
-                convec(1,pres2_col)=-1/length(pres2_col);
-                
-                matlabbatch{3}.spm.stats.con.consess{1}.tcon.weights = convec;
-                
-                %% pres_1 simple t-contrast
-                matlabbatch{3}.spm.stats.con.consess{2}.tcon.name = 'pres_1';
-                
-                convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
-                convec(1,pres1_col)=1/length(pres1_col);
-                
-                matlabbatch{3}.spm.stats.con.consess{2}.tcon.weights = convec;
-                
-                %% pres_2 simple t_contrast
-                matlabbatch{3}.spm.stats.con.consess{3}.tcon.name = 'pres_2';
-                
-                convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
-                convec(1,pres2_col)=1/length(pres2_col);
-                
-                matlabbatch{3}.spm.stats.con.consess{3}.tcon.weights = convec;
-                
-                %% pres_1 > pres_7,8,&9            
-                matlabbatch{3}.spm.stats.con.spmmat = {strcat(temp_dir,'SPM.mat')};
-                matlabbatch{3}.spm.stats.con.consess{4}.tcon.name = 'pres_1 > pres_789';
+                matlabbatch{3}.spm.stats.con.consess{1}.tcon.name = 'recent_main_l-h';
                 %use spmmat.SPM.xX.name header to find the
                 %right columns
                 [~,pres1_col]=find(contains(spmmat.SPM.xX.name(1,:),'pres_1*bf(1)'));
                 [~,pres7_col]=find(contains(spmmat.SPM.xX.name(1,:),'pres_7*bf(1)'));
                 [~,pres8_col]=find(contains(spmmat.SPM.xX.name(1,:),'pres_8*bf(1)'));
                 [~,pres9_col]=find(contains(spmmat.SPM.xX.name(1,:),'pres_9*bf(1)'));
+                [~,recent_low_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'recent_low*bf(1)'));
+                [~,recent_high_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'recent_high*bf(1)'));
                 
                 convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
                 convec(1,pres1_col)=1/length(pres1_col);
+                convec(1,recent_low_main_col)=1/length(recent_low_main_col);
+                
                 convec(1,pres7_col)=-1/(3*length(pres7_col));
                 convec(1,pres8_col)=-1/(3*length(pres8_col));
                 convec(1,pres9_col)=-1/(3*length(pres9_col));
+                convec(1,recent_high_main_col)=-1/length(recent_high_main_col);
+                matlabbatch{3}.spm.stats.con.consess{1}.tcon.weights = convec;
+                
+                %% setup main effect of lifetime familiarity (dec-rele and dec-irrele in test phase)
+                matlabbatch{3}.spm.stats.con.consess{2}.tcon.name = 'lifetime_main_h-l';
+                
+                [~,life_low_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_low*bf(1)'));
+                [~,life_high_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_high*bf(1)'));
+                [~,life_irr_low_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_irr_low*bf(1)'));
+                [~,life_irr_high_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_irr_high*bf(1)'));
+                
+                convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
+                convec(1,life_low_main_col)=-1/length(life_low_main_col);                
+                convec(1,life_irr_low_main_col)=-1/length(life_irr_low_main_col);
+                
+                convec(1,life_high_main_col)=1/length(life_high_main_col);
+                convec(1,life_irr_high_main_col)=1/length(life_irr_high_main_col);
+                
+                matlabbatch{3}.spm.stats.con.consess{2}.tcon.weights = convec;
+                
+                %% setup interaction between dec-relevance and frequency
+                matlabbatch{3}.spm.stats.con.consess{3}.tcon.name = 'dec-rele(phase/task) x recent exposure';
+                
+                convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
+                convec(1,pres1_col)=-1/length(pres1_col);
+                               
+                convec(1,pres7_col)=1/(3*length(pres7_col));
+                convec(1,pres8_col)=1/(3*length(pres8_col));
+                convec(1,pres9_col)=1/(3*length(pres9_col));
+                
+                convec(1,recent_low_main_col)=1/length(recent_low_main_col);
+                
+                convec(1,recent_high_main_col)=-1/length(recent_high_main_col);
+                
+                matlabbatch{3}.spm.stats.con.consess{3}.tcon.weights = convec;
+                
+                %% setup interaction between dec-relevance and lifetime familiarity          
+                matlabbatch{3}.spm.stats.con.consess{4}.tcon.name = 'dec-rele(task) x lifetime exposure';
+                
+                convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
+                convec(1,life_low_main_col)=-1/length(life_low_main_col);                
+                
+                convec(1,life_high_main_col)=1/length(life_high_main_col);
+                
+                convec(1,life_irr_low_main_col)=1/length(life_irr_low_main_col);
+                
+                convec(1,life_irr_high_main_col)=-1/length(life_irr_high_main_col);
                 
                 matlabbatch{3}.spm.stats.con.consess{4}.tcon.weights = convec;
             
             %run the contrast and thresholding jobs
             spm_jobman('run',matlabbatch(3));
-           
-
 end
