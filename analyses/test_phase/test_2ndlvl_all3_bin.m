@@ -92,6 +92,26 @@ switch contrast
         matlabbatch{4}.spm.stats.results.spmmat = {strcat(output_dir,'/lifetime_irr_h-l/SPM.mat')};%threshold
         matlabbatch{4}.spm.stats.results.conspec(1).titlestr = 'lifetime_irr_h-l';
 
+        case 'recent_h-l'
+        %load job template
+        test_resp_2ndlvl_job_indi_singleT;
+
+        if ~exist(strcat(output_dir,'/recent_h-l'),'dir')
+            mkdir (output_dir,'recent_h-l');
+        end
+        file_cell=cell(0,1);
+        for i=1:length(SSID)
+            file_cell{i,1}=strcat(con_dir,'/sub-',SSID{i,1},'/temp/con_0003.nii');
+        end
+        matlabbatch{1}.spm.stats.factorial_design.dir = {strcat(output_dir,'/recent_h-l')};%specify
+        matlabbatch{1}.spm.stats.factorial_design.des.t1.scans = file_cell;
+        matlabbatch{1}.spm.stats.factorial_design.masking.em = {maskfile};
+        matlabbatch{2}.spm.stats.fmri_est.spmmat = {strcat(output_dir,'/recent_h-l/SPM.mat')};%estimate
+        matlabbatch{3}.spm.stats.con.spmmat = {strcat(output_dir,'/recent_h-l/SPM.mat')};%contrast
+        matlabbatch{3}.spm.stats.con.consess{1}.tcon.name = 'recent_h-l';
+        matlabbatch{3}.spm.stats.con.consess{1}.tcon.weights = 1;
+        matlabbatch{4}.spm.stats.results.spmmat = {strcat(output_dir,'/recent_h-l/SPM.mat')};%threshold
+        matlabbatch{4}.spm.stats.results.conspec(1).titlestr = 'recent_h-l';
 end
 
 spm_jobman('run',matlabbatch);
