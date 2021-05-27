@@ -1,5 +1,5 @@
 %% not binning conditions(responses), replace recent with lifetime_irr(postscan)
-function test_1stlvl_postscan_softAROMA_bin(project_derivative,output,sub,expstart_vol,fmriprep_foldername,TR,maskfile)
+function test_1stlvl_postscan_softAROMA(project_derivative,output,sub,expstart_vol,fmriprep_foldername,TR,maskfile)
 %(i.e. if there are 4 dummy scans, the experiment starts at the 5th
 %TR/trigger/volume). In this version every participant in every run has to have the same number of
 %dummy scans. 
@@ -54,7 +54,7 @@ sub_dir=strcat(output,'/test_1stlvl_postscan_softAROMA/',sub);
             
             %record which condtions each run has, useful for specifying design matrix at
             %the end
-            runbycond=cell(length(substr.run),16);%maximam 16 condtions (5 levels in each of the 3 tasks + noresp) that may differ between runs.
+            runbycond=cell(length(substr.run),11);%maximam 11 condtions per run
             %load post-scan ratings
             [~,~,raw]=xlsread(strcat(project_derivative,'/behavioral/',sub,'/',erase(sub,'sub-'),'_task-pscan_data.xlsx'));
             substr.postscan=raw;
@@ -111,14 +111,7 @@ sub_dir=strcat(output,'/test_1stlvl_postscan_softAROMA/',sub);
                     lifetime_irr_4=freq_trials(cellfun(@(x)x>6.07&&x<=7.51,freq_trials(:,3)),:);
                     lifetime_irr_5=freq_trials(cellfun(@(x)x>7.51,freq_trials(:,3)),:);
                 end
-                %column 8 and column 9 are the raw and dichotomous feat_over to be
-                %used as parametric modulator, respectively
-                recent_1=freq_trials(cellfun(@(x)x=='1',freq_trials(:,6)),:);
-                recent_2=freq_trials(cellfun(@(x)x=='2',freq_trials(:,6)),:);
-                recent_3=freq_trials(cellfun(@(x)x=='3',freq_trials(:,6)),:);
-                recent_4=freq_trials(cellfun(@(x)x=='4',freq_trials(:,6)),:);
-                recent_5=freq_trials(cellfun(@(x)x=='5',freq_trials(:,6)),:);
-
+               
                 lifetime_1=fam_trials(cellfun(@(x)x=='1',fam_trials(:,6)),:);
                 lifetime_2=fam_trials(cellfun(@(x)x=='2',fam_trials(:,6)),:);
                 lifetime_3=fam_trials(cellfun(@(x)x=='3',fam_trials(:,6)),:);
@@ -153,7 +146,7 @@ sub_dir=strcat(output,'/test_1stlvl_postscan_softAROMA/',sub);
                 sliceinfo=cellfun(@strcat,prefix,comma,slice,'UniformOutput',false);
                 
                 %an indicator for which condition is missing in a given run
-                cond={'recent_1','recent_2','recent_3','recent_4','recent_5','lifetime_1','lifetime_2','lifetime_3','lifetime_4','lifetime_5','lifetime_irr_1','lifetime_irr_2','lifetime_irr_3','lifetime_irr_4','lifetime_irr_5','noresp';recent_1,recent_2,recent_3,recent_4,recent_5,lifetime_1,lifetime_2,lifetime_3,lifetime_4,lifetime_5,lifetime_irr_1,lifetime_irr_2,lifetime_irr_3,lifetime_irr_4,lifetime_irr_5,noresp};
+                cond={'lifetime_1','lifetime_2','lifetime_3','lifetime_4','lifetime_5','lifetime_irr_1','lifetime_irr_2','lifetime_irr_3','lifetime_irr_4','lifetime_irr_5','noresp';lifetime_1,lifetime_2,lifetime_3,lifetime_4,lifetime_5,lifetime_irr_1,lifetime_irr_2,lifetime_irr_3,lifetime_irr_4,lifetime_irr_5,noresp};
                 [~,have_cond]=find(cellfun(@(x)~isempty(x),cond(2,:)));
                 miss_cond=find(cellfun(@(x)isempty(x),cond(2,:)));
                 remove_cond=length(miss_cond);%num of cond to be removed from matlabbatch
@@ -286,182 +279,69 @@ sub_dir=strcat(output,'/test_1stlvl_postscan_softAROMA/',sub);
                 %consistently named, better not update SPM
                 %the below lines should return a single
                 %number each
-                
-                % IMPORTANT NOTE: since the lifetime_irr trials are the
-                % frequency trials (i.e. colinear design columns), this will
-                % result in invalid contrast when the contrast vector does
-                % not sum to 0 within each run (the colinearity is
-                % within-runs). So we would need to reweight the contrast
-                % within each run so the weights sum to 0. This means the
-                % same condition (e.g. life_irr_1) may be weighted
-                % differently across runs. But since we are interested in
-                % the difference between conditions, as long as we keep the
-                % direction of the contrast consistent across runs, I don't
-                % think we are introducing any systematic biases that could
-                % result in false positive. We do not need
-                % to do that for the lifetime
-                % decision-relevant trials since those
-                % trials were only modeled once in the
-                % design matrix, so it does not have the
-                % constraint that the contrast vector has to
-                % sum to 0 within runs. But to ease comparison between
-                % contrasts, we are also enforcing this
-                % contraint on those contrasts as well.
-                
-                
+
 %% setup lifetime linear main effect. Note that "as long as all of the contrasts are derived from the same GLM model, then you can have as many as you want in a single SPM.mat" ---Suzanne Witt
                 %setup linear contrast for lifetime
                 %conditions
                 matlabbatch{3}.spm.stats.con.spmmat = {strcat(temp_dir,'SPM.mat')};
-                matlabbatch{3}.spm.stats.con.consess{1}.tcon.name = 'high>low lifetime';
+                matlabbatch{3}.spm.stats.con.consess{1}.tcon.name = 'linear inc lifetime';
                 %use spmmat.SPM.xX.name header to find the
                 %right columns
                 convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));
-               for k=1:4 % loop through 4 test runs   
-                [~,life_1_main_col]=find(contains(spmmat.SPM.xX.name(1,:),strcat('Sn(',num2str(k),') lifetime_1*bf(1)')));
-                [~,life_2_main_col]=find(contains(spmmat.SPM.xX.name(1,:),strcat('Sn(',num2str(k),') lifetime_2*bf(1)')));
-                [~,life_3_main_col]=find(contains(spmmat.SPM.xX.name(1,:),strcat('Sn(',num2str(k),') lifetime_3*bf(1)')));
-                [~,life_4_main_col]=find(contains(spmmat.SPM.xX.name(1,:),strcat('Sn(',num2str(k),') lifetime_4*bf(1)')));
-                [~,life_5_main_col]=find(contains(spmmat.SPM.xX.name(1,:),strcat('Sn(',num2str(k),') lifetime_5*bf(1)')));
+               
+                [~,life1_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_1*bf(1)'));
+                [~,life2_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_2*bf(1)'));
+                [~,life3_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_3*bf(1)'));
+                [~,life4_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_4*bf(1)'));
+                [~,life5_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_5*bf(1)'));
                 
-                nonempty_col=[life_1_main_col,life_2_main_col,life_3_main_col,life_4_main_col,life_5_main_col];
-                %generate run-specific contrast vector
-                nonempty_cond=~cellfun(@isempty,runbycond(k,:));
-                run_cond=runbycond(k,nonempty_cond);
-                life_cond=length(find(contains(run_cond,'lifetime')&~contains(run_cond,'irr')));
-                convec_run=(1:life_cond);%increase
-                convec_run=convec_run-mean(convec_run);%center on 0
-                
-                %put the run-specific contrast vector into
-                %the overall contrast vector
-                convec(1,nonempty_col)=convec_run;
-               end
+                convec(1,life1_main_col)=-2/length(life1_main_col);
+                convec(1,life2_main_col)=-1/length(life2_main_col);
+                convec(1,life3_main_col)=0;
+                convec(1,life4_main_col)=1/length(life4_main_col);
+                convec(1,life5_main_col)=2/length(life5_main_col);
                 
                 matlabbatch{3}.spm.stats.con.consess{1}.tcon.weights = convec;
                 
-                %% recent linear main contrast (put it in a different consess)
-                matlabbatch{3}.spm.stats.con.consess{2}.tcon.name = 'low>high recent';
-
+                %% main effect of linear decrease with lifetime (for PrC mainly)
+                matlabbatch{3}.spm.stats.con.consess{2}.tcon.name = 'linear dec lifetime';
                 convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));
-               for k=1:4 % loop through 4 test runs   
-                [~,recent_1_main_col]=find(contains(spmmat.SPM.xX.name(1,:),strcat('Sn(',num2str(k),') recent_1*bf(1)')));
-                [~,recent_2_main_col]=find(contains(spmmat.SPM.xX.name(1,:),strcat('Sn(',num2str(k),') recent_2*bf(1)')));
-                [~,recent_3_main_col]=find(contains(spmmat.SPM.xX.name(1,:),strcat('Sn(',num2str(k),') recent_3*bf(1)')));
-                [~,recent_4_main_col]=find(contains(spmmat.SPM.xX.name(1,:),strcat('Sn(',num2str(k),') recent_4*bf(1)')));
-                [~,recent_5_main_col]=find(contains(spmmat.SPM.xX.name(1,:),strcat('Sn(',num2str(k),') recent_5*bf(1)')));
-                
-                nonempty_col=[recent_1_main_col,recent_2_main_col,recent_3_main_col,recent_4_main_col,recent_5_main_col];
-                %generate run-specific contrast vector
-                nonempty_cond=~cellfun(@isempty,runbycond(k,:));
-                run_cond=runbycond(k,nonempty_cond);
-                recent_cond=length(find(contains(run_cond,'recent')));
-                convec_run=(recent_cond:-1:1);%decrease
-                convec_run=convec_run-mean(convec_run);%center on 0
-                
-                %put the run-specific contrast vector into
-                %the overall contrast vector
-                convec(1,nonempty_col)=convec_run;
-               end
+               
+                convec(1,life1_main_col)=2/length(life1_main_col);
+                convec(1,life2_main_col)=1/length(life2_main_col);
+                convec(1,life3_main_col)=0;
+                convec(1,life4_main_col)=-1/length(life4_main_col);
+                convec(1,life5_main_col)=-2/length(life5_main_col);
                 
                 matlabbatch{3}.spm.stats.con.consess{2}.tcon.weights = convec;
                 
-                %% main effect of linear increase with recent (for PPC mainly)
-                matlabbatch{3}.spm.stats.con.consess{3}.tcon.name = 'high>low recent';
+                %% main effect of high>low dec-irr lifetime
+                matlabbatch{3}.spm.stats.con.consess{3}.tcon.name = 'linear inc lifetime irr';
                 convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));
-               for k=1:4 % loop through 4 test runs   
-                [~,recent_1_main_col]=find(contains(spmmat.SPM.xX.name(1,:),strcat('Sn(',num2str(k),') recent_1*bf(1)')));
-                [~,recent_2_main_col]=find(contains(spmmat.SPM.xX.name(1,:),strcat('Sn(',num2str(k),') recent_2*bf(1)')));
-                [~,recent_3_main_col]=find(contains(spmmat.SPM.xX.name(1,:),strcat('Sn(',num2str(k),') recent_3*bf(1)')));
-                [~,recent_4_main_col]=find(contains(spmmat.SPM.xX.name(1,:),strcat('Sn(',num2str(k),') recent_4*bf(1)')));
-                [~,recent_5_main_col]=find(contains(spmmat.SPM.xX.name(1,:),strcat('Sn(',num2str(k),') recent_5*bf(1)')));
+              
+                [~,life_irr_1_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_irr_1*bf(1)'));
+                [~,life_irr_2_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_irr_2*bf(1)'));
+                [~,life_irr_3_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_irr_3*bf(1)'));
+                [~,life_irr_4_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_irr_4*bf(1)'));
+                [~,life_irr_5_main_col]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_irr_5*bf(1)'));
                 
-                nonempty_col=[recent_1_main_col,recent_2_main_col,recent_3_main_col,recent_4_main_col,recent_5_main_col];
-                %generate run-specific contrast vector
-                nonempty_cond=~cellfun(@isempty,runbycond(k,:));
-                run_cond=runbycond(k,nonempty_cond);
-                recent_cond=length(find(contains(run_cond,'recent')));
-                convec_run=(1:recent_cond);%increase
-                convec_run=convec_run-mean(convec_run);%center on 0
+                convec(1,life_irr_1_main_col)=-2/length(life_irr_1_main_col);
+                convec(1,life_irr_2_main_col)=-1/length(life_irr_2_main_col);
+                convec(1,life_irr_3_main_col)=0;
+                convec(1,life_irr_4_main_col)=1/length(life_irr_4_main_col);
+                convec(1,life_irr_5_main_col)=2/length(life_irr_5_main_col);
                 
-                %put the run-specific contrast vector into
-                %the overall contrast vector
-                convec(1,nonempty_col)=convec_run;
-               end
-
                 matlabbatch{3}.spm.stats.con.consess{3}.tcon.weights = convec;
-                
-                %% main effect of linear decrease with lifetime (for PrC mainly)
-                matlabbatch{3}.spm.stats.con.consess{4}.tcon.name = 'low>high lifetime';
-                convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));
-               for k=1:4 % loop through 4 test runs   
-                [~,life_1_main_col]=find(contains(spmmat.SPM.xX.name(1,:),strcat('Sn(',num2str(k),') lifetime_1*bf(1)')));
-                [~,life_2_main_col]=find(contains(spmmat.SPM.xX.name(1,:),strcat('Sn(',num2str(k),') lifetime_2*bf(1)')));
-                [~,life_3_main_col]=find(contains(spmmat.SPM.xX.name(1,:),strcat('Sn(',num2str(k),') lifetime_3*bf(1)')));
-                [~,life_4_main_col]=find(contains(spmmat.SPM.xX.name(1,:),strcat('Sn(',num2str(k),') lifetime_4*bf(1)')));
-                [~,life_5_main_col]=find(contains(spmmat.SPM.xX.name(1,:),strcat('Sn(',num2str(k),') lifetime_5*bf(1)')));
-                
-                nonempty_col=[life_1_main_col,life_2_main_col,life_3_main_col,life_4_main_col,life_5_main_col];
-                %generate run-specific contrast vector
-                nonempty_cond=~cellfun(@isempty,runbycond(k,:));
-                run_cond=runbycond(k,nonempty_cond);
-                life_cond=length(find(contains(run_cond,'lifetime')&~contains(run_cond,'irr')));
-                convec_run=(life_cond:-1:1);%decrease
-                convec_run=convec_run-mean(convec_run);%center on 0
-                
-                %put the run-specific contrast vector into
-                %the overall contrast vector
-                convec(1,nonempty_col)=convec_run;
-               end
+                %% main effect of low>high dec-irr lifetime
+                matlabbatch{3}.spm.stats.con.consess{4}.tcon.name = 'linear dec lifetime irr';
+                convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
+                convec(1,life_irr_1_main_col)=2/length(life_irr_1_main_col);
+                convec(1,life_irr_2_main_col)=1/length(life_irr_2_main_col);
+                convec(1,life_irr_3_main_col)=0;
+                convec(1,life_irr_4_main_col)=-1/length(life_irr_4_main_col);
+                convec(1,life_irr_5_main_col)=-2/length(life_irr_5_main_col);
 
                 matlabbatch{3}.spm.stats.con.consess{4}.tcon.weights = convec;
-                
-                %% main effect of high>low dec-irr lifetime
-                matlabbatch{3}.spm.stats.con.consess{5}.tcon.name = 'high>low lifetime irr';
-                convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));
-               for k=1:4 % loop through 4 test runs   
-                [~,life_irr_1_main_col]=find(contains(spmmat.SPM.xX.name(1,:),strcat('Sn(',num2str(k),') lifetime_irr_1*bf(1)')));
-                [~,life_irr_2_main_col]=find(contains(spmmat.SPM.xX.name(1,:),strcat('Sn(',num2str(k),') lifetime_irr_2*bf(1)')));
-                [~,life_irr_3_main_col]=find(contains(spmmat.SPM.xX.name(1,:),strcat('Sn(',num2str(k),') lifetime_irr_3*bf(1)')));
-                [~,life_irr_4_main_col]=find(contains(spmmat.SPM.xX.name(1,:),strcat('Sn(',num2str(k),') lifetime_irr_4*bf(1)')));
-                [~,life_irr_5_main_col]=find(contains(spmmat.SPM.xX.name(1,:),strcat('Sn(',num2str(k),') lifetime_irr_5*bf(1)')));
-                
-                nonempty_col=[life_irr_1_main_col,life_irr_2_main_col,life_irr_3_main_col,life_irr_4_main_col,life_irr_5_main_col];
-                %generate run-specific contrast vector
-                nonempty_cond=~cellfun(@isempty,runbycond(k,:));
-                run_cond=runbycond(k,nonempty_cond);
-                life_irr_cond=length(find(contains(run_cond,'lifetime_irr')));
-                convec_run=(1:life_irr_cond);%increase
-                convec_run=convec_run-mean(convec_run);%center on 0
-                
-                %put the run-specific contrast vector into
-                %the overall contrast vector
-                convec(1,nonempty_col)=convec_run;
-               end
-                matlabbatch{3}.spm.stats.con.consess{5}.tcon.weights = convec;
-                %% main effect of low>high dec-irr lifetime
-                matlabbatch{3}.spm.stats.con.consess{6}.tcon.name = 'low>high lifetime irr';
-                convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
-               for k=1:4 % loop through 4 test runs   
-                [~,life_irr_1_main_col]=find(contains(spmmat.SPM.xX.name(1,:),strcat('Sn(',num2str(k),') lifetime_irr_1*bf(1)')));
-                [~,life_irr_2_main_col]=find(contains(spmmat.SPM.xX.name(1,:),strcat('Sn(',num2str(k),') lifetime_irr_2*bf(1)')));
-                [~,life_irr_3_main_col]=find(contains(spmmat.SPM.xX.name(1,:),strcat('Sn(',num2str(k),') lifetime_irr_3*bf(1)')));
-                [~,life_irr_4_main_col]=find(contains(spmmat.SPM.xX.name(1,:),strcat('Sn(',num2str(k),') lifetime_irr_4*bf(1)')));
-                [~,life_irr_5_main_col]=find(contains(spmmat.SPM.xX.name(1,:),strcat('Sn(',num2str(k),') lifetime_irr_5*bf(1)')));
-                
-                nonempty_col=[life_irr_1_main_col,life_irr_2_main_col,life_irr_3_main_col,life_irr_4_main_col,life_irr_5_main_col];
-                %generate run-specific contrast vector
-                nonempty_cond=~cellfun(@isempty,runbycond(k,:));
-                run_cond=runbycond(k,nonempty_cond);
-                life_irr_cond=length(find(contains(run_cond,'lifetime_irr')));
-                convec_run=(life_irr_cond:-1:1);%decrease
-                convec_run=convec_run-mean(convec_run);%center on 0
-                
-                %put the run-specific contrast vector into
-                %the overall contrast vector
-                convec(1,nonempty_col)=convec_run;
-               end
-
-                matlabbatch{3}.spm.stats.con.consess{6}.tcon.weights = convec;
 %                end
                 %% 1st lvl results (thresholded)
                 matlabbatch{4}.spm.stats.results.spmmat = {strcat(temp_dir,'SPM.mat')};

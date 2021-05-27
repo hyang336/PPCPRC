@@ -1,5 +1,5 @@
 %% not binning conditions(responses), otherwise the same as test_1stlvl_all3_softAROMA_bin.m
-function test_1stlvl_all3_softAROMA_bin(project_derivative,output,sub,expstart_vol,fmriprep_foldername,TR,maskfile)
+function test_1stlvl_all3_softAROMA(project_derivative,output,sub,expstart_vol,fmriprep_foldername,TR,maskfile)
 %(i.e. if there are 4 dummy scans, the experiment starts at the 5th
 %TR/trigger/volume). In this version every participant in every run has to have the same number of
 %dummy scans. 
