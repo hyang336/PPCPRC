@@ -8,7 +8,13 @@
 % 0005: dec-irr lifetime high>low main effect
 % 0006: dec-irr lifetime low>high main effect
 
-function test_2ndlvl_all3_conjunction(con_dir,output_dir,sublist,contrast_list,maskfile)
+%% for '/test_1stlvl_softAROMA/' contrast images are:
+% 0001: lifetime linear increase
+% 0002: recent linear decrease
+% 0003: recent linear increase
+% 0004: lifetime linear decrease
+
+function test_2ndlvl_conjunction(con_dir,output_dir,sublist,contrast_list,maskfile)
 
 if ~exist(output_dir,'dir')
     mkdir (output_dir);
