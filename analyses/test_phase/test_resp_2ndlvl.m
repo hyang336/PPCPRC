@@ -19,30 +19,25 @@ fclose(fid);
 spm('defaults', 'FMRI');
 spm_jobman('initcfg');
 
-%% contrast image are:
-% ###sub-020 only has contrast 0001,0002,0008(numbered as 0003),and 0009(numbered as 0004)###
+%% for '/test_1stlvl_all3_softAROMA_bin/' contrast images are:
+% 0001: lifetime high>low main effect
+% 0002: recent low>high main effect
+% 0003: recent high>low inc main effect
+% 0004: lifetime low>high main effect
+% 0005: dec-irr lifetime high>low main effect
+% 0006: dec-irr lifetime low>high main effect
 
-% 0001: lifetime linear inc main effect
-% 0002: recent linear dec main effect
-% 0003: lifetime linear inc para_moded
-% 0004: recent linear dec para_moded
-% 0005: feat_over main effect in lifetime trials
-% 0006: feat_over main effect in recent trials
-% 0007: feat_over main effect in all trials
-% 0008: recent linear inc main effect
-% 0009: lifetime linear dec main effect
+%% for '/test_1stlvl_softAROMA/' contrast images are:
+% 0001: lifetime linear increase
+% 0002: recent linear decrease
+% 0003: recent linear increase
+% 0004: lifetime linear decrease
 
-% To test whether parametric modulation effect (interaction)
-% is significant, we need to use the tmaps to compare
-% whether the model fit in the first-level is better for the
-% modulated design columns
-
-% 2020-05-06 Currently we run 4 tests, main effet of lifetime and
-% recent exposure with a contrast vector of [1 0] run on contrast 0001 and 0002;
-% interaction with feature-overlap within each task, with
-% contrast vector [1 -1] on t-maps for 0003 and 0001, and
-% 0004 and 0002, respectively for lifetime and recent
-% exposure.
+%% for '/test_1stlvl_postscan_softAROMA/' contrast images are:
+% 0001: lifetime linear increase
+% 0002: lifetime linear decrease
+% 0003: dec-irr lifetime linear increase
+% 0004: dec-irr lifetime linear decrease
 
 %%   
 

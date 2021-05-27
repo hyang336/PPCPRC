@@ -14,6 +14,12 @@
 % 0003: recent linear increase
 % 0004: lifetime linear decrease
 
+%% for '/test_1stlvl_postscan_softAROMA/' contrast images are:
+% 0001: lifetime linear increase
+% 0002: lifetime linear decrease
+% 0003: dec-irr lifetime linear increase
+% 0004: dec-irr lifetime linear decrease
+
 function test_2ndlvl_conjunction(con_dir,output_dir,sublist,contrast_list,maskfile)
 
 if ~exist(output_dir,'dir')
