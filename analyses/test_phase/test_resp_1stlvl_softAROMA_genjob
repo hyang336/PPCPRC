@@ -1,7 +1,7 @@
 #!/bin/bash
 usage(){
 echo "Create joblist to be run with joblistSubmit
- usage: test_resp_1stlvl_softAROMA_genjob <bids_dir> <project_derivatives> <output_dir> <sub> <exp_start volume> <fmriprep_foldername> <TR> <maskfile> > <joblist.txt>"
+ usage: test_resp_1stlvl_softAROMA_genjob <bids_dir> <project_derivatives> <output_dir> <sub> <exp_start volume> <fmriprep_foldername> <TR> <maskfile> <onset_mode> > <joblist.txt>"
 }
 bids_dir=$1
 project_derivatives=$2
@@ -17,9 +17,10 @@ expstart_vol=$5
 fmriprep_fn=$6
 TR=$7
 maskfile=$8
-if [ "$#" -eq 8 ]; then
+onset_mode=$9
+if [ "$#" -eq 9 ]; then
 	for sub in $subs; do
-	echo 'matlab -nosplash -nodisplay -r "addpath(genpath('"'/home/hyang336/matlab/'"')); addpath(genpath('"'/home/hyang336/PPCPRC/'"')); test_resp_1stlvl_softAROMA('"'$project_derivatives'"','"'$output_dir'"','"'$suffix$sub'"','"$expstart_vol"','"'$fmriprep_fn'"','"$TR"','"'$maskfile'"'); exit;"' 
+	echo 'matlab -nosplash -nodisplay -r "addpath(genpath('"'/home/hyang336/matlab/'"')); addpath(genpath('"'/home/hyang336/PPCPRC/'"')); test_resp_1stlvl_softAROMA('"'$project_derivatives'"','"'$output_dir'"','"'$suffix$sub'"','"$expstart_vol"','"'$fmriprep_fn'"','"$TR"','"'$maskfile'"','"'$onset_mode'"'); exit;"' 
 	done
 else
 usage

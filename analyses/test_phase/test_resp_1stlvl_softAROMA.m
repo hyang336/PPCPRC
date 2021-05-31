@@ -1,14 +1,18 @@
 %% same as test_resp_1stlvl.m but using soft AROMA-ICA instead of raw motion regressors
 %% no longer include parametric modulation
 
-function test_resp_1stlvl_softAROMA(project_derivative,output,sub,expstart_vol,fmriprep_foldername,TR,maskfile)
+function test_resp_1stlvl_softAROMA(project_derivative,output,sub,expstart_vol,fmriprep_foldername,TR,maskfile,onset_mode)
 %(i.e. if there are 4 dummy scans, the experiment starts at the 5th
 %TR/trigger/volume). In this version every participant in every run has to have the same number of
 %dummy scans. 
 
 %sub needs to be in the format of 'sub-xxx'
-sub_dir=strcat(output,'/test_1stlvl_softAROMA/',sub);
-
+switch onset_mode %how to model onsets of events (Grinband et al. 2008)
+    case 'var_epoch'
+        sub_dir=strcat(output,'/test_1stlvl_softAROMA_var-epoch/',sub);
+    case 'const_epoch'
+        sub_dir=strcat(output,'/test_1stlvl_softAROMA_const-epoch/',sub);
+end
 % %for copying matlabbatch template, no longer in use
 % %only works when you run the whole script
 % git_file=mfilename('fullpath');
@@ -141,7 +145,12 @@ sub_dir=strcat(output,'/test_1stlvl_softAROMA/',sub);
                 for k=1:length(have_cond)%again the column number here is *hard-coded*
                     matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).name = cond{1,have_cond(k)};
                     matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).onset = cell2mat(cond{2,have_cond(k)}(:,1));
-                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).duration = cell2mat(cond{2,have_cond(k)}(:,5));
+                    switch onset_mode
+                        case 'var_epoch'
+                            matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).duration = cell2mat(cond{2,have_cond(k)}(:,7));%use RT
+                        case 'const_epoch'
+                            matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).duration = cell2mat(cond{2,have_cond(k)}(:,5));%use stim presentation duration
+                    end
                     %gotta fill these fields too
                     matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).tmod = 0;
                     matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).pmod = struct('name', {}, 'param', {}, 'poly', {});

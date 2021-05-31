@@ -43,6 +43,9 @@ famRTavg=data.frame(matrix(ncol=3,nrow=length(ss_list)*5))
 x=c("mean_RT","SSID","resp")
 colnames(famRTavg)=x
 
+#empty frame to store all frequency data
+data_freq_all=data.frame()
+
 library(gtools)
 #load data, calculate correlation and mean resp for each level of freq and fam in a for-loop
 for (i in c(1:length(ss_list))){
@@ -55,6 +58,8 @@ data=data[rowSums(is.na(data)) != ncol(data)-2, ]
 data_freq=data[data$task=="recent",]
 data_fam=data[data$task=="lifetime",]
 data_postscan=data[data$task=="post_scan",]
+#store freq data for DDM
+data_freq_all=rbind(data_freq_all,data_freq)
 #calculate normfam for frequency items to be compared with post_scan response
 data_freq.match=data_freq[match(data_postscan$Stimuli,data_freq$Stimuli),]#match item order
 data_postscan$norm_fam=data_freq.match$norm_fam
@@ -175,8 +180,63 @@ fam_frame$pearson_R=as.numeric(fam_frame$pearson_R)
 freq_frame$pearson_R=as.numeric(freq_frame$pearson_R)
 postscan_frame$pearson_R=as.numeric(postscan_frame$pearson_R)
 
+#account for the correction of lifetime-irr ratings we did in the fMRI analyses
+freqpost_frame_corr=freqpost_frame
+freqpost_frame_corr=freqpost_frame_corr[freqpost_frame_corr$SSID!='010',]#remove sub-010
+#replace postscan ratings with norm ratings for 4 subs
+freqpost_frame_corr$pearson_R[freqpost_frame_corr$SSID=='020']=freqnorm_frame$pearson_R[freqnorm_frame$SSID=='020']
+freqpost_frame_corr$pearson_R[freqpost_frame_corr$SSID=='022']=freqnorm_frame$pearson_R[freqnorm_frame$SSID=='022']
+freqpost_frame_corr$pearson_R[freqpost_frame_corr$SSID=='023']=freqnorm_frame$pearson_R[freqnorm_frame$SSID=='023']
+freqpost_frame_corr$pearson_R[freqpost_frame_corr$SSID=='029']=freqnorm_frame$pearson_R[freqnorm_frame$SSID=='029']
 
-######################plots#######################
+#t test correlation between freq judgement and postscan ratings against 0
+t.test(unlist(freqpost_frame_corr$pearson_R))
+
+#RT analyses of the frequency task, also as a basis to define accurate and inaccurate trials for DDM
+
+#create objective freq rank
+data_freq_all$objective_freq_rank[data_freq_all$objective_freq==9]=5
+data_freq_all$objective_freq_rank[data_freq_all$objective_freq==7]=4
+data_freq_all$objective_freq_rank[data_freq_all$objective_freq==5]=3
+data_freq_all$objective_freq_rank[data_freq_all$objective_freq==3]=2
+data_freq_all$objective_freq_rank[data_freq_all$objective_freq==1]=1
+
+#if the objective freq rank and participants responses differ more than 1, a trial is marked as inaccurate
+data_freq_all$accuracy=0
+data_freq_all$accuracy[abs(as.numeric(data_freq_all$Response)-data_freq_all$objective_freq_rank)<=1]=1#1 means correct
+
+#average RT across accurate and inaccurate trials separately for each subject
+library(dplyr)
+data_freq_summary=data_freq_all %>%
+  group_by(ParticipantNum,accuracy) %>%
+  summarise(mean = mean(RespTime,na.rm=TRUE), n = n())
+
+#paired t-test
+t.test(data_freq_summary$mean[data_freq_summary$accuracy==0],data_freq_summary$mean[data_freq_summary$accuracy==1],paired=TRUE,alternative='greater')
+#only significant in one-tailed test, possibly due to our definition of accuracy being a bit lenient
+
+#This is what Stefan suggested, comparing RT for trials rated as 5 while having only 1 or 3 presentations vs. those having 7 or 9 presentations during the study
+data_freq_only5=data_freq_all[as.numeric(data_freq_all$Response)==5&!is.na(data_freq_all$Response),]
+data_freq_only5=data_freq_only5[data_freq_only5$objective_freq_rank!=3,]
+data_freq_only5$obj_freq_bin[data_freq_only5$objective_freq_rank==4|data_freq_only5$objective_freq_rank==5]=1
+data_freq_only5$obj_freq_bin[data_freq_only5$objective_freq_rank==1|data_freq_only5$objective_freq_rank==2]=0
+
+data_freq_only5_summary=data_freq_only5 %>%
+  group_by(ParticipantNum,obj_freq_bin) %>%
+  summarise(mean = mean(RespTime,na.rm=TRUE), n = n())#some subjects have no lower bin
+
+#get rid of people with only one bin
+sub_bin_count=count(data_freq_only5_summary,var='ParticipantNum')
+droplist=sub_bin_count$ParticipantNum[sub_bin_count$n==1]
+data_freq_only5_summary.complete=data_freq_only5_summary[!is.element(data_freq_only5_summary$ParticipantNum,droplist),]
+#stats
+t.test(data_freq_only5_summary.complete$mean[data_freq_only5_summary.complete$obj_freq_bin==1],data_freq_only5_summary.complete$mean[data_freq_only5_summary.complete$obj_freq_bin==0],paired=TRUE)
+#not significant, but these are based on a very small number of trials
+
+
+
+
+####################################plots################################
 bsize=0.1
 library(ggplot2)
 #generate ggplots, using ERP data as background
