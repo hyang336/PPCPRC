@@ -10,11 +10,12 @@ lifetime_events=fullfile(strcat(project_derivative,'/behavioral/',sub,'/',sub,'_
 % fullfile
 [~,~,raw]=xlsread(lifetime_events{1});%should have only 1 file, hopefully 
 [~,~,fo_sheet]=xlsread('stimulus_select_5.2.xlsm',1);%spreadsheet containing feat_overlap
+[~,~,t_sheet]=xlsread('lifetime_episem_regress_29ss.xlsx',1);%spreadsheet containing epi_t and sem_t
 feat_over=fo_sheet(2:91,1:2);%pull out all stimuli and their feat_over for later search
 feat_over(91:180,1:2)=fo_sheet(2:91,13:14);
 
-event=cell(size(raw,1),10);
-event(1,1:10)={'onset','obj_freq','norm_fam','task','duration','resp','RT','feat_over','feat_di','stimuli'};
+event=cell(size(raw,1),12);
+event(1,1:12)={'onset','obj_freq','norm_fam','task','duration','resp','RT','feat_over','feat_di','stimuli','epi_t','sem_t'};
 
 %find columns of interest based on headers
 [~,startcol]=find(cellfun(@(x)strcmp(x,'ExpStartTime'),raw(1,1:end)));
@@ -37,13 +38,16 @@ event(2:end,7)=raw(2:end,RTcol);
 event(2:end,10)=raw(2:end,stimcol);
 
 for i=2:size(event,1)
-[word_id,~]=find(strcmp(event{i,10},feat_over(1:end,1)));%find the word
-event{i,8}=feat_over{word_id,2};%fill in the feat_over value
-if event{i,8}>0.04%binarize, note that for a given run there may be different # of high and low feat_over trials, so they still needs to be demeaned(orthogonalized) in SPM as parametric modulator
-    event{i,9}=1;
-else
-    event{i,9}=-1;
-end
+    [word_id,~]=find(strcmp(event{i,10},feat_over(1:end,1)));%find the word
+    [word_id_regress,~]=find(strcmp(event{i,10},t_sheet(2:end,9)));%find word for epi_t and sem_t
+    event{i,11}=t_sheet{word_id_regress+1,5};%has header
+    event{i,12}=t_sheet{word_id_regress+1,8};
+    event{i,8}=feat_over{word_id,2};%fill in the feat_over value
+    if event{i,8}>0.04%binarize, note that for a given run there may be different # of high and low feat_over trials, so they still needs to be demeaned(orthogonalized) in SPM as parametric modulator
+        event{i,9}=1;
+    else
+        event{i,9}=-1;
+    end
 end
 eventout=event(2:end,:);%no headers
 end
