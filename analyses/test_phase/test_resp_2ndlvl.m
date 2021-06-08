@@ -50,7 +50,7 @@ spm_jobman('initcfg');
 % 0005: epi_t or sem_t linear increase in lifetime trials
 
 if length(varargin)==1 %if only one contrast name is specified, use single-sample t-test
-    
+        contrast=varargin{1};
         %load job template
         test_resp_2ndlvl_job_indi_singleT;
         
@@ -61,17 +61,20 @@ if length(varargin)==1 %if only one contrast name is specified, use single-sampl
         for i=1:length(SSID)
             file_cell{i,1}=strcat(con_dir,'/sub-',SSID{i,1},'/temp/',contrast,'.nii');
         end
-        matlabbatch{1}.spm.stats.factorial_design.dir = {strcat(output_dir,'/lifetime_main')};%specify
+        matlabbatch{1}.spm.stats.factorial_design.dir = {output_dir};%specify
         matlabbatch{1}.spm.stats.factorial_design.des.t1.scans = file_cell;
         matlabbatch{1}.spm.stats.factorial_design.masking.em = {maskfile};
-        matlabbatch{2}.spm.stats.fmri_est.spmmat = {strcat(output_dir,'/lifetime_main/SPM.mat')};%estimate
-        matlabbatch{3}.spm.stats.con.spmmat = {strcat(output_dir,'/lifetime_main/SPM.mat')};%contrast
-        matlabbatch{3}.spm.stats.con.consess{1}.tcon.name = 'lifetime_main';
+        matlabbatch{2}.spm.stats.fmri_est.spmmat = {strcat(output_dir,'/SPM.mat')};%estimate
+        matlabbatch{3}.spm.stats.con.spmmat = {strcat(output_dir,'/SPM.mat')};%contrast
+        matlabbatch{3}.spm.stats.con.consess{1}.tcon.name = strcat(con_dir,'_',contrast);
         matlabbatch{3}.spm.stats.con.consess{1}.tcon.weights = 1;
-        matlabbatch{4}.spm.stats.results.spmmat = {strcat(output_dir,'/lifetime_main/SPM.mat')};%threshold
-        matlabbatch{4}.spm.stats.results.conspec(1).titlestr = 'lifetime_main';
+        matlabbatch{4}.spm.stats.results.spmmat = {strcat(output_dir,'/SPM.mat')};%threshold
+        matlabbatch{4}.spm.stats.results.conspec(1).titlestr = strcat(con_dir,'_',contrast);
         
 elseif length(varargin)==2 %if two contrast names are specified, use paired t-test
+        contrast_1=varargin{1};
+        contrast_2=varargin{2};
+        
         %load job template
         test_resp_2ndlvl_job_indi_pairedT;
 
@@ -80,17 +83,19 @@ elseif length(varargin)==2 %if two contrast names are specified, use paired t-te
         end
         file_cell=cell(0,1);
         for i=1:length(SSID)
-            file_cell{i,1}=strcat(con_dir,'/sub-',SSID{i,1},'/temp/con_0002.nii');
+            file_cell{i,1}=strcat(con_dir,'/sub-',SSID{i,1},'/temp/',contrast_1,'.nii');
+            file_cell{i,2}=strcat(con_dir,'/sub-',SSID{i,1},'/temp/',contrast_2,'.nii');
+            matlabbatch{1}.spm.stats.factorial_design.des.pt.pair(i).scans=file_cell;
         end
-        matlabbatch{1}.spm.stats.factorial_design.dir = {strcat(output_dir,'/recent_main')};%specify
-        matlabbatch{1}.spm.stats.factorial_design.des.t1.scans = file_cell;
+        matlabbatch{1}.spm.stats.factorial_design.dir = {output_dir};%specify
+        
         matlabbatch{1}.spm.stats.factorial_design.masking.em = {maskfile};
-        matlabbatch{2}.spm.stats.fmri_est.spmmat = {strcat(output_dir,'/recent_main/SPM.mat')};%estimate
-        matlabbatch{3}.spm.stats.con.spmmat = {strcat(output_dir,'/recent_main/SPM.mat')};%contrast
-        matlabbatch{3}.spm.stats.con.consess{1}.tcon.name = 'recent_main';
-        matlabbatch{3}.spm.stats.con.consess{1}.tcon.weights = 1;
-        matlabbatch{4}.spm.stats.results.spmmat = {strcat(output_dir,'/recent_main/SPM.mat')};%threshold
-        matlabbatch{4}.spm.stats.results.conspec(1).titlestr = 'recent_main';
+        matlabbatch{2}.spm.stats.fmri_est.spmmat = {strcat(output_dir,'/SPM.mat')};%estimate
+        matlabbatch{3}.spm.stats.con.spmmat = {strcat(output_dir,'/SPM.mat')};%contrast
+        matlabbatch{3}.spm.stats.con.consess{1}.tcon.name = strcat(con_dir,'_',contrast_1,'-',contrast_2);
+        matlabbatch{3}.spm.stats.con.consess{1}.tcon.weights = [1, -1];
+        matlabbatch{4}.spm.stats.results.spmmat = {strcat(output_dir,'/SPM.mat')};%threshold
+        matlabbatch{4}.spm.stats.results.conspec(1).titlestr = strcat(con_dir,'_',contrast_1,'-',contrast_2);
     
 end
 
