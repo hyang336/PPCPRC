@@ -75,6 +75,16 @@ for j=1:length(substr.run)
     %event file
     freq_trials=substr.runevent{j}(strcmp(substr.runevent{j}(:,4),'recent'),:);
     fam_trials=substr.runevent{j}(strcmp(substr.runevent{j}(:,4),'lifetime'),:);
+    %replace noresp trial with 0
+    freq_noresp=find(cellfun(@(x) isnan(x),freq_trials(:,6)));
+    fam_noresp=find(cellfun(@(x) isnan(x),fam_trials(:,6)));
+    %replace those trials with 0
+    freq_trials(freq_noresp,6)={'0'};
+    fam_trials(fam_noresp,6)={'0'};
+    %replace RT with stimulus presentation time for boxcar
+    %modelling
+    freq_trials(freq_noresp,7)=freq_trials(freq_noresp,5);%column 5 is stimulus presentation time
+    fam_trials(fam_noresp,7)=fam_trials(fam_noresp,5);
     
     conf_name=strcat(project_derivative,'/',fmriprep_foldername,'/fmriprep/',sub,'/func/',sub,'_',task{1},run{1},'*confound*.tsv');%use task{1} and run{1} since it's iteratively defined
     confstruct=dir(conf_name);
