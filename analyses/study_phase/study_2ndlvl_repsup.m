@@ -3,6 +3,8 @@
 %contrast 0001 pres_1>pres_2
 %contrast 0002 pres_1>baseline
 %contrast 0003 pres_2>baseline
+%contrast 0004 pres_1>avg(pres_789)
+%contrast 0005 pres_1 throught pres_9 decrease
 function study_2ndlvl_repsup(con_dir,output_dir,sublist,maskfile)
 
 %read in subject IDs

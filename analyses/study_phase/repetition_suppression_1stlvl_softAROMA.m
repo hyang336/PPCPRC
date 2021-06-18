@@ -5,14 +5,20 @@
 %% And we can construct a directional AND test with conjunction analyses with the "conjunction null" option
 %% See Friston et al. (2005) "Conjunction revisited"
 
-function repetition_suppression_1stlvl_softAROMA(project_derivative,output,sub,expstart_vol,fmriprep_foldername,TR,maskfile)
+function repetition_suppression_1stlvl_softAROMA(project_derivative,output,sub,expstart_vol,fmriprep_foldername,TR,maskfile,onset_mode)
     
 %(i.e. if there are 4 dummy scans, the experiment starts at the 5th
 %TR/trigger/volume). In this version every participant in every run has to have the same number of
 %dummy scans. 
 
 %sub needs to be in the format of 'sub-xxx'
-sub_dir=strcat(output,'/repetition_suppression_softAROMA/',sub);
+switch onset_mode %how to model onsets of events (Grinband et al. 2008)
+    case 'var_epoch'
+        sub_dir=strcat(output,'/repetition_suppression_softAROMA_var-epoch/',sub);
+    case 'const_epoch'
+        sub_dir=strcat(output,'/repetition_suppression_softAROMA_const-epoch/',sub);
+end
+
 
 %% step 1 generate alltrial regressor and noise regressor
         %assume BIDS folder structure
@@ -146,7 +152,12 @@ sub_dir=strcat(output,'/repetition_suppression_softAROMA/',sub);
                 for k=1:length(have_cond)%again the column number here is *hard-coded*
                     matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).name = cond{1,have_cond(k)};
                     matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).onset = cell2mat(cond{2,have_cond(k)}(:,1));
-                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).duration = 1.5; %the duration in load_event_test is hard-coded to 2.5, which is only correct for test-phase
+                    switch onset_mode
+                        case 'var_epoch'
+                            matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).duration = cell2mat(cond{2,have_cond(k)}(:,7));%use RT
+                        case 'const_epoch'
+                            matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).duration = 1.5; %the duration in load_event_test is hard-coded to 2.5, which is only correct for test-phase
+                    end
                     % ignore feat_over for now
 %                     matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).tmod = 0;
 %                     matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).pmod = struct('name', 'feat_over', 'param', cell2mat(cond{2,have_cond(k)}(:,8)), 'poly', 1);%the 8th column of a cond cell array is the feat_over para_modulator, using dichotomized value then to result in some conditions having all same feat_over value in a given run, which means the design matrix becomes rank deficient and requiring the contrast vector involving that column to add up to 1.
@@ -312,6 +323,34 @@ sub_dir=strcat(output,'/repetition_suppression_softAROMA/',sub);
                 
                 matlabbatch{3}.spm.stats.con.consess{4}.tcon.weights = convec;
             
+                %% linear across 9 levels
+                matlabbatch{3}.spm.stats.con.spmmat = {strcat(temp_dir,'SPM.mat')};
+                matlabbatch{3}.spm.stats.con.consess{5}.tcon.name = 'pres_123456789';
+                %use spmmat.SPM.xX.name header to find the
+                %right columns
+                [~,pres1_col]=find(contains(spmmat.SPM.xX.name(1,:),'pres_1*bf(1)'));
+                [~,pres2_col]=find(contains(spmmat.SPM.xX.name(1,:),'pres_2*bf(1)'));
+                [~,pres3_col]=find(contains(spmmat.SPM.xX.name(1,:),'pres_3*bf(1)'));
+                [~,pres4_col]=find(contains(spmmat.SPM.xX.name(1,:),'pres_4*bf(1)'));
+                [~,pres5_col]=find(contains(spmmat.SPM.xX.name(1,:),'pres_5*bf(1)'));
+                [~,pres6_col]=find(contains(spmmat.SPM.xX.name(1,:),'pres_6*bf(1)'));
+                [~,pres7_col]=find(contains(spmmat.SPM.xX.name(1,:),'pres_7*bf(1)'));
+                [~,pres8_col]=find(contains(spmmat.SPM.xX.name(1,:),'pres_8*bf(1)'));
+                [~,pres9_col]=find(contains(spmmat.SPM.xX.name(1,:),'pres_9*bf(1)'));
+                
+                convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
+                convec(1,pres1_col)=4/length(pres1_col);
+                convec(1,pres2_col)=3/length(pres2_col);
+                convec(1,pres3_col)=2/length(pres3_col);
+                convec(1,pres4_col)=1/length(pres4_col);
+                convec(1,pres5_col)=0/length(pres5_col);
+                convec(1,pres6_col)=-1/length(pres6_col);
+                convec(1,pres7_col)=-2/(3*length(pres7_col));
+                convec(1,pres8_col)=-3/(3*length(pres8_col));
+                convec(1,pres9_col)=-4/(3*length(pres9_col));
+                
+                matlabbatch{3}.spm.stats.con.consess{5}.tcon.weights = convec;
+                
             %run the contrast and thresholding jobs
             spm_jobman('run',matlabbatch(3));
            
