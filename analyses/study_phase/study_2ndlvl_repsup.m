@@ -1,11 +1,12 @@
 %% 2nd level contrast (for now just run it on Graham interactively)
+% 2021-06-23 now also runs F contrasts
 
 %contrast 0001 pres_1>pres_2
 %contrast 0002 pres_1>baseline
 %contrast 0003 pres_2>baseline
 %contrast 0004 pres_1>avg(pres_789)
 %contrast 0005 pres_1 throught pres_9 decrease
-function study_2ndlvl_repsup(con_dir,output_dir,sublist,maskfile)
+function study_2ndlvl_repsup(con_dir,output_dir,sublist,maskfile,contrast_type)
 
 %read in subject IDs
 fid=fopen(sublist,'r');

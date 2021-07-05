@@ -81,7 +81,7 @@ for j=1:length(substr.run)
     %replace those trials with 0
     freq_trials(freq_noresp,6)={'0'};
     fam_trials(fam_noresp,6)={'0'};
-    %replace RT with stimulus presentation time for boxcar
+    %replace RT with stimulus presentation time noresp trials for boxcar
     %modelling
     freq_trials(freq_noresp,7)=freq_trials(freq_noresp,5);%column 5 is stimulus presentation time
     fam_trials(fam_noresp,7)=fam_trials(fam_noresp,5);
