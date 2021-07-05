@@ -345,9 +345,9 @@ end
                 convec(1,pres4_col)=1/length(pres4_col);
                 convec(1,pres5_col)=0/length(pres5_col);
                 convec(1,pres6_col)=-1/length(pres6_col);
-                convec(1,pres7_col)=-2/(3*length(pres7_col));
-                convec(1,pres8_col)=-3/(3*length(pres8_col));
-                convec(1,pres9_col)=-4/(3*length(pres9_col));
+                convec(1,pres7_col)=-2/length(pres7_col);
+                convec(1,pres8_col)=-3/length(pres8_col);
+                convec(1,pres9_col)=-4/length(pres9_col);
                 
                 matlabbatch{3}.spm.stats.con.consess{5}.tcon.weights = convec;
                 
