@@ -20,7 +20,7 @@ maskfile=$8
 onset_mode=$9
 if [ "$#" -eq 10 ]; then
 	for sub in $subs; do
-		if [ "$10" = 'prompts' ]; then
+		if [ "$10" == 'prompts' ]; then
 			echo 'matlab -nosplash -nodisplay -r "addpath(genpath('"'/home/hyang336/matlab/'"')); addpath(genpath('"'/home/hyang336/PPCPRC/'"')); test_resp_1stlvl_softAROMA_withPrompt('"'$project_derivatives'"','"'$output_dir'"','"'$suffix$sub'"','"$expstart_vol"','"'$fmriprep_fn'"','"$TR"','"'$maskfile'"','"'$onset_mode'"'); exit;"' 
 		else
 			echo 'matlab -nosplash -nodisplay -r "addpath(genpath('"'/home/hyang336/matlab/'"')); addpath(genpath('"'/home/hyang336/PPCPRC/'"')); test_resp_1stlvl_softAROMA('"'$project_derivatives'"','"'$output_dir'"','"'$suffix$sub'"','"$expstart_vol"','"'$fmriprep_fn'"','"$TR"','"'$maskfile'"','"'$onset_mode'"'); exit;"' 
