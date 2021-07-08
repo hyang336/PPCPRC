@@ -9,9 +9,9 @@ function repetition_suppression_1stlvl_softAROMA_pmod(project_derivative,output,
 %sub needs to be in the format of 'sub-xxx'
 switch onset_mode %how to model onsets of events (Grinband et al. 2008)
     case 'var_epoch'
-        sub_dir=strcat(output,'/repetition_suppression_softAROMA_var-epoch/',sub);
+        sub_dir=strcat(output,'/repetition_suppression_softAROMA_var-epoch_pmod/',sub);
     case 'const_epoch'
-        sub_dir=strcat(output,'/repetition_suppression_softAROMA_const-epoch/',sub);
+        sub_dir=strcat(output,'/repetition_suppression_softAROMA_const-epoch_pmod/',sub);
 end
 
 
@@ -55,7 +55,10 @@ end
         %record which condtions each run has, useful for specifying design matrix at
         %the end
         runbycond=cell(length(substr.run),45);%maximam 45 condtions (5 bins with presentation number 1 to 9) that may differ between runs.
-            
+        
+        %load post-scan ratings
+        [~,~,raw]=xlsread(strcat(project_derivative,'/behavioral/',sub,'/',erase(sub,'sub-'),'_task-pscan_data.xlsx'));
+        substr.postscan=raw;
             %loop through runs
             for j=1:length(substr.run)
 %% **moved into the run for-loop on 9/17/2018 14:41, did not change behavior**           
@@ -69,7 +72,20 @@ end
                 %% the duration in load_event_test is hard-coded to 2.5, which is only correct for test-phase, but otherwise it should work
                 substr.runevent{j}=load_event_test(project_derivative,sub,task,run,expstart_vol,TR);%store the loaded event files in sub.runevent; sub-xxx, task-xxx_, run-xx
                 %the event output has no headers, they are in order of {'onset','obj_freq','norm_fam','task','duration','resp','RT'};
-
+                
+                %% first convert the 9-point norm_fam scale to 5-point, then replace norm_fam with participants postscan ratings, this should automatically leave the norm_fam (in 5-point scale) when someone doesn't have postscan rating for a stimulus
+                normfam=cell2mat(substr.runevent{j}(:,3));
+                % https://www.ibm.com/support/pages/transforming-different-likert-scales-common-scale
+                normfam=(normfam-1)/(9-1);
+                normfam=(5-1)*normfam+1;
+                %replace with 5-point scale
+                substr.runevent{j}(:,3)=num2cell(normfam);
+                %loop over study trials to find stim
+                for s=1:size(substr.runevent{j},1)
+                    postscan_rating=str2num(substr.postscan{strcmp(substr.postscan(:,6),substr.runevent{j}{s,10}),11});
+                    substr.runevent{j}{s,3}=postscan_rating;%replace with postscan ratings
+                end
+                
                 %% 20210306 the obj_freq column is numeric
                 %conditions are difined on the number of
                 %presentation of a trial, regardless of
@@ -153,10 +169,11 @@ end
                         case 'const_epoch'
                             matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).duration = 1.5; %the duration in load_event_test is hard-coded to 2.5, which is only correct for test-phase
                     end
-                    % ignore feat_over for now
-%                     matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).tmod = 0;
-%                     matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).pmod = struct('name', 'feat_over', 'param', cell2mat(cond{2,have_cond(k)}(:,8)), 'poly', 1);%the 8th column of a cond cell array is the feat_over para_modulator, using dichotomized value then to result in some conditions having all same feat_over value in a given run, which means the design matrix becomes rank deficient and requiring the contrast vector involving that column to add up to 1.
-%                     matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).orth = 1;
+                   % pmods
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).tmod = 0;
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).pmod(1) = struct('name', 'lifetime_fam', 'param', cell2mat(cond{2,have_cond(k)}(:,3)), 'poly', 1);%pmod of lifetime fam
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).pmod(2) = struct('name', 'feat_over', 'param', cell2mat(cond{2,have_cond(k)}(:,8)), 'poly', 1);%pmod of feat_over
+                    matlabbatch{1}.spm.stats.fmri_spec.sess(j).cond(k).orth = 1;
                 end
                 
                 %no longer include motion regressors since
@@ -345,6 +362,119 @@ end
                 convec(1,pres9_col)=-4/length(pres9_col);
                 
                 matlabbatch{3}.spm.stats.con.consess{5}.tcon.weights = convec;
+                
+                %% increase with lifetime pmod 1st presentation
+                matlabbatch{3}.spm.stats.con.consess{6}.tcon.name = 'pres_1-lifetime_inc';
+                %use spmmat.SPM.xX.name header to find the
+                %right columns
+                [~,pres1_lifetime]=find(contains(spmmat.SPM.xX.name(1,:),'pres_1xlifetime_fam^1*bf(1)'));
+                %remove all 0 columns
+                all0_col=find(all(spmmat.SPM.xX.X(:,pres1_lifetime)==0));
+                if ~isempty(all0_col)
+                    pres1_lifetime(all0_col)=[];
+                end
+                convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
+                convec(1,pres1_lifetime)=1/length(pres1_lifetime);
+                                
+                matlabbatch{3}.spm.stats.con.consess{6}.tcon.weights = convec;
+                %% decrease with lifetime pmod 1st presentation
+                matlabbatch{3}.spm.stats.con.consess{7}.tcon.name = 'pres_1-lifetime_dec';
+                %use spmmat.SPM.xX.name header to find the
+                %right columns
+                [~,pres1_lifetime]=find(contains(spmmat.SPM.xX.name(1,:),'pres_1xlifetime_fam^1*bf(1)'));
+                %remove all 0 columns
+                all0_col=find(all(spmmat.SPM.xX.X(:,pres1_lifetime)==0));
+                if ~isempty(all0_col)
+                    pres1_lifetime(all0_col)=[];
+                end
+                convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
+                convec(1,pres1_lifetime)=-1/length(pres1_lifetime);
+                                
+                matlabbatch{3}.spm.stats.con.consess{7}.tcon.weights = convec;
+                %% increase with feature-overlap 1st presentation
+                matlabbatch{3}.spm.stats.con.consess{8}.tcon.name = 'pres_1-FO_inc';
+                %use spmmat.SPM.xX.name header to find the
+                %right columns
+                [~,pres1_FO]=find(contains(spmmat.SPM.xX.name(1,:),'pres_1xfeat_over^1*bf(1)'));
+                %remove all 0 columns
+                all0_col=find(all(spmmat.SPM.xX.X(:,pres1_FO)==0));
+                if ~isempty(all0_col)
+                    pres1_FO(all0_col)=[];
+                end
+                convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
+                convec(1,pres1_FO)=1/length(pres1_FO);
+                                
+                matlabbatch{3}.spm.stats.con.consess{8}.tcon.weights = convec;
+                %% decrease with feature-overlap 1st presentation
+                matlabbatch{3}.spm.stats.con.consess{9}.tcon.name = 'pres_1-FO_dec';
+                %use spmmat.SPM.xX.name header to find the
+                %right columns
+                [~,pres1_FO]=find(contains(spmmat.SPM.xX.name(1,:),'pres_1xfeat_over^1*bf(1)'));
+                all0_col=find(all(spmmat.SPM.xX.X(:,pres1_FO)==0));
+                if ~isempty(all0_col)
+                    pres1_FO(all0_col)=[];
+                end
+                convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
+                convec(1,pres1_FO)=-1/length(pres1_FO);
+                                
+                matlabbatch{3}.spm.stats.con.consess{9}.tcon.weights = convec;
+                %% increase with lifetime pmod all presentations
+                matlabbatch{3}.spm.stats.con.consess{10}.tcon.name = 'lifetime_inc';
+                %use spmmat.SPM.xX.name header to find the
+                %right columns
+                [~,presALL_lifetime]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_fam^1*bf(1)'));
+                %remove all 0 columns
+                all0_col=find(all(spmmat.SPM.xX.X(:,presALL_lifetime)==0));
+                if ~isempty(all0_col)
+                    presALL_lifetime(all0_col)=[];
+                end
+                convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
+                convec(1,presALL_lifetime)=1/length(presALL_lifetime);
+                                
+                matlabbatch{3}.spm.stats.con.consess{10}.tcon.weights = convec;
+                %% decrease with lifetime pmod all presentation
+                matlabbatch{3}.spm.stats.con.consess{11}.tcon.name = 'lifetime_dec';
+                %use spmmat.SPM.xX.name header to find the
+                %right columns
+                [~,presALL_lifetime]=find(contains(spmmat.SPM.xX.name(1,:),'lifetime_fam^1*bf(1)'));
+                %remove all 0 columns
+                all0_col=find(all(spmmat.SPM.xX.X(:,presALL_lifetime)==0));
+                if ~isempty(all0_col)
+                    presALL_lifetime(all0_col)=[];
+                end
+                convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
+                convec(1,presALL_lifetime)=-1/length(presALL_lifetime);
+                                
+                matlabbatch{3}.spm.stats.con.consess{11}.tcon.weights = convec;
+                %% increase with feature-overlap all presentation
+                matlabbatch{3}.spm.stats.con.consess{12}.tcon.name = 'FO_inc';
+                %use spmmat.SPM.xX.name header to find the
+                %right columns
+                [~,presALL_FO]=find(contains(spmmat.SPM.xX.name(1,:),'feat_over^1*bf(1)'));
+                %remove all 0 columns
+                all0_col=find(all(spmmat.SPM.xX.X(:,presALL_FO)==0));
+                if ~isempty(all0_col)
+                    presALL_FO(all0_col)=[];
+                end
+                convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
+                convec(1,presALL_FO)=1/length(presALL_FO);
+                                
+                matlabbatch{3}.spm.stats.con.consess{12}.tcon.weights = convec;
+                %% decrease with feature-overlap all presentation
+                matlabbatch{3}.spm.stats.con.consess{13}.tcon.name = 'FO_dec';
+                %use spmmat.SPM.xX.name header to find the
+                %right columns
+                [~,presALL_FO]=find(contains(spmmat.SPM.xX.name(1,:),'feat_over^1*bf(1)'));
+                %remove all 0 columns
+                all0_col=find(all(spmmat.SPM.xX.X(:,presALL_FO)==0));
+                if ~isempty(all0_col)
+                    presALL_FO(all0_col)=[];
+                end
+                convec=zeros(1,length(spmmat.SPM.xX.name(1,:)));%contrast vector should be of the same dimension as the number of columns in the design matrix
+                convec(1,presALL_FO)=-1/length(presALL_FO);
+                                
+                matlabbatch{3}.spm.stats.con.consess{13}.tcon.weights = convec;
+                
                 
             %run the contrast and thresholding jobs
             spm_jobman('run',matlabbatch(3));
