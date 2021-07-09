@@ -82,8 +82,10 @@ end
                 substr.runevent{j}(:,3)=num2cell(normfam);
                 %loop over study trials to find stim
                 for s=1:size(substr.runevent{j},1)
-                    postscan_rating=str2num(substr.postscan{strcmp(substr.postscan(:,6),substr.runevent{j}{s,10}),11});
-                    substr.runevent{j}{s,3}=postscan_rating;%replace with postscan ratings
+                    if ~isnan(substr.postscan{strcmp(substr.postscan(:,6),substr.runevent{j}{s,10}),11})
+                        postscan_rating=str2num(substr.postscan{strcmp(substr.postscan(:,6),substr.runevent{j}{s,10}),11});
+                        substr.runevent{j}{s,3}=postscan_rating;%replace with postscan ratings
+                    end
                 end
                 
                 %% 20210306 the obj_freq column is numeric
