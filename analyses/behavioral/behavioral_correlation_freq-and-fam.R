@@ -176,6 +176,7 @@ objfreqpostscan_frame$task[i]="postscan"
 objfreqpostscan_frame$pearson_R[i]=corr_objfreqpostscan[1]
 }
 
+#############################################################################
 fam_frame$pearson_R=as.numeric(fam_frame$pearson_R)
 freq_frame$pearson_R=as.numeric(freq_frame$pearson_R)
 postscan_frame$pearson_R=as.numeric(postscan_frame$pearson_R)
@@ -191,6 +192,10 @@ freqpost_frame_corr$pearson_R[freqpost_frame_corr$SSID=='029']=freqnorm_frame$pe
 
 #t test correlation between freq judgement and postscan ratings against 0
 t.test(unlist(freqpost_frame_corr$pearson_R))
+
+#t test for correlation between postscan and objective frequency
+objfreqpostscan_frame_corr=objfreqpostscan_frame[objfreqpostscan_frame$SSID!='010',]#remove sub-010
+t.test(unlist(objfreqpostscan_frame_corr$pearson_R))
 
 #RT analyses of the frequency task, also as a basis to define accurate and inaccurate trials for DDM
 
