@@ -12,9 +12,9 @@ switch Nis %how to model "N"
         %sub needs to be in the format of 'sub-xxx'
         switch onset_mode %how to model onsets of events (Grinband et al. 2008)
             case 'var_epoch'
-                sub_dir=strcat(output,'/study_1stlvl_LSS-pres_softAROMA_var-epoch_pmod/',sub);
+                sub_dir=strcat(output,'/study_1stlvl_LSS-pres_softAROMA_var-epoch/',sub);
             case 'const_epoch'
-                sub_dir=strcat(output,'/study_1stlvl_LSS-pres_softAROMA_const-epoch_pmod/',sub);
+                sub_dir=strcat(output,'/study_1stlvl_LSS-pres_softAROMA_const-epoch/',sub);
         end
         
         if ~exist(strcat(sub_dir,'output'),'dir')
@@ -260,9 +260,9 @@ switch Nis %how to model "N"
         %sub needs to be in the format of 'sub-xxx'
         switch onset_mode %how to model onsets of events (Grinband et al. 2008)
             case 'var_epoch'
-                sub_dir=strcat(output,'/study_1stlvl_LSS-life_softAROMA_var-epoch_pmod/',sub);
+                sub_dir=strcat(output,'/study_1stlvl_LSS-life_softAROMA_var-epoch/',sub);
             case 'const_epoch'
-                sub_dir=strcat(output,'/study_1stlvl_LSS-life_softAROMA_const-epoch_pmod/',sub);
+                sub_dir=strcat(output,'/study_1stlvl_LSS-life_softAROMA_const-epoch/',sub);
         end
         
         if ~exist(strcat(sub_dir,'output'),'dir')
