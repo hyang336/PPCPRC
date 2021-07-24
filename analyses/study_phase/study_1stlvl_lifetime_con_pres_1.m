@@ -87,6 +87,7 @@ if ~isempty(life1)%if there is at least 1 trial for this condition
         life1_str=life1_str{1};
     else
         life1_str=sprintf(fmt,'i',1);
+        matlabbatch{1}.spm.util.imcalc.input{1}=strcat(project_derivative,'/',LSSN_foldername,'/',sub,'/temp/task-study_run_',num2str(pres_1_event{life1,14}),'/trial_',num2str(pres_1_event{life1,15}),'/beta_0001.nii');
     end
     matlabbatch{1}.spm.util.imcalc.output = 'life1_beta.nii';
     matlabbatch{1}.spm.util.imcalc.outdir = {temp_dir};
@@ -109,6 +110,7 @@ if ~isempty(life2)%if there is at least 1 trial for this condition
         life2_str=life2_str{1};
     else
         life2_str=sprintf(fmt,'i',1);
+        matlabbatch{1}.spm.util.imcalc.input{1}=strcat(project_derivative,'/',LSSN_foldername,'/',sub,'/temp/task-study_run_',num2str(pres_1_event{life2,14}),'/trial_',num2str(pres_1_event{life2,15}),'/beta_0001.nii');
     end
     matlabbatch{1}.spm.util.imcalc.output = 'life2_beta.nii';
     matlabbatch{1}.spm.util.imcalc.outdir = {temp_dir};
@@ -131,6 +133,7 @@ if ~isempty(life3)%if there is at least 1 trial for this condition
         life3_str=life3_str{1};
     else
         life3_str=sprintf(fmt,'i',1);
+        matlabbatch{1}.spm.util.imcalc.input{1}=strcat(project_derivative,'/',LSSN_foldername,'/',sub,'/temp/task-study_run_',num2str(pres_1_event{life3,14}),'/trial_',num2str(pres_1_event{life3,15}),'/beta_0001.nii');
     end
     matlabbatch{1}.spm.util.imcalc.output = 'life3_beta.nii';
     matlabbatch{1}.spm.util.imcalc.outdir = {temp_dir};
@@ -153,6 +156,7 @@ if ~isempty(life4)%if there is at least 1 trial for this condition
         life4_str=life4_str{1};
     else
         life4_str=sprintf(fmt,'i',1);
+        matlabbatch{1}.spm.util.imcalc.input{1}=strcat(project_derivative,'/',LSSN_foldername,'/',sub,'/temp/task-study_run_',num2str(pres_1_event{life4,14}),'/trial_',num2str(pres_1_event{life4,15}),'/beta_0001.nii');
     end
     matlabbatch{1}.spm.util.imcalc.output = 'life4_beta.nii';
     matlabbatch{1}.spm.util.imcalc.outdir = {temp_dir};
@@ -175,6 +179,7 @@ if ~isempty(life5)%if there is at least 1 trial for this condition
         life5_str=life5_str{1};
     else
         life5_str=sprintf(fmt,'i',1);
+        matlabbatch{1}.spm.util.imcalc.input{1}=strcat(project_derivative,'/',LSSN_foldername,'/',sub,'/temp/task-study_run_',num2str(pres_1_event{life5,14}),'/trial_',num2str(pres_1_event{life5,15}),'/beta_0001.nii');
     end
     matlabbatch{1}.spm.util.imcalc.output = 'life5_beta.nii';
     matlabbatch{1}.spm.util.imcalc.outdir = {temp_dir};
