@@ -220,7 +220,7 @@ else %adjust for empty condition
     inc(zero_cond)=[];
     dec(zero_cond)=[];
     for i=1:size(life,2)
-        matlabbatch{1}.spm.util.imcalc.input{i,1}=strcat(temp_dir,'/life',num2str(i),'_beta.nii');
+        matlabbatch{1}.spm.util.imcalc.input{i,1}=strcat(temp_dir,'/',life{1,i},'_beta.nii');
         lifeinc_str{i}=[inc{i},'.*',sprintf(fmt,'i',i)];
         lifedec_str{i}=[dec{i},'.*',sprintf(fmt,'i',i)];
     end
