@@ -4,6 +4,9 @@
 % consider different presentations or different level of
 % post-scan lifetime familiarity as different conditions
 
+% Does not spatially smooth the data since this is mainly
+% for MVPA
+
 function study_1stlvl_LSSN_softAROMA(project_derivative,output,sub,expstart_vol,fmriprep_foldername,TR,maskfile,onset_mode,Nis)
 
 switch Nis %how to model "N"
@@ -40,12 +43,7 @@ switch Nis %how to model "N"
         %load the nii files, primarily to get the number of time points
         substr.runexp=spm_vol(strcat(temp_dir,erase(substr.run,'.gz')));
         
-        %call smooth function, which is in
-        %analyses/pilot/
-        %smooth the unzipped .nii files, return smoothed
-        %.nii as 1-by-run cells to a field in substr
-        substr.runsmooth=crapsmoothspm(temp_dir,erase(substr.run,'.gz'),[4 4 4]);
-        
+   
         %load post-scan ratings
         [~,~,raw]=xlsread(strcat(project_derivative,'/behavioral/',sub,'/',erase(sub,'sub-'),'_task-pscan_data.xlsx'));
         substr.postscan=raw;
@@ -80,7 +78,7 @@ switch Nis %how to model "N"
             comma=repmat(',',(length(substr.runexp{j})-1+1),1);
             comma=cellstr(comma);
             prefix=cell(length(slice),1);
-            prefix(:)={substr.runexp{j}.fname};%should be a unique run name
+            prefix(:)={substr.runexp{j}.fname};%should be a unique run name, using non-smoothed data
             sliceinfo=cellfun(@strcat,prefix,comma,slice,'UniformOutput',false);
             
             %conditions are difined on the number of
@@ -287,12 +285,6 @@ switch Nis %how to model "N"
         %gunzip(maskfile,temp_dir);
         %load the nii files, primarily to get the number of time points
         substr.runexp=spm_vol(strcat(temp_dir,erase(substr.run,'.gz')));
-        
-        %call smooth function, which is in
-        %analyses/pilot/
-        %smooth the unzipped .nii files, return smoothed
-        %.nii as 1-by-run cells to a field in substr
-        substr.runsmooth=crapsmoothspm(temp_dir,erase(substr.run,'.gz'),[4 4 4]);
         
         %load post-scan ratings
         [~,~,raw]=xlsread(strcat(project_derivative,'/behavioral/',sub,'/',erase(sub,'sub-'),'_task-pscan_data.xlsx'));

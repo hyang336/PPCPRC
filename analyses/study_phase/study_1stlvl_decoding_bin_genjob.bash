@@ -16,7 +16,7 @@ else
 fi
 if [ "$#" -eq 6 ]; then
 	for sub in $subs; do
-		echo 'matlab -nosplash -nodisplay -r "addpath(genpath('"'/home/hyang336/matlab/'"')); addpath(genpath('"'/home/hyang336/PPCPRC/'"')); study_1stlvl_SVM_bin('"'$project_derivatives'"','"'$fmriprep_fn'"','"'$LSSN_foldername'"','"'ASHS_foldername'"','"'$output_dir'"','"'$suffix$sub'"'); exit;"' 
+		echo 'matlab -nosplash -nodisplay -r "addpath(genpath('"'/home/hyang336/matlab/'"')); addpath(genpath('"'/home/hyang336/PPCPRC/'"')); study_1stlvl_SVM_bin('"'$project_derivatives'"','"'$fmriprep_fn'"','"'$LSSN_foldername'"','"'$ASHS_foldername'"','"'$output_dir'"','"'$suffix$sub'"'); exit;"' 
 	done
 else
 usage
