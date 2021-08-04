@@ -32,7 +32,7 @@ end
 [freq_high,~]=find(cellfun(@(x) mod(x,10),runevent(:,2))==6|cellfun(@(x) mod(x,10),runevent(:,2))==7|cellfun(@(x) mod(x,10),runevent(:,2))==8|cellfun(@(x) mod(x,10),runevent(:,2))==9);
 [freq_low,~]=find(cellfun(@(x) mod(x,10),runevent(:,2))==1|cellfun(@(x) mod(x,10),runevent(:,2))==2|cellfun(@(x) mod(x,10),runevent(:,2))==3|cellfun(@(x) mod(x,10),runevent(:,2))==4);
 %recode lifetime around subject mean
-submean=mean(str2num(cell2mat(runevent(:,13))));%calculate mean
+submean=nanmean(str2num(cell2mat(runevent(:,13))));%calculate mean
 runevent(:,13)=num2cell(str2num(cell2mat(runevent(:,13))));%replace lifetime with num
 [life_high,~]=find(cellfun(@(x) x>submean,runevent(:,13)));
 [life_low,~]=find(cellfun(@(x) x<submean,runevent(:,13)));
@@ -71,15 +71,15 @@ for i=1:length(freq_high_sample)
    beta_img=niftiread(strcat(project_derivative,'/',LSS_dir,'/',sub,'/temp/task-study_run_',num2str(freq_high_data{i,14}),'/trial_',num2str(freq_high_data{i,15}),'/beta_0001.nii'));
    assert(all(size(beta_img)==size(lPrC_mask)));%make sure the beta image and the mask is in the same space
    PrC_beta=beta_img(find(lPrC_mask));
-   freq_high_data{i,16}=PrC_beta(~isnan(PrC_beta));%remove NaN which are probably voxels outside the brain
-   freq_high_feat=[freq_high_feat;PrC_beta(~isnan(PrC_beta))'];
+   freq_high_data{i,16}=PrC_beta;%remove NaN which are probably voxels outside the brain
+   freq_high_feat=[freq_high_feat;PrC_beta'];
    
    freq_low_data(i,1:15)=runevent(freq_low_sample(i),:);
    beta_img=niftiread(strcat(project_derivative,'/',LSS_dir,'/',sub,'/temp/task-study_run_',num2str(freq_low_data{i,14}),'/trial_',num2str(freq_low_data{i,15}),'/beta_0001.nii'));
    assert(all(size(beta_img)==size(lPrC_mask)));%make sure the beta image and the mask is in the same space
    PrC_beta=beta_img(find(lPrC_mask));
-   freq_low_data{i,16}=PrC_beta(~isnan(PrC_beta));
-   freq_low_feat=[freq_low_feat;PrC_beta(~isnan(PrC_beta))'];
+   freq_low_data{i,16}=PrC_beta;
+   freq_low_feat=[freq_low_feat;PrC_beta'];
 end
 
 %actually I don't need all those variables above, just
@@ -90,7 +90,12 @@ labels(length(freq_high_sample)+1:end,1)={'low'};
 
 features=[freq_high_feat;freq_low_feat];
 
-freq_SVM=fitclinear(features,labels,'KFold',5);
+%remove columns(voxels) with NaNs in any run and in any
+%condition
+feature_consistent=features;
+feature_consistent(:,any(isnan(feature_consistent),1))=[];
+
+freq_SVM=fitclinear(feature_consistent,labels,'KFold',5);
 freq_error=kfoldLoss(freq_SVM);
 
 %% cross-validated training and testing on lifetime
@@ -103,15 +108,15 @@ for i=1:length(life_high_sample)
    beta_img=niftiread(strcat(project_derivative,'/',LSS_dir,'/',sub,'/temp/task-study_run_',num2str(life_high_data{i,14}),'/trial_',num2str(life_high_data{i,15}),'/beta_0001.nii'));
    assert(all(size(beta_img)==size(lPrC_mask)));%make sure the beta image and the mask is in the same space
    PrC_beta=beta_img(find(lPrC_mask));
-   life_high_data{i,16}=PrC_beta(~isnan(PrC_beta));%remove NaN which are probably voxels outside the brain
-   life_high_feat=[life_high_feat;PrC_beta(~isnan(PrC_beta))'];
+   life_high_data{i,16}=PrC_beta;%remove NaN which are probably voxels outside the brain
+   life_high_feat=[life_high_feat;PrC_beta'];
    
    life_low_data(i,1:15)=runevent(life_low_sample(i),:);
    beta_img=niftiread(strcat(project_derivative,'/',LSS_dir,'/',sub,'/temp/task-study_run_',num2str(life_low_data{i,14}),'/trial_',num2str(life_low_data{i,15}),'/beta_0001.nii'));
    assert(all(size(beta_img)==size(lPrC_mask)));%make sure the beta image and the mask is in the same space
    PrC_beta=beta_img(find(lPrC_mask));
-   life_low_data{i,16}=PrC_beta(~isnan(PrC_beta));
-   life_low_feat=[life_low_feat;PrC_beta(~isnan(PrC_beta))'];
+   life_low_data{i,16}=PrC_beta;
+   life_low_feat=[life_low_feat;PrC_beta'];
 end
 
 %actually I don't need all those variables above, just
@@ -122,7 +127,12 @@ labels(length(life_high_sample)+1:end,1)={'low'};
 
 features=[life_high_feat;life_low_feat];
 
-life_SVM=fitclinear(features,labels,'KFold',5);
+%remove columns(voxels) with NaNs in any run and in any
+%condition
+feature_consistent=features;
+feature_consistent(:,any(isnan(feature_consistent),1))=[];
+
+life_SVM=fitclinear(feature_consistent,labels,'KFold',5);
 life_error=kfoldLoss(life_SVM);
 
 
