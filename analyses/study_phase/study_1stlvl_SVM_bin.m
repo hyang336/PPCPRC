@@ -31,18 +31,18 @@ end
 %recode freq
 [freq_high,~]=find(cellfun(@(x) mod(x,10),runevent(:,2))==6|cellfun(@(x) mod(x,10),runevent(:,2))==7|cellfun(@(x) mod(x,10),runevent(:,2))==8|cellfun(@(x) mod(x,10),runevent(:,2))==9);
 [freq_low,~]=find(cellfun(@(x) mod(x,10),runevent(:,2))==1|cellfun(@(x) mod(x,10),runevent(:,2))==2|cellfun(@(x) mod(x,10),runevent(:,2))==3|cellfun(@(x) mod(x,10),runevent(:,2))==4);
-%recode lifetime around subject mean
-submean=nanmean(str2double(runevent(:,13)));%calculate mean
+% %recode lifetime around subject mean
+% submean=nanmean(str2double(runevent(:,13)));%calculate mean
 runevent(:,13)=num2cell(str2double(runevent(:,13)));%replace lifetime with num
-[life_high,~]=find(cellfun(@(x) x>submean,runevent(:,13)));
-[life_low,~]=find(cellfun(@(x) x<submean,runevent(:,13)));
+[life_high,~]=find(cellfun(@(x) x>3,runevent(:,13)));
+[life_low,~]=find(cellfun(@(x) x<3,runevent(:,13)));
 
 %% sample trials to equalize high vs. low 10 times to guarantee every trial is at least included once following (Martin et al. 2013, 2016)
 % 1. First sample the larger class (a) n times without replacement until we have
 % less trials (x) than the smaller class (b), then sample
 % b-a from a-b, which guarantees that all trials are
 % included at least once. Then we just randomly sample
-% without replacement from a until we have 10 samples.
+% without replacement from a until we have at least 10 samples.
 
  %to train on freq
  if length(freq_high)<=length(freq_low)
