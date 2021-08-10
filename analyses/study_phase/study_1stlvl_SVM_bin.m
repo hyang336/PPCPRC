@@ -136,15 +136,15 @@ for m=1:max(length(freq_high_sample),length(freq_low_sample))
     %select trials for each sample
     if length(freq_high_sample)>length(freq_low_sample)
         freq_low_trials=freq_low_sample{1};
-        freq_high_trials=freq_high_sample{m}
+        freq_high_trials=freq_high_sample{m};
     else
         freq_low_trials=freq_low_sample{m};
         freq_high_trials=freq_high_sample{1};
     end
     % features and labels
-    labels=cell(length(freq_high_trials)+length(freq_low_trials),1);
-    labels(1:length(freq_high_trials),1)={'high'};
-    labels(length(freq_high_trials)+1:end,1)={'low'};
+    classes=cell(length(freq_high_trials)+length(freq_low_trials),1);
+    classes(1:length(freq_high_trials),1)={'high'};
+    classes(length(freq_high_trials)+1:end,1)={'low'};
     
     %assert that the two classes have the same number of trials otherwise
     %the for-loop below needs to be more complex
@@ -169,14 +169,14 @@ for m=1:max(length(freq_high_sample),length(freq_low_sample))
     lPrC_betas=[freq_high_PrC;freq_low_PrC];
     
     % Divide data into n=5 bins for cross-validation   
-    cv_split=cvpartition(length(labels),'KFold',cvfold);
+    cv_split=cvpartition(length(classes),'KFold',cvfold);
     
     % cross validation loop for freq
     for n = 1:cvfold %using 5-fold cross-validation       
         % Feature/voxel selection using ANOVA then rank ordering F-values
         test_trials=cv_split.test(n);
         X=lPrC_betas(~test_trials,:);%training data
-        Y=labels(~test_trials);%training label
+        Y=classes(~test_trials);%training label
         for voxel=1:size(X,2)%run one-way ANOVA for each voxel
             [~,tbl,~] = anova1(X(:,voxel),Y,'off');
             %checks for the ANOVA table size
@@ -188,105 +188,93 @@ for m=1:max(length(freq_high_sample),length(freq_low_sample))
         % all NaNs in the data since voxels outside the brain is very
         % unlikely to have the largest F-values
         [~,topvoxels]=maxk(Fval,ceil(length(Fval)*0.1));
-
+        %save the top voxel indices in a tensor for later calculation of overlap
+        freq_voxels(m,:,n)=topvoxels;
+        
         % Train
-
+        model=fitcsvm(X(:,topvoxels),Y);
         % Test
-
+        predictions=predict(model,lPrC_betas(test_trials,topvoxels));
         % Compile results
+        freq_accuracy(m,n)=sum(strcmp(classes(test_trials),predictions))/length(predictions);
+    end    
+end
+
+
+%% training and testing loop for life
+for m=1:max(length(life_high_sample),length(life_low_sample))
+    %select trials for each sample
+    if length(life_high_sample)>length(life_low_sample)
+        life_low_trials=life_low_sample{1};
+        life_high_trials=life_high_sample{m};
+    else
+        life_low_trials=life_low_sample{m};
+        life_high_trials=life_high_sample{1};
     end
-end
-
-
-
-
-
-
-
-
-
-
-
-%% cross-validated training and testing on freq
-
-freq_high_data=cell(length(freq_high_sample),16);
-freq_low_data=cell(length(freq_low_sample),16);
-freq_high_feat=[];
-freq_low_feat=[];
-for o=1:length(freq_high_sample)
-    freq_high_data(o,1:15)=runevent(freq_high_sample(o),:);
-    beta_img=niftiread(strcat(project_derivative,'/',LSS_dir,'/',sub,'/temp/task-study_run_',num2str(freq_high_data{o,14}),'/trial_',num2str(freq_high_data{o,15}),'/beta_0001.nii'));
-    assert(all(size(beta_img)==size(lPrC_mask)));%make sure the beta image and the mask is in the same space
-    PrC_beta=beta_img(find(lPrC_mask));
-    freq_high_data{o,16}=PrC_beta;%remove NaN which are probably voxels outside the brain
-    freq_high_feat=[freq_high_feat;PrC_beta'];
+    % features and labels
+    classes=cell(length(life_high_trials)+length(life_low_trials),1);
+    classes(1:length(life_high_trials),1)={'high'};
+    classes(length(life_high_trials)+1:end,1)={'low'};
     
-    freq_low_data(o,1:15)=runevent(freq_low_sample(o),:);
-    beta_img=niftiread(strcat(project_derivative,'/',LSS_dir,'/',sub,'/temp/task-study_run_',num2str(freq_low_data{o,14}),'/trial_',num2str(freq_low_data{o,15}),'/beta_0001.nii'));
-    assert(all(size(beta_img)==size(lPrC_mask)));%make sure the beta image and the mask is in the same space
-    PrC_beta=beta_img(find(lPrC_mask));
-    freq_low_data{o,16}=PrC_beta;
-    freq_low_feat=[freq_low_feat;PrC_beta'];
-end
-
-%actually I don't need all those variables above, just
-%generate two arrays, one for lable, the other for betas
-labels=cell(length(freq_high_sample)+length(freq_low_sample),1);
-labels(1:length(freq_high_sample),1)={'high'};
-labels(length(freq_high_sample)+1:end,1)={'low'};
-
-features=[freq_high_feat;freq_low_feat];
-
-%remove columns(voxels) with NaNs in any run and in any
-%condition
-feature_consistent=features;
-feature_consistent(:,any(isnan(feature_consistent),1))=[];
-
-freq_SVM=fitclinear(feature_consistent,labels,'KFold',5);
-freq_error=kfoldLoss(freq_SVM);
-
-%% cross-validated training and testing on lifetime
-life_high_data=cell(length(life_high_sample),16);
-life_low_data=cell(length(life_low_sample),16);
-life_high_feat=[];
-life_low_feat=[];
-for o=1:length(life_high_sample)
-    life_high_data(o,1:15)=runevent(life_high_sample(o),:);
-    beta_img=niftiread(strcat(project_derivative,'/',LSS_dir,'/',sub,'/temp/task-study_run_',num2str(life_high_data{o,14}),'/trial_',num2str(life_high_data{o,15}),'/beta_0001.nii'));
-    assert(all(size(beta_img)==size(lPrC_mask)));%make sure the beta image and the mask is in the same space
-    PrC_beta=beta_img(find(lPrC_mask));
-    life_high_data{o,16}=PrC_beta;%remove NaN which are probably voxels outside the brain
-    life_high_feat=[life_high_feat;PrC_beta'];
+    %assert that the two classes have the same number of trials otherwise
+    %the for-loop below needs to be more complex
+    assert(length(life_high_trials)==length(life_low_trials));
+    life_high_PrC=[];
+	life_low_PrC=[];
+    for o=1:length(life_high_trials)
+        life_high_data(o,1:15)=runevent(life_high_trials(o),:);
+        beta_img=niftiread(strcat(project_derivative,'/',LSS_dir,'/',sub,'/temp/task-study_run_',num2str(life_high_data{o,14}),'/trial_',num2str(life_high_data{o,15}),'/beta_0001.nii'));
+        assert(all(size(beta_img)==size(lPrC_mask)));%make sure the beta image and the mask is in the same space
+        PrC_beta=beta_img(find(lPrC_mask));
+        life_high_PrC=[life_high_PrC;PrC_beta'];
+        
+        life_low_data(o,1:15)=runevent(life_low_trials(o),:);
+        beta_img=niftiread(strcat(project_derivative,'/',LSS_dir,'/',sub,'/temp/task-study_run_',num2str(life_low_data{o,14}),'/trial_',num2str(life_low_data{o,15}),'/beta_0001.nii'));
+        assert(all(size(beta_img)==size(lPrC_mask)));%make sure the beta image and the mask is in the same space
+        PrC_beta=beta_img(find(lPrC_mask));
+        life_low_PrC=[life_low_PrC;PrC_beta'];
+    end
     
-    life_low_data(o,1:15)=runevent(life_low_sample(o),:);
-    beta_img=niftiread(strcat(project_derivative,'/',LSS_dir,'/',sub,'/temp/task-study_run_',num2str(life_low_data{o,14}),'/trial_',num2str(life_low_data{o,15}),'/beta_0001.nii'));
-    assert(all(size(beta_img)==size(lPrC_mask)));%make sure the beta image and the mask is in the same space
-    PrC_beta=beta_img(find(lPrC_mask));
-    life_low_data{o,16}=PrC_beta;
-    life_low_feat=[life_low_feat;PrC_beta'];
+    % concatenate lPrC betas for the two classes for this sample
+    lPrC_betas=[life_high_PrC;life_low_PrC];
+    
+    % Divide data into n=5 bins for cross-validation   
+    cv_split=cvpartition(length(classes),'KFold',cvfold);
+    
+    % cross validation loop for life
+    for n = 1:cvfold %using 5-fold cross-validation       
+        % Feature/voxel selection using ANOVA then rank ordering F-values
+        test_trials=cv_split.test(n);
+        X=lPrC_betas(~test_trials,:);%training data
+        Y=classes(~test_trials);%training label
+        for voxel=1:size(X,2)%run one-way ANOVA for each voxel
+            [~,tbl,~] = anova1(X(:,voxel),Y,'off');
+            %checks for the ANOVA table size
+            assert(size(tbl,1)==4);
+            assert(size(tbl,2)==6);
+            Fval(voxel)=tbl{2,5};%hard-coded for now since the ANOVA table is a cell array and should have consistent structure
+        end
+        % Find voxels with the top 10% of F-value, this should also get rid of
+        % all NaNs in the data since voxels outside the brain is very
+        % unlikely to have the largest F-values
+        [~,topvoxels]=maxk(Fval,ceil(length(Fval)*0.1));
+        %save the top voxel indices in a tensor for later calculation of overlap
+        life_voxels(m,:,n)=topvoxels;
+        
+        % Train
+        model=fitcsvm(X(:,topvoxels),Y);
+        % Test
+        predictions=predict(model,lPrC_betas(test_trials,topvoxels));
+        % Compile results
+        life_accuracy(m,n)=sum(strcmp(classes(test_trials),predictions))/length(predictions);
+    end    
 end
-
-%actually I don't need all those variables above, just
-%generate two arrays, one for lable, the other for betas
-labels=cell(length(life_high_sample)+length(life_low_sample),1);
-labels(1:length(life_high_sample),1)={'high'};
-labels(length(life_high_sample)+1:end,1)={'low'};
-
-features=[life_high_feat;life_low_feat];
-
-%remove columns(voxels) with NaNs in any run and in any
-%condition
-feature_consistent=features;
-feature_consistent(:,any(isnan(feature_consistent),1))=[];
-
-life_SVM=fitclinear(feature_consistent,labels,'KFold',5);
-life_error=kfoldLoss(life_SVM);
 
 
 %% save the output
 if ~exist(strcat(output,'/',sub),'dir')
     mkdir (strcat(output,'/',sub));
 end
-save(strcat(output,'/',sub,'/SVM_results.mat'),'freq_SVM','freq_error','life_SVM','life_error');
+save(strcat(output,'/',sub,'/SVM_results.mat'),'freq_voxels','freq_accuracy','life_voxels','life_accuracy');
 
 end
