@@ -11,9 +11,9 @@ function postscan_lifetime_1stlvl_softAROMA(project_derivative,output,sub,expsta
 %sub needs to be in the format of 'sub-xxx'
 switch onset_mode %how to model onsets of events (Grinband et al. 2008)
     case 'var_epoch'
-        sub_dir=strcat(output,'/postscan_lifetime_softAROMA_var-epoch_pmod/',sub);
+        sub_dir=strcat(output,'/postscan_lifetime_softAROMA_var-epoch/',sub);
     case 'const_epoch'
-        sub_dir=strcat(output,'/postscan_lifetime_softAROMA_const-epoch_pmod/',sub);
+        sub_dir=strcat(output,'/postscan_lifetime_softAROMA_const-epoch/',sub);
 end
 
 
@@ -83,13 +83,13 @@ end
                 end
                 
                 %% define conditions with postscan lifetime familiarity ratings
+                noresp=substr.runevent{j}(cellfun(@(x) isnan(x),substr.runevent{j}(:,6)),:);%trials participants did not repond, cant be sure if they perceived the stimulus
                 if ~ismember(sub,{'sub-020','sub-022'})
                     lifetime_1=substr.runevent{j}(cellfun(@(x) strcmp(x,'1'),substr.runevent{j}(:,13)),:);
                     lifetime_2=substr.runevent{j}(cellfun(@(x) strcmp(x,'2'),substr.runevent{j}(:,13)),:);
                     lifetime_3=substr.runevent{j}(cellfun(@(x) strcmp(x,'3'),substr.runevent{j}(:,13)),:);
                     lifetime_4=substr.runevent{j}(cellfun(@(x) strcmp(x,'4'),substr.runevent{j}(:,13)),:);
-                    lifetime_5=substr.runevent{j}(cellfun(@(x) strcmp(x,'5'),substr.runevent{j}(:,13)),:);
-                    noresp=substr.runevent{j}(cellfun(@(x) isnan(x),substr.runevent{j}(:,13)),:);
+                    lifetime_5=substr.runevent{j}(cellfun(@(x) strcmp(x,'5'),substr.runevent{j}(:,13)),:); 
                 else
                     %otherwise use normative ratings
                     %our stimuli (180 in total) has a
