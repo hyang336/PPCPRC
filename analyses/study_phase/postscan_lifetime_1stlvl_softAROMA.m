@@ -83,7 +83,11 @@ end
                 end
                 
                 %% define conditions with postscan lifetime familiarity ratings
-                noresp=substr.runevent{j}(cellfun(@(x) isnan(x),substr.runevent{j}(:,6)),:);%trials participants did not repond, cant be sure if they perceived the stimulus
+                %trials participants did not repond, cant be sure if they perceived the stimulus
+                respnan=cellfun(@(x) isnan(x),substr.runevent{j}(:,6),'UniformOutput',0);%more complicated than test phase because now the resp has more than one characters in each cell
+                noresp_trials=cellfun(@(x) any(x), respnan);
+                noresp=substr.runevent{j}(noresp_trials,:);
+                
                 if ~ismember(sub,{'sub-020','sub-022'})
                     lifetime_1=substr.runevent{j}(cellfun(@(x) strcmp(x,'1'),substr.runevent{j}(:,13)),:);
                     lifetime_2=substr.runevent{j}(cellfun(@(x) strcmp(x,'2'),substr.runevent{j}(:,13)),:);
