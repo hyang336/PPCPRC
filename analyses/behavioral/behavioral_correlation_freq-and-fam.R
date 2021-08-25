@@ -184,17 +184,33 @@ postscan_frame$pearson_R=as.numeric(postscan_frame$pearson_R)
 #account for the correction of lifetime-irr ratings we did in the fMRI analyses
 freqpost_frame_corr=freqpost_frame
 freqpost_frame_corr=freqpost_frame_corr[freqpost_frame_corr$SSID!='010',]#remove sub-010
-#replace postscan ratings with norm ratings for 4 subs
+
+#2SD cutoff for postscan_frame
+postscan_sd=sd(unlist(postscan_frame$pearson_R))
+postscan_low=mean(unlist(postscan_frame$pearson_R))-2*postscan_sd
+postscan_high=mean(unlist(postscan_frame$pearson_R))+2*postscan_sd
+#020 and 022 are below the 2SD cutoff, they also have negative correlations
+
+#replace postscan ratings with norm ratings for 020 and 022
 freqpost_frame_corr$pearson_R[freqpost_frame_corr$SSID=='020']=freqnorm_frame$pearson_R[freqnorm_frame$SSID=='020']
 freqpost_frame_corr$pearson_R[freqpost_frame_corr$SSID=='022']=freqnorm_frame$pearson_R[freqnorm_frame$SSID=='022']
-freqpost_frame_corr$pearson_R[freqpost_frame_corr$SSID=='023']=freqnorm_frame$pearson_R[freqnorm_frame$SSID=='023']
-freqpost_frame_corr$pearson_R[freqpost_frame_corr$SSID=='029']=freqnorm_frame$pearson_R[freqnorm_frame$SSID=='029']
 
 #t test correlation between freq judgement and postscan ratings against 0
 t.test(unlist(freqpost_frame_corr$pearson_R))
 
+#t tests for freq and fam judgement, excluding sub-010
+freq_frame=freq_frame[freq_frame$SSID!='010',]
+t.test(unlist(freq_frame$pearson_R))
+fam_frame=fam_frame[fam_frame$SSID!='010',]
+t.test(unlist(fam_frame$pearson_R))
+postscan_frame=postscan_frame[postscan_frame$SSID!='010',]
+t.test(unlist(postscan_frame$pearson_R))
+
 #t test for correlation between postscan and objective frequency
 objfreqpostscan_frame_corr=objfreqpostscan_frame[objfreqpostscan_frame$SSID!='010',]#remove sub-010
+#replace postscan ratings with norm ratings for 020 and 022
+objfreqpostscan_frame_corr$pearson_R[objfreqpostscan_frame_corr$SSID=='020']=normobjfreq_frame$pearson_R[normobjfreq_frame$SSID=='020']
+objfreqpostscan_frame_corr$pearson_R[objfreqpostscan_frame_corr$SSID=='022']=normobjfreq_frame$pearson_R[normobjfreq_frame$SSID=='022']
 t.test(unlist(objfreqpostscan_frame_corr$pearson_R))
 
 #RT analyses of the frequency task, also as a basis to define accurate and inaccurate trials for DDM

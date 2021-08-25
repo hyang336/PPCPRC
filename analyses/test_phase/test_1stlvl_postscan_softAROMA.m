@@ -97,7 +97,7 @@ end
                 %trials
                 [o,l]=ismember(freq_trials(:,10),substr.postscan(:,6));%find stimuli                
                 freq_trials(:,11)=substr.postscan(l,11);%fill in post-scan ratings
-                if ~ismember(sub,{'sub-020','sub-022','sub-023','sub-029'}) % these 4 subjects have nonsignificant correlation between their postscan ratings and normative data
+                if ~ismember(sub,{'sub-020','sub-022'}) % these 2 subjects had negative correlation between their postscan ratings and normative data
                     %if not these subjects, use postscan
                     %ratings
                     lifetime_irr_1=freq_trials(cellfun(@(x)x=='1',freq_trials(:,11)),:);

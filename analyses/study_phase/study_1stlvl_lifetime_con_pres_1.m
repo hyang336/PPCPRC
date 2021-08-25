@@ -46,7 +46,26 @@ for j=1:5 %loop through 5 runs
     substr.runevent{j}=load_event_test(project_derivative,sub,task,run,expstart_vol,TR);
     substr.runevent{j}(:,14)={j};%run number
     for s=1:size(substr.runevent{j},1)
-        postscan_rating=substr.postscan{strcmp(substr.postscan(:,6),substr.runevent{j}{s,10}),11};
+        if ~ismember(sub,{'sub-020','sub-022'})%use normative data for these 2, otherwise use postscan ratings
+            postscan_rating=substr.postscan{strcmp(substr.postscan(:,6),substr.runevent{j}{s,10}),11};
+        else
+            %our stimuli (180 in total) has a
+            %normative rating ranging from 1.75 to
+            %8.95, the cutoffs were defined by
+            %evenly dividing that range into 5
+            %intervals
+            if substr.runevent{j}{s,3}<=3.19
+                postscan_rating='1';
+            elseif substr.runevent{j}{s,3}>3.19&&substr.runevent{j}{s,3}<=4.63
+                postscan_rating='2';
+            elseif substr.runevent{j}{s,3}>4.63&&substr.runevent{j}{s,3}<=6.07
+                postscan_rating='3';
+            elseif substr.runevent{j}{s,3}>6.07&&substr.runevent{j}{s,3}<=7.51
+                postscan_rating='4';
+            elseif substr.runevent{j}{s,3}>7.51
+                postscan_rating='5';
+            end            
+        end
         substr.runevent{j}{s,13}=postscan_rating;%replace with postscan ratings
         substr.runevent{j}{s,15}=s;%trial number
     end

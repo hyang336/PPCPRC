@@ -83,13 +83,26 @@ end
                 end
                 
                 %% define conditions with postscan lifetime familiarity ratings
-                lifetime_1=substr.runevent{j}(cellfun(@(x) strcmp(x,'1'),substr.runevent{j}(:,13)),:);
-                lifetime_2=substr.runevent{j}(cellfun(@(x) strcmp(x,'2'),substr.runevent{j}(:,13)),:);
-                lifetime_3=substr.runevent{j}(cellfun(@(x) strcmp(x,'3'),substr.runevent{j}(:,13)),:);
-                lifetime_4=substr.runevent{j}(cellfun(@(x) strcmp(x,'4'),substr.runevent{j}(:,13)),:);
-                lifetime_5=substr.runevent{j}(cellfun(@(x) strcmp(x,'5'),substr.runevent{j}(:,13)),:);
-                noresp=substr.runevent{j}(cellfun(@(x) isnan(x),substr.runevent{j}(:,13)),:);
-              
+                if ~ismember(sub,{'sub-020','sub-022'})
+                    lifetime_1=substr.runevent{j}(cellfun(@(x) strcmp(x,'1'),substr.runevent{j}(:,13)),:);
+                    lifetime_2=substr.runevent{j}(cellfun(@(x) strcmp(x,'2'),substr.runevent{j}(:,13)),:);
+                    lifetime_3=substr.runevent{j}(cellfun(@(x) strcmp(x,'3'),substr.runevent{j}(:,13)),:);
+                    lifetime_4=substr.runevent{j}(cellfun(@(x) strcmp(x,'4'),substr.runevent{j}(:,13)),:);
+                    lifetime_5=substr.runevent{j}(cellfun(@(x) strcmp(x,'5'),substr.runevent{j}(:,13)),:);
+                    noresp=substr.runevent{j}(cellfun(@(x) isnan(x),substr.runevent{j}(:,13)),:);
+                else
+                    %otherwise use normative ratings
+                    %our stimuli (180 in total) has a
+                    %normative rating ranging from 1.75 to
+                    %8.95, the cutoffs were defined by
+                    %evenly dividing that range into 5
+                    %intervals
+                    lifetime_1=substr.runevent{j}(cellfun(@(x)x<=3.19,substr.runevent{j}(:,3)),:);
+                    lifetime_2=substr.runevent{j}(cellfun(@(x)x>3.19&&x<=4.63,substr.runevent{j}(:,3)),:);
+                    lifetime_3=substr.runevent{j}(cellfun(@(x)x>4.63&&x<=6.07,substr.runevent{j}(:,3)),:);
+                    lifetime_4=substr.runevent{j}(cellfun(@(x)x>6.07&&x<=7.51,substr.runevent{j}(:,3)),:);
+                    lifetime_5=substr.runevent{j}(cellfun(@(x)x>7.51,substr.runevent{j}(:,3)),:);
+                end
                 %confounds
                 conf_name=strcat(project_derivative,'/',fmriprep_foldername,'/fmriprep/',sub,'/func/',sub,'_',task{1},run{1},'*confound*.tsv');%use task{1} and run{1} since it's iteratively defined
                 confstruct=dir(conf_name);

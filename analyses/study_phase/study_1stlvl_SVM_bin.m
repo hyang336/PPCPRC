@@ -262,9 +262,9 @@ for m=1:max(length(life_high_sample),length(life_low_sample))
         life_voxels(m,:,n)=topvoxels;
         
         % Train
-        model=fitcsvm(X(:,topvoxels),Y);
+        life_model=fitcsvm(X(:,topvoxels),Y);
         % Test
-        predictions=predict(model,lPrC_betas(test_trials,topvoxels));
+        predictions=predict(life_model,lPrC_betas(test_trials,topvoxels));
         % Compile results
         life_accuracy(m,n)=sum(strcmp(classes(test_trials),predictions))/length(predictions);
     end    
