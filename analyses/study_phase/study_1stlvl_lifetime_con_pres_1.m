@@ -76,12 +76,18 @@ end
 pres_1=find(cellfun(@(x) mod(x,10),runevent(:,2))==1);
 pres_1_event=runevent(pres_1,:);
 
+%disregard trials without response, since we cannot be sure that
+%participants perceived the stimulus
+respnan=cellfun(@(x) isnan(x),pres_1_event(:,6),'UniformOutput',0);%more complicated than test phase because now the resp has more than one characters in each cell
+noresp_trials=cellfun(@(x) any(x), respnan);
+pres_1_event_resp=pres_1_event(~noresp_trials,:);
+
 %find different levels of lifetime
-life1=find(strcmp(pres_1_event(:,13),'1'));
-life2=find(strcmp(pres_1_event(:,13),'2'));
-life3=find(strcmp(pres_1_event(:,13),'3'));
-life4=find(strcmp(pres_1_event(:,13),'4'));
-life5=find(strcmp(pres_1_event(:,13),'5'));
+life1=find(strcmp(pres_1_event_resp(:,13),'1'));
+life2=find(strcmp(pres_1_event_resp(:,13),'2'));
+life3=find(strcmp(pres_1_event_resp(:,13),'3'));
+life4=find(strcmp(pres_1_event_resp(:,13),'4'));
+life5=find(strcmp(pres_1_event_resp(:,13),'5'));
 
 %% load and average the corresponding beta.nii images for each level of lifetime familiarity
 
@@ -99,14 +105,14 @@ if ~isempty(life1)%if there is at least 1 trial for this condition
         temp_str=cell(0);
         for i=1:length(life1)
             temp_str{i}=sprintf(fmt,'i',i);
-            matlabbatch{1}.spm.util.imcalc.input{i,1}=strcat(project_derivative,'/',LSSN_foldername,'/',sub,'/temp/task-study_run_',num2str(pres_1_event{life1(i),14}),'/trial_',num2str(pres_1_event{life1(i),15}),'/beta_0001.nii');
+            matlabbatch{1}.spm.util.imcalc.input{i,1}=strcat(project_derivative,'/',LSSN_foldername,'/',sub,'/temp/task-study_run_',num2str(pres_1_event_resp{life1(i),14}),'/trial_',num2str(pres_1_event_resp{life1(i),15}),'/beta_0001.nii');
         end
         life1_str=join(temp_str,'+');
         life1_str=strcat('(',life1_str,')/',num2str(length(life1)));
         life1_str=life1_str{1};
     else
         life1_str=sprintf(fmt,'i',1);
-        matlabbatch{1}.spm.util.imcalc.input{1}=strcat(project_derivative,'/',LSSN_foldername,'/',sub,'/temp/task-study_run_',num2str(pres_1_event{life1,14}),'/trial_',num2str(pres_1_event{life1,15}),'/beta_0001.nii');
+        matlabbatch{1}.spm.util.imcalc.input{1}=strcat(project_derivative,'/',LSSN_foldername,'/',sub,'/temp/task-study_run_',num2str(pres_1_event_resp{life1,14}),'/trial_',num2str(pres_1_event_resp{life1,15}),'/beta_0001.nii');
     end
     matlabbatch{1}.spm.util.imcalc.output = 'life1_beta.nii';
     matlabbatch{1}.spm.util.imcalc.outdir = {temp_dir};
@@ -122,14 +128,14 @@ if ~isempty(life2)%if there is at least 1 trial for this condition
         temp_str=cell(0);
         for i=1:length(life2)
             temp_str{i}=sprintf(fmt,'i',i);
-            matlabbatch{1}.spm.util.imcalc.input{i,1}=strcat(project_derivative,'/',LSSN_foldername,'/',sub,'/temp/task-study_run_',num2str(pres_1_event{life2(i),14}),'/trial_',num2str(pres_1_event{life2(i),15}),'/beta_0001.nii');
+            matlabbatch{1}.spm.util.imcalc.input{i,1}=strcat(project_derivative,'/',LSSN_foldername,'/',sub,'/temp/task-study_run_',num2str(pres_1_event_resp{life2(i),14}),'/trial_',num2str(pres_1_event_resp{life2(i),15}),'/beta_0001.nii');
         end
         life2_str=join(temp_str,'+');
         life2_str=strcat('(',life2_str,')/',num2str(length(life2)));
         life2_str=life2_str{1};
     else
         life2_str=sprintf(fmt,'i',1);
-        matlabbatch{1}.spm.util.imcalc.input{1}=strcat(project_derivative,'/',LSSN_foldername,'/',sub,'/temp/task-study_run_',num2str(pres_1_event{life2,14}),'/trial_',num2str(pres_1_event{life2,15}),'/beta_0001.nii');
+        matlabbatch{1}.spm.util.imcalc.input{1}=strcat(project_derivative,'/',LSSN_foldername,'/',sub,'/temp/task-study_run_',num2str(pres_1_event_resp{life2,14}),'/trial_',num2str(pres_1_event_resp{life2,15}),'/beta_0001.nii');
     end
     matlabbatch{1}.spm.util.imcalc.output = 'life2_beta.nii';
     matlabbatch{1}.spm.util.imcalc.outdir = {temp_dir};
@@ -145,14 +151,14 @@ if ~isempty(life3)%if there is at least 1 trial for this condition
         temp_str=cell(0);
         for i=1:length(life3)
             temp_str{i}=sprintf(fmt,'i',i);
-            matlabbatch{1}.spm.util.imcalc.input{i,1}=strcat(project_derivative,'/',LSSN_foldername,'/',sub,'/temp/task-study_run_',num2str(pres_1_event{life3(i),14}),'/trial_',num2str(pres_1_event{life3(i),15}),'/beta_0001.nii');
+            matlabbatch{1}.spm.util.imcalc.input{i,1}=strcat(project_derivative,'/',LSSN_foldername,'/',sub,'/temp/task-study_run_',num2str(pres_1_event_resp{life3(i),14}),'/trial_',num2str(pres_1_event_resp{life3(i),15}),'/beta_0001.nii');
         end
         life3_str=join(temp_str,'+');
         life3_str=strcat('(',life3_str,')/',num2str(length(life3)));
         life3_str=life3_str{1};
     else
         life3_str=sprintf(fmt,'i',1);
-        matlabbatch{1}.spm.util.imcalc.input{1}=strcat(project_derivative,'/',LSSN_foldername,'/',sub,'/temp/task-study_run_',num2str(pres_1_event{life3,14}),'/trial_',num2str(pres_1_event{life3,15}),'/beta_0001.nii');
+        matlabbatch{1}.spm.util.imcalc.input{1}=strcat(project_derivative,'/',LSSN_foldername,'/',sub,'/temp/task-study_run_',num2str(pres_1_event_resp{life3,14}),'/trial_',num2str(pres_1_event_resp{life3,15}),'/beta_0001.nii');
     end
     matlabbatch{1}.spm.util.imcalc.output = 'life3_beta.nii';
     matlabbatch{1}.spm.util.imcalc.outdir = {temp_dir};
@@ -168,14 +174,14 @@ if ~isempty(life4)%if there is at least 1 trial for this condition
         temp_str=cell(0);
         for i=1:length(life4)
             temp_str{i}=sprintf(fmt,'i',i);
-            matlabbatch{1}.spm.util.imcalc.input{i,1}=strcat(project_derivative,'/',LSSN_foldername,'/',sub,'/temp/task-study_run_',num2str(pres_1_event{life4(i),14}),'/trial_',num2str(pres_1_event{life4(i),15}),'/beta_0001.nii');
+            matlabbatch{1}.spm.util.imcalc.input{i,1}=strcat(project_derivative,'/',LSSN_foldername,'/',sub,'/temp/task-study_run_',num2str(pres_1_event_resp{life4(i),14}),'/trial_',num2str(pres_1_event_resp{life4(i),15}),'/beta_0001.nii');
         end
         life4_str=join(temp_str,'+');
         life4_str=strcat('(',life4_str,')/',num2str(length(life4)));
         life4_str=life4_str{1};
     else
         life4_str=sprintf(fmt,'i',1);
-        matlabbatch{1}.spm.util.imcalc.input{1}=strcat(project_derivative,'/',LSSN_foldername,'/',sub,'/temp/task-study_run_',num2str(pres_1_event{life4,14}),'/trial_',num2str(pres_1_event{life4,15}),'/beta_0001.nii');
+        matlabbatch{1}.spm.util.imcalc.input{1}=strcat(project_derivative,'/',LSSN_foldername,'/',sub,'/temp/task-study_run_',num2str(pres_1_event_resp{life4,14}),'/trial_',num2str(pres_1_event_resp{life4,15}),'/beta_0001.nii');
     end
     matlabbatch{1}.spm.util.imcalc.output = 'life4_beta.nii';
     matlabbatch{1}.spm.util.imcalc.outdir = {temp_dir};
@@ -191,14 +197,14 @@ if ~isempty(life5)%if there is at least 1 trial for this condition
         temp_str=cell(0);
         for i=1:length(life5)
             temp_str{i}=sprintf(fmt,'i',i);
-            matlabbatch{1}.spm.util.imcalc.input{i,1}=strcat(project_derivative,'/',LSSN_foldername,'/',sub,'/temp/task-study_run_',num2str(pres_1_event{life5(i),14}),'/trial_',num2str(pres_1_event{life5(i),15}),'/beta_0001.nii');
+            matlabbatch{1}.spm.util.imcalc.input{i,1}=strcat(project_derivative,'/',LSSN_foldername,'/',sub,'/temp/task-study_run_',num2str(pres_1_event_resp{life5(i),14}),'/trial_',num2str(pres_1_event_resp{life5(i),15}),'/beta_0001.nii');
         end
         life5_str=join(temp_str,'+');
         life5_str=strcat('(',life5_str,')/',num2str(length(life5)));
         life5_str=life5_str{1};
     else
         life5_str=sprintf(fmt,'i',1);
-        matlabbatch{1}.spm.util.imcalc.input{1}=strcat(project_derivative,'/',LSSN_foldername,'/',sub,'/temp/task-study_run_',num2str(pres_1_event{life5,14}),'/trial_',num2str(pres_1_event{life5,15}),'/beta_0001.nii');
+        matlabbatch{1}.spm.util.imcalc.input{1}=strcat(project_derivative,'/',LSSN_foldername,'/',sub,'/temp/task-study_run_',num2str(pres_1_event_resp{life5,14}),'/trial_',num2str(pres_1_event_resp{life5,15}),'/beta_0001.nii');
     end
     matlabbatch{1}.spm.util.imcalc.output = 'life5_beta.nii';
     matlabbatch{1}.spm.util.imcalc.outdir = {temp_dir};
