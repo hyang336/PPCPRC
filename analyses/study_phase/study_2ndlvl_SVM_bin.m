@@ -15,12 +15,19 @@ fclose(fid);
 %compile results
 for i=1:length(SSID)
    result=load(strcat(lvl1_dir,'/sub-',SSID{i},'/SVM_results.mat')); 
-   freq_error(i)=result.freq_error;
-   life_error(i)=result.life_error;
+   freq_voxels{i}=result.freq_voxels;
+   life_voxels{i}=result.life_voxels;
+   freq_accuracy{i}=result.freq_accuracy;
+   life_accuracy{i}=result.life_accuracy;
 end
 
-[~,freq_p,freq_ci,freq_tval]=ttest(freq_error,0.5,'Tail','left');%alternative hypothesis is that the error is less than 0.5
-[~,life_p,life_ci,life_tval]=ttest(life_error,0.5,'Tail','left');%alternative hypothesis is that the error is less than 0.5
+%average across sample and cross-validation fold
+freq_mean_acc=cellfun(@(x) mean(x,'all'),freq_accuracy);
+life_mean_acc=cellfun(@(x) mean(x,'all'),life_accuracy);
+
+%test against chance
+[~,freq_p,freq_ci,freq_tval]=ttest(freq_mean_acc,0.5,'Tail','right');%alternative hypothesis is that accuracy higher than 0.5
+[~,life_p,life_ci,life_tval]=ttest(life_mean_acc,0.5,'Tail','right');%alternative hypothesis is that accuracy higher than 0.5
 
 if ~exist(output,'dir')
     mkdir (output);

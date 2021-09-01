@@ -1,5 +1,5 @@
 %% function to plot results for the study phase lifetime familiarity effect
-function beta_plots_v2(first_lvl_dir,sublist,mask_dir,ROI_mask,output_dir,analysis)
+function beta_plots_study_lifetime(first_lvl_dir,sublist,mask_dir,ROI_mask,output_dir,analysis)
 %read in subject IDs
 fid=fopen(sublist,'r');
 tline=fgetl(fid);
@@ -68,26 +68,31 @@ switch analysis
         
         %% for plot, if statement checks for missing conditions
         if exist('sub_life1_ROI_beta','var') == 1
+            sub_life1_ROI_beta=sub_life1_ROI_beta(~cellfun(@isempty, sub_life1_ROI_beta));
             life1_avg=mean(cell2mat(sub_life1_ROI_beta),'omitnan');
             life1_se=std(cell2mat(sub_life1_ROI_beta),'omitnan')/sqrt(length(sub_life1_ROI_beta));
             save(strcat(output_dir,'/',ROI_mask,'_life1.mat'),'life1_avg','life1_se');
         end
         if exist('sub_life2_ROI_beta','var') == 1
+            sub_life2_ROI_beta=sub_life2_ROI_beta(~cellfun(@isempty, sub_life2_ROI_beta));
             life2_avg=mean(cell2mat(sub_life2_ROI_beta),'omitnan');
             life2_se=std(cell2mat(sub_life2_ROI_beta),'omitnan')/sqrt(length(sub_life2_ROI_beta));
             save(strcat(output_dir,'/',ROI_mask,'_life2.mat'),'life2_avg','life2_se');
         end
         if exist('sub_life3_ROI_beta','var') == 1
+            sub_life3_ROI_beta=sub_life3_ROI_beta(~cellfun(@isempty, sub_life3_ROI_beta));
             life3_avg=mean(cell2mat(sub_life3_ROI_beta),'omitnan');
             life3_se=std(cell2mat(sub_life3_ROI_beta),'omitnan')/sqrt(length(sub_life3_ROI_beta));
             save(strcat(output_dir,'/',ROI_mask,'_life3.mat'),'life3_avg','life3_se');
         end
         if exist('sub_life4_ROI_beta','var') == 1
+            sub_life4_ROI_beta=sub_life4_ROI_beta(~cellfun(@isempty, sub_life4_ROI_beta));
             life4_avg=mean(cell2mat(sub_life4_ROI_beta),'omitnan');
             life4_se=std(cell2mat(sub_life4_ROI_beta),'omitnan')/sqrt(length(sub_life4_ROI_beta));
             save(strcat(output_dir,'/',ROI_mask,'_life4.mat'),'life4_avg','life4_se');
         end
         if exist('sub_life5_ROI_beta','var') == 1
+            sub_life5_ROI_beta=sub_life5_ROI_beta(~cellfun(@isempty, sub_life5_ROI_beta));
             life5_avg=mean(cell2mat(sub_life5_ROI_beta),'omitnan');
             life5_se=std(cell2mat(sub_life5_ROI_beta),'omitnan')/sqrt(length(sub_life5_ROI_beta));
             save(strcat(output_dir,'/',ROI_mask,'_life5.mat'),'life5_avg','life5_se');
@@ -97,7 +102,7 @@ switch analysis
         %hard-coded variable to load event files
         TR=2.5;
         expstart_vol=5;
-        project_derivative='/scratch/hyang336/working_dir/PPC_MD/'
+        project_derivative='/scratch/hyang336/working_dir/PPC_MD/';
         fmriprep_foldername='fmriprep_1.5.4_AROMA';
         %% load event files and recode high vs. low freq and lifetime
         for i=1:length(SSID)            
@@ -111,10 +116,10 @@ switch analysis
             for j=1:5 %loop through 5 runs
                 task=regexp(substr.run{j},'task-\w*_','match');%this will return something like "task-localizer...._"
                 run=regexp(substr.run{j},'run-\d\d_','match');
-                substr.runevent{j}=load_event_test(project_derivative,sub,task,run,expstart_vol,TR);
+                substr.runevent{j}=load_event_test(project_derivative,strcat('sub-',SSID{i}),task,run,expstart_vol,TR);
                 substr.runevent{j}(:,14)={j};%run number
                 for s=1:size(substr.runevent{j},1)
-                    if ~ismember(SSID{i},{'sub-020','sub-022'})%use normative data for these 2, otherwise use postscan ratings
+                    if ~ismember(SSID{i},{'020','022'})%use normative data for these 2, otherwise use postscan ratings
                         postscan_rating=substr.postscan{strcmp(substr.postscan(:,6),substr.runevent{j}{s,10}),11};
                     else
                         %our stimuli (180 in total) has a
