@@ -1,6 +1,9 @@
 %% LSS-N for test phase, using softAROMA and variable epoch
 %% this could be done in native space but since we pulled out the effect ROI in MNI space we decide to remain in that space
 
+%20210902, it runs the smooth function but the output is not used, the
+%entire procedure uses non-smoothed data
+
 function test_resp_1stlvl_LSSN_softAROMA(project_derivative,fmriprep_foldername,output,sub,expstart_vol,maskfile)
 %updated 2021, now mainly support my own fMRI project,
 %changed the folder structure so we no longer delete SPM.mat
