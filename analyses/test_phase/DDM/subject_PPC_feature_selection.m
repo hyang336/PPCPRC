@@ -1,5 +1,6 @@
 %% select voxels that are most strongly activated by the frequency task for each subject in the PPC, using testphase-LSSN output
 %% also recode accuracy and output a spreadsheet for HDDM
+%% pass in different ROI mask to extract betas in different region, remember to change line 69 (maxk or mink) where the top voxels are selected based on the regression slope between the single-trial beta and the behavior response
 function subject_PPC_feature_selection(sublist,PPC_mask_dir,LSSN_foldername,output_dir)
 %some hard-coded parameters to load event files
 TR=2.5;
@@ -18,7 +19,7 @@ while ischar(tline)
 end
 fclose(fid);
 
-freq_result=cell2table(cell(0,4),'VariableNames',{'subj_idx','rt','response','precuneus_beta'});
+freq_result=cell2table(cell(0,5),'VariableNames',{'subj_idx','stim','rt','response','precuneus_beta'});
 
 for i=1:length(SSID)
     %load event files and code run/trial numbers
@@ -65,13 +66,13 @@ for i=1:length(SSID)
     for voxel=1:size(Precuneus_beta,2)
         b(voxel)=Precuneus_beta(:,voxel)\ratings;%regression slope on freq ratings
     end
-    [~,topvoxels]=maxk(b,ceil(length(b)*0.05));%top 5% voxels
+    [~,topvoxels]=maxk(b,ceil(length(b)*0.05));%top 5% voxels, need to change maxk to mink when using regions with decreasing signal (e.g. PrC)
     
     %average betas among the selected voxels within each trial
     precuneus_signal=mean(Precuneus_beta(:,topvoxels),2);
     
     %compile results and save RT, accuracy, betas, and subject number
-    temp=[repmat({SSID{i}},[size(freq_trials_resp,1),1]),freq_trials_resp(:,7),freq_trials_resp(:,13),num2cell(precuneus_signal)];    
+    temp=[repmat({SSID{i}},[size(freq_trials_resp,1),1]),freq_trials_resp(:,2),freq_trials_resp(:,7),freq_trials_resp(:,13),num2cell(precuneus_signal)];    
     freq_result=[freq_result;temp];
     
 end
