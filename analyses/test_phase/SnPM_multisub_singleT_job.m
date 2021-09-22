@@ -18,3 +18,11 @@ matlabbatch{1}.spm.tools.snpm.des.OneSampT.masking.em = {'/scratch/hyang336/work
 matlabbatch{1}.spm.tools.snpm.des.OneSampT.globalc.g_omit = 1;
 matlabbatch{1}.spm.tools.snpm.des.OneSampT.globalm.gmsca.gmsca_no = 1;
 matlabbatch{1}.spm.tools.snpm.des.OneSampT.globalm.glonorm = 1;
+
+matlabbatch{2}.spm.tools.snpm.cp.snpmcfg = {'/scratch/hyang336/working_dir/PPC_MD/GLM_avgMask_4mmSmooth/SnPM/testphase_recent_inc/SnPMcfg.mat'};
+
+matlabbatch{3}.spm.tools.snpm.inference.SnPMmat = '<UNDEFINED>';
+matlabbatch{3}.spm.tools.snpm.inference.Thr.Vox.VoxSig.FDRth = 0.05;
+matlabbatch{3}.spm.tools.snpm.inference.Tsign = 1;
+matlabbatch{3}.spm.tools.snpm.inference.WriteFiltImg.name = 'SnPM_filtered_FDR';
+matlabbatch{3}.spm.tools.snpm.inference.Report = 'MIPtable';

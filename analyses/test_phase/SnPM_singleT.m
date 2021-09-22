@@ -24,12 +24,17 @@ SnPM_multisub_singleT_job
 
 %loop over subjects to load contrast images (one per subject)
 for i=1:length(SSID)%loop over subjects
-        confile=strcat(lvl1_dir{j},'/sub-',SSID{i},'/temp/',contrast,'.nii,1');
-        matlabbatch{1}.spm.tools.snpm.des.OneSampT.P{i}=confile;
+        confile=strcat(lvl1_dir,'/sub-',SSID{i},'/temp/',contrast,'.nii,1');
+        matlabbatch{1}.spm.tools.snpm.des.OneSampT.P{i,1}=confile;
 end
 matlabbatch{1}.spm.tools.snpm.des.OneSampT.vFWHM=[4,4,4];%variance smoothing equals the smoothing extent of the data
 matlabbatch{1}.spm.tools.snpm.des.OneSampT.masking.em = {mask};
 matlabbatch{1}.spm.tools.snpm.des.OneSampT.dir = {output_dir};
+%compute
+matlabbatch{2}.spm.tools.snpm.cp.snpmcfg = {strcat(output_dir,'/SnPMcfg.mat')};
+
+%infer
+matlabbatch{3}.spm.tools.snpm.inference.SnPMmat = {strcat(output_dir,'/SnPM.mat')};
 
 spm_jobman('run',matlabbatch);
 
