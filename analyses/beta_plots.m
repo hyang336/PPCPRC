@@ -172,6 +172,11 @@ function beta_plots(first_lvl_folder,sublist,mask_dir,ROI_mask,output_dir)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%        
         [~,pres1_col]=find(contains(spmmat.SPM.xX.name(1,:),'pres_1*bf(1)'));
+        [~,pres2_col]=find(contains(spmmat.SPM.xX.name(1,:),'pres_2*bf(1)'));
+        [~,pres3_col]=find(contains(spmmat.SPM.xX.name(1,:),'pres_3*bf(1)'));
+        [~,pres4_col]=find(contains(spmmat.SPM.xX.name(1,:),'pres_4*bf(1)'));
+        [~,pres5_col]=find(contains(spmmat.SPM.xX.name(1,:),'pres_5*bf(1)'));
+        [~,pres6_col]=find(contains(spmmat.SPM.xX.name(1,:),'pres_6*bf(1)'));
         [~,pres7_col]=find(contains(spmmat.SPM.xX.name(1,:),'pres_7*bf(1)'));
         [~,pres8_col]=find(contains(spmmat.SPM.xX.name(1,:),'pres_8*bf(1)'));
         [~,pres9_col]=find(contains(spmmat.SPM.xX.name(1,:),'pres_9*bf(1)'));
@@ -183,6 +188,45 @@ function beta_plots(first_lvl_folder,sublist,mask_dir,ROI_mask,output_dir)
             sub_pres1_ROI_beta{i}=nanmean(pres1_ROI_beta);
         end
         
+        if ~isempty(pres2_col)
+            for j=1:length(pres2_col)
+                pres2_beta{j}=niftiread(strcat(first_lvl_folder,'/sub-',SSID{i},'/temp/beta_',num2str(pres2_col(j),'%04.f'),'.nii'));
+                pres2_ROI_beta(j)=nanmean(pres2_beta{j}(find(ROI)));%average beta within the ROI
+            end
+            sub_pres2_ROI_beta{i}=nanmean(pres2_ROI_beta);
+        end
+        
+        if ~isempty(pres3_col)
+            for j=1:length(pres3_col)
+                pres3_beta{j}=niftiread(strcat(first_lvl_folder,'/sub-',SSID{i},'/temp/beta_',num2str(pres3_col(j),'%04.f'),'.nii'));
+                pres3_ROI_beta(j)=nanmean(pres3_beta{j}(find(ROI)));%average beta within the ROI
+            end
+            sub_pres3_ROI_beta{i}=nanmean(pres3_ROI_beta);
+        end
+        
+        if ~isempty(pres4_col)
+            for j=1:length(pres4_col)
+                pres4_beta{j}=niftiread(strcat(first_lvl_folder,'/sub-',SSID{i},'/temp/beta_',num2str(pres4_col(j),'%04.f'),'.nii'));
+                pres4_ROI_beta(j)=nanmean(pres4_beta{j}(find(ROI)));%average beta within the ROI
+            end
+            sub_pres4_ROI_beta{i}=nanmean(pres4_ROI_beta);
+        end
+        
+        if ~isempty(pres5_col)
+            for j=1:length(pres5_col)
+                pres5_beta{j}=niftiread(strcat(first_lvl_folder,'/sub-',SSID{i},'/temp/beta_',num2str(pres5_col(j),'%04.f'),'.nii'));
+                pres5_ROI_beta(j)=nanmean(pres5_beta{j}(find(ROI)));%average beta within the ROI
+            end
+            sub_pres5_ROI_beta{i}=nanmean(pres5_ROI_beta);
+        end
+        
+        if ~isempty(pres6_col)
+            for j=1:length(pres6_col)
+                pres6_beta{j}=niftiread(strcat(first_lvl_folder,'/sub-',SSID{i},'/temp/beta_',num2str(pres6_col(j),'%04.f'),'.nii'));
+                pres6_ROI_beta(j)=nanmean(pres6_beta{j}(find(ROI)));%average beta within the ROI
+            end
+            sub_pres6_ROI_beta{i}=nanmean(pres6_ROI_beta);
+        end
         
         if ~isempty(pres7_col)
             for j=1:length(pres7_col)
@@ -313,6 +357,36 @@ if exist('sub_pres1_ROI_beta','var') == 1
     pres1_avg=mean(cell2mat(sub_pres1_ROI_beta));
     pres1_se=std(cell2mat(sub_pres1_ROI_beta))/sqrt(length(sub_pres1_ROI_beta));
     save(strcat(output_dir,'/',ROI_mask,'_pres1.mat'),'pres1_avg','pres1_se');
+end
+
+if exist('sub_pres2_ROI_beta','var') == 1
+    pres2_avg=mean(cell2mat(sub_pres2_ROI_beta));
+    pres2_se=std(cell2mat(sub_pres2_ROI_beta))/sqrt(length(sub_pres2_ROI_beta));
+    save(strcat(output_dir,'/',ROI_mask,'_pres2.mat'),'pres2_avg','pres2_se');
+end
+
+if exist('sub_pres3_ROI_beta','var') == 1
+    pres3_avg=mean(cell2mat(sub_pres3_ROI_beta));
+    pres3_se=std(cell2mat(sub_pres3_ROI_beta))/sqrt(length(sub_pres3_ROI_beta));
+    save(strcat(output_dir,'/',ROI_mask,'_pres3.mat'),'pres3_avg','pres3_se');
+end
+
+if exist('sub_pres4_ROI_beta','var') == 1
+    pres4_avg=mean(cell2mat(sub_pres4_ROI_beta));
+    pres4_se=std(cell2mat(sub_pres4_ROI_beta))/sqrt(length(sub_pres4_ROI_beta));
+    save(strcat(output_dir,'/',ROI_mask,'_pres4.mat'),'pres4_avg','pres4_se');
+end
+
+if exist('sub_pres5_ROI_beta','var') == 1
+    pres5_avg=mean(cell2mat(sub_pres5_ROI_beta));
+    pres5_se=std(cell2mat(sub_pres5_ROI_beta))/sqrt(length(sub_pres5_ROI_beta));
+    save(strcat(output_dir,'/',ROI_mask,'_pres5.mat'),'pres5_avg','pres5_se');
+end
+
+if exist('sub_pres6_ROI_beta','var') == 1
+    pres6_avg=mean(cell2mat(sub_pres6_ROI_beta));
+    pres6_se=std(cell2mat(sub_pres6_ROI_beta))/sqrt(length(sub_pres6_ROI_beta));
+    save(strcat(output_dir,'/',ROI_mask,'_pres6.mat'),'pres6_avg','pres6_se');
 end
 
 if exist('sub_pres7_ROI_beta','var') == 1
