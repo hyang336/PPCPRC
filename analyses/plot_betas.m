@@ -69,8 +69,34 @@ hold off
 set(gcf, 'InvertHardcopy', 'off')
 
 %studyphase lifetime all trials
-
+bar(categorical([1:1:5]),[life1_avg,life2_avg,life3_avg,life4_avg,life5_avg],'FaceColor','#FFC000');
+hold on
+er=errorbar(categorical([1:1:5]),[life1_avg,life2_avg,life3_avg,life4_avg,life5_avg],[life1_se,life2_se,life3_se,life4_se,life5_se],'Color','w');
+er.LineStyle = 'none';
+xlabel('lifetime ratings');
+ylabel('average beta value');
+set(gca,'Color','k');
+set(gcf,'Color','k');
+set(gca,'XColor','w');
+set(gca,'YColor','w');
+set(gca,'FontSize',13);
+box off
+hold off
+set(gcf, 'InvertHardcopy', 'off')
 
 %studyphase lifetime pres1
-
+bar(categorical([1:1:5]),[life1_avg,life2_avg,life3_avg,life4_avg,life5_avg],'FaceColor','#FFC000');
+hold on
+er=errorbar(categorical([1:1:5]),[life1_avg,life2_avg,life3_avg,life4_avg,life5_avg],[life1_se,life2_se,life3_se,life4_se,life5_se],'Color','w');
+er.LineStyle = 'none';
+xlabel('lifetime ratings');
+ylabel('average beta value');
+set(gca,'Color','k');
+set(gcf,'Color','k');
+set(gca,'XColor','w');
+set(gca,'YColor','w');
+set(gca,'FontSize',13);
+box off
+hold off
+set(gcf, 'InvertHardcopy', 'off')
 
