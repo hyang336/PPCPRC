@@ -7,6 +7,9 @@ datapath="C:\\Users\\haozi\\Desktop\\PhD\\fMRI_PrC-PPC_data\\hddm\\"
 prc.data=read.csv(paste(datapath,"PrC\\hddm_data_prc.csv",sep=""))
 precuneus.data=read.csv(paste(datapath,"precuneus\\hddm_data_prec.csv",sep=""))
 
+#test whether beta differ in magnitude between regions
+t.test(abs(prc.data$prc_beta),abs(precuneus.data$precuneus_beta))
+
 SSID=unique(prc.data$subj_idx)
 for (i in c(1:length(SSID))){
   prc.beta=prc.data$prc_beta[prc.data$subj_idx==SSID[i]]
@@ -17,7 +20,9 @@ for (i in c(1:length(SSID))){
   m1=lm(precuneus.beta~prc.beta)
   #residual
   precuneus.data$residuals[precuneus.data$subj_idx==SSID[i]]=resid(m1)
-  precuneus.data$residuals_z[precuneus.data$subj_idx==SSID[i]]=scale(precuneus.data$residuals[precuneus.data$subj_idx==SSID[i]])
+  #z-score regression
+  m2=lm(scale(precuneus.beta)~scale(prc.beta))
+  precuneus.data$residuals_z[precuneus.data$subj_idx==SSID[i]]=resid(m2)
 }
 
 write.csv(prc.data,paste(datapath,"PrC\\hddm_data_prc.csv",sep=""))
