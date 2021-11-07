@@ -1,3 +1,5 @@
+%% #### probably not a good idea, see analysis list, not completed for now 2021 11 07 ####
+
 %% build the .csv file for HDDM. Note that the some column names in HDDM are reserved
 %% As of 2021-11-03, we try to use above FWE threshold clusters from the 1st level t-test of 
 %% increasing frequency judgement effect to define whole-brain ROIs, and ASHS mask for PrC
