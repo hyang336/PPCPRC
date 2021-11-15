@@ -50,7 +50,7 @@ switch contrast_type
         % one sample t-test
         file_cell=cell(0,1);
         for i=1:length(SSID)
-            file_cell{i,1}=strcat(con_dir,'/sub-',SSID{i,1},'/temp/',contrast,'.nii');
+            file_cell{i,1}=strcat(con_dir,'/sub-',SSID{i,1},'/',contrast,'.nii');
         end
         matlabbatch{1}.spm.stats.factorial_design.dir = {strcat(output_dir,'/',contrast,'_t')};%specify
         matlabbatch{1}.spm.stats.factorial_design.des.t1.scans = file_cell;
@@ -85,8 +85,8 @@ switch contrast_type
         % paired t-test
         file_cell=cell(0,2);
         for i=1:length(SSID)
-            file_cell{i,1}=strcat(con_dir,'/sub-',SSID{i,1},'/temp/',contrast_1,'.nii');
-            file_cell{i,2}=strcat(con_dir,'/sub-',SSID{i,1},'/temp/',contrast_2,'.nii');
+            file_cell{i,1}=strcat(con_dir,'/sub-',SSID{i,1},'/',contrast_1,'.nii');
+            file_cell{i,2}=strcat(con_dir,'/sub-',SSID{i,1},'/',contrast_2,'.nii');
             matlabbatch{1}.spm.stats.factorial_design.des.pt.pair(i).scans=file_cell(i,:)';
         end
         matlabbatch{1}.spm.stats.factorial_design.dir = {strcat(output_dir,'/',contrast_1,'-',contrast_2,'_paired-t')};%specify
@@ -119,7 +119,7 @@ switch contrast_type
         % F-test
         file_cell=cell(0,1);
         for i=1:length(SSID)
-            file_cell{i,1}=strcat(con_dir,'/sub-',SSID{i,1},'/temp/',contrast,'.nii');
+            file_cell{i,1}=strcat(con_dir,'/sub-',SSID{i,1},'/',contrast,'.nii');
         end
         matlabbatch{1}.spm.stats.factorial_design.dir = {strcat(output_dir,'/',contrast,'_F')};%specify
         matlabbatch{1}.spm.stats.factorial_design.des.t1.scans = file_cell;
