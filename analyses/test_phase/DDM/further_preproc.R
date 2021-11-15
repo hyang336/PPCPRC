@@ -24,12 +24,15 @@ for (i in c(1:length(SSID))){
   #regression
   m1=lm(precuneus.beta~prc.beta)
   m2=lm(mpfc.beta~prc.beta)
+  m3=lm(mpfc.beta~precuneus.beta)
   #residual
   precuneus.data$residuals[precuneus.data$subj_idx==SSID[i]]=resid(m1)
   mpfc.data$residuals[mpfc.data$subj_idx==SSID[i]]=resid(m2)
+  mpfc.data$residuals2[mpfc.data$subj_idx==SSID[i]]=resid(m3)
   #z-score residuals
   precuneus.data$residuals_z[precuneus.data$subj_idx==SSID[i]]=scale(resid(m1))
   mpfc.data$residuals_z[mpfc.data$subj_idx==SSID[i]]=scale(resid(m2))
+  mpfc.data$residuals2_z[mpfc.data$subj_idx==SSID[i]]=scale(resid(m3))
 }
 
 #write.csv(prc.data,paste(datapath,"PrC\\hddm_data_prc.csv",sep=""))
