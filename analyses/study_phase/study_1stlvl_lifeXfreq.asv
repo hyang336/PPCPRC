@@ -316,13 +316,7 @@ inter_convec=freq_convec.*life_convec; % the magnitude of these weights are kind
 
 matlabbatch{3}.spm.stats.con.consess{1}.tcon.weights = inter_convec;
 
-%freq_dec main effect
-matlabbatch{3}.spm.stats.con.consess{2}.tcon.name = 'repsup';
-matlabbatch{3}.spm.stats.con.consess{2}.tcon.weights = freq_convec;
-%life_dec main effect
-matlabbatch{3}.spm.stats.con.consess{3}.tcon.name = 'lifesup';
-matlabbatch{3}.spm.stats.con.consess{3}.tcon.weights = life_convec;
-
+%freq
 %run the contrast and thresholding jobs
 spm_jobman('run',matlabbatch(3));
 end
