@@ -4,7 +4,7 @@
 % frequency judgement. Extract and average their LSS-N betas, output to a
 % .csv file, then run a two-level regression in R
 
-function test_mirror_beta_extract(project_derivative, LSSN_foldername,sublist,output,lifetime_mask)
+function test_mirror_beta_extract(project_derivative,LSSN_foldername,sublist,output,lifetime_mask)
 %predefine some parameters
 TR=2.5;
 expstart_vol=5;
@@ -75,7 +75,7 @@ for i=1:length(SSID)%loop through subjects
     event_compiled=[event_compiled;runevent];
 end
 
-headers={'onset','obj_freq','norm_fam','task','duration','resp','RT','feat_over','feat_over_bin','stim','epi_t','sem_t','trial_num','run_num','freq_overestimate','ROI_beta','sub'}
+headers={'onset','obj_freq','norm_fam','task','duration','resp','RT','feat_over','feat_over_bin','stim','epi_t','sem_t','trial_num','run_num','freq_overestimate','ROI_beta','sub'};
 event_compiled=[headers;event_compiled];
-writable(event_compiled,strcat(output,'/test_lifetime-in-freq_event_compiled.csv'));
+writetable(event_compiled,strcat(output,'/test_lifetime-in-freq_event_compiled.csv'));
 end
