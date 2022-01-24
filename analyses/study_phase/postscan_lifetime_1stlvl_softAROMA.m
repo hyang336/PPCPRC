@@ -1,6 +1,4 @@
-%% use postscan ratings to code GLM columns, with presentation frequency and feature-overlap as parametric modulators.
-
-%% studyphase repetition GLM, also include lifetime familiarity as 1st pmod and feature-overlap as 2nd pmod
+%% use postscan ratings to code GLM columns
 
 function postscan_lifetime_1stlvl_softAROMA(project_derivative,output,sub,expstart_vol,fmriprep_foldername,TR,maskfile,onset_mode)
     

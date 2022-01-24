@@ -107,10 +107,19 @@ for (i in seq(1,5)){
 p1=ggplot(data = RT.freq_sum,aes(x=as.factor(pres),y = rt,group=1)) + 
   geom_line()+
   geom_point()+
-  geom_errorbar(aes(ymin=rt-se, ymax=rt+se), width=.2,position=position_dodge(.9))
+  theme(axis.text=element_text(size=(15)),axis.title=element_text(size=(15)))+
+  geom_errorbar(aes(ymin=rt-se, ymax=rt+se), width=.2,position=position_dodge(.9))+
+  xlab("objective presentation frequency")+
+  ylab("response time (second)")
+ggsave(filename='study_freq_RT.png',path=paste(datapath,'interim_summary\\ch2_figs\\',sep=''),plot=p1,width=4,height=4,units="in",dpi=300,scale = 1)
 
 #lifetime RT plot
 p2=ggplot(data = RT.life_sum,aes(x=as.factor(lifetime_ratings),y = rt,group=1)) + 
   geom_line()+
   geom_point()+
-  geom_errorbar(aes(ymin=rt-se, ymax=rt+se), width=.2,position=position_dodge(.9))
+  theme(axis.text=element_text(size=(15)),axis.title=element_text(size=(15)))+
+  geom_errorbar(aes(ymin=rt-se, ymax=rt+se), width=.2,position=position_dodge(.9))+
+  xlab("normative lifetime familiarity")+
+  ylab("response time (second)")
+ggsave(filename='study_fam_RT.png',path=paste(datapath,'interim_summary\\ch2_figs\\',sep=''),plot=p2,width=4,height=4,units="in",dpi=300,scale = 1)
+

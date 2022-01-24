@@ -9,7 +9,7 @@ precuneus.data=read.csv(paste(datapath,"precuneus_func-defined\\hddm_data_prec.c
 mpfc.data=read.csv(paste(datapath,"mPFC_func-defined\\hddm_data_mpfc.csv",sep=""))
 
 #test whether beta differ in magnitude between regions
-#t.test(abs(prc.data$prc_beta),abs(precuneus.data$precuneus_beta))
+t.test(abs(prc.data$prc_beta),abs(precuneus.data$precuneus_beta), paired=TRUE)
 
 SSID=unique(prc.data$subj_idx)
 for (i in c(1:length(SSID))){
@@ -38,3 +38,4 @@ for (i in c(1:length(SSID))){
 #write.csv(prc.data,paste(datapath,"PrC\\hddm_data_prc.csv",sep=""))
 write.csv(precuneus.data,paste(datapath,"precuneus_func-defined\\hddm_data_prec_res.csv",sep=""))
 write.csv(mpfc.data,paste(datapath,"mPFC_func-defined\\hddm_data_mpfc_res.csv",sep=""))
+
