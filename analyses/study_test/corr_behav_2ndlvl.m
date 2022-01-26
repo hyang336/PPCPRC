@@ -173,10 +173,11 @@ switch effect
                 for s=1:size(runevent,1)
                     runevent{s,15}=s;%trial number
                 end
-                [o,l]=ismember(runevent(:,10),pscan(:,6));%find stimuli
-                runevent(:,13)=pscan(l,11);%fill in post-scan ratings
+                freq_trials=runevent(strcmp(runevent(:,4),'recent'),:);
+                [o,l]=ismember(freq_trials(:,10),pscan(:,6));%find stimuli
+                freq_trials(:,13)=pscan(l,11);%fill in post-scan ratings
                 %concatenate across runs
-                event=[event;runevent];
+                event=[event;freq_trials];
             end
             
             %remove noresp trials, the prc con img should have that
