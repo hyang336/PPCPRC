@@ -20,7 +20,7 @@ switch effect
         mask=niftiread(maskfile);
         %calculate behavioral variable
         behav_folder=strcat(project_derivative,'/behavioral/');
-        
+        prime_res=cell(0,3);
         for i=1:length(SSID)
             conimg=niftiread(strcat(lvl1_folder,'/sub-',SSID{i},'/temp/con_0004.nii'));%con_0004 is the pres1vs789 contrast
             prc_con_val=nanmean(conimg(find(mask)));
@@ -70,7 +70,7 @@ switch effect
         mask=niftiread(maskfile);
         %calculate behavioral variable
         behav_folder=strcat(project_derivative,'/behavioral/');
-        
+        prime_res=cell(0,3);
         for i=1:length(SSID)
             conimg=niftiread(strcat(lvl1_folder,'/sub-',SSID{i},'/temp/con_0001.nii'));%con_0001 is the lifetime_dec contrast
             prc_con_val=nanmean(conimg(find(mask)));
@@ -127,6 +127,7 @@ switch effect
         mask=niftiread(maskfile);
         %calculate behavioral variable
         behav_folder=strcat(project_derivative,'/behavioral/');
+        prime_res=cell(0,3);
         for i=1:length(SSID)
             conimg=niftiread(strcat(lvl1_folder,'/sub-',SSID{i},'/temp/con_0001.nii'));%con_0001 is the lifetime_dec contrast
             prc_con_val=nanmean(conimg(find(mask)));
