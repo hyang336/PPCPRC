@@ -1,5 +1,5 @@
 %% correlate across participants the fMRI effect and the behavioral data
-function corr_behav_2ndlvl(project_derivative,sublist,effect,output_dir)
+function corr_behav_2ndlvl(project_derivative,sublist,effect)
 
 %read in subject IDs
 fid=fopen(sublist,'r');
@@ -16,7 +16,7 @@ switch effect
         %extract contrast
         lvl1_folder=strcat(project_derivative,'/GLM_avgMask_4mmSmooth/repetition_suppression_softAROMA/');
         %prc mask
-        maskfile=strcat(prject_derivative,'/masks/abovethreshold_PrC_masks/studyphase_pres1vs789_dec/lPrC75_SVC_abovethreshold_mask.nii');
+        maskfile=strcat(project_derivative,'/masks/abovethreshold_PrC_masks/studyphase_pres1vs789_dec/lPrC75_SVC_abovethreshold_mask.nii');
         mask=niftiread(maskfile);
         %calculate behavioral variable
         behav_folder=strcat(project_derivative,'/behavioral/');
@@ -66,7 +66,7 @@ switch effect
         %extract contrast
         lvl1_folder=strcat(project_derivative,'/GLM_avgMask_pscan020022exclude/postscan_lifetime_softAROMA_const-epoch/');
         %prc mask
-        maskfile=strcat(prject_derivative,'/masks/abovethreshold_PrC_masks/studyphase_lifetime_alltrial/lPrC75_SVC_abovethreshold_mask.nii');
+        maskfile=strcat(project_derivative,'/masks/abovethreshold_PrC_masks/studyphase_lifetime_alltrial/lPrC75_SVC_abovethreshold_mask.nii');
         mask=niftiread(maskfile);
         %calculate behavioral variable
         behav_folder=strcat(project_derivative,'/behavioral/');
@@ -123,7 +123,7 @@ switch effect
         %extract contrast
         lvl1_folder=strcat(project_derivative,'/GLM_avgMask_pscan020022exclude/test_1stlvl_postscan_softAROMA_const-epoch/');
         %prc mask
-        maskfile=strcat(prject_derivative,'/masks/abovethreshold_PrC_masks/testphase_life-irr_conjunction_both_dec/lPrC75_SVC_global_null_abovethreshold_mask.nii');
+        maskfile=strcat(project_derivative,'/masks/abovethreshold_PrC_masks/testphase_life-irr_conjunction_both_dec/lPrC75_SVC_global_null_abovethreshold_mask.nii');
         mask=niftiread(maskfile);
         %calculate behavioral variable
         behav_folder=strcat(project_derivative,'/behavioral/');

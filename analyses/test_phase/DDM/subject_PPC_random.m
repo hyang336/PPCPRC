@@ -1,4 +1,4 @@
-%% use a random vector as fMRI data, this should definitely not improve fitting above baseline model
+cd%% use a random vector as fMRI data, this should definitely not improve fitting above baseline model
 %% select voxels that are most strongly activated by the frequency task for each subject in the PPC, using testphase-LSSN output
 %% also recode accuracy and output a spreadsheet for HDDM
 %% pass in different ROI mask to extract betas in different region, remember to change line 69 (maxk or mink) where the top voxels are selected based on the regression slope between the single-trial beta and the behavior response
@@ -55,9 +55,9 @@ for i=1:length(SSID)
     
     %random numbers
     precuneus_signal=-1 + (1+1)*rand(size(freq_trials_resp,1),1);
-   
+    
     %compile results and save RT, accuracy, betas, and subject number
-    temp=[repmat({SSID{i}},[size(freq_trials_resp,1),1]),freq_trials_resp(:,2),freq_trials_resp(:,7),freq_trials_resp(:,13),num2cell(precuneus_signal)];    
+    temp=[repmat({SSID{i}},[size(freq_trials_resp,1),1]),freq_trials_resp(:,2),freq_trials_resp(:,7),freq_trials_resp(:,13),num2cell(precuneus_signal)];
     freq_result=[freq_result;temp];
     
 end
