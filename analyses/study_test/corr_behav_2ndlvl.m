@@ -52,9 +52,9 @@ switch effect
             b1=mod(cell2mat(event(:,2)),10)\cell2mat(event(:,7));
             
             %compile results
-            prime_res(i,1)=SSID{i};
-            prime_res(i,2)=prc_con_val;
-            prime_res(i,3)=b1;
+            prime_res(i,1)=SSID(i);
+            prime_res(i,2)={prc_con_val};
+            prime_res(i,3)={b1};
         end
         
         %correlate across participants
@@ -109,9 +109,9 @@ switch effect
             end
             
             %compile results
-            prime_res(i,1)=SSID{i};
-            prime_res(i,2)=prc_con_val;
-            prime_res(i,3)=b1;
+            prime_res(i,1)=SSID(i);
+            prime_res(i,2)={prc_con_val};
+            prime_res(i,3)={b1};
         end
         
         %correlate across participants
@@ -167,9 +167,9 @@ switch effect
             end
             
             %compile results
-            prime_res(i,1)=SSID{i};
-            prime_res(i,2)=prc_con_val;
-            prime_res(i,3)=b1;
+            prime_res(i,1)=SSID(i);
+            prime_res(i,2)={prc_con_val};
+            prime_res(i,3)={b1};
         end
         
         %correlate across participants
