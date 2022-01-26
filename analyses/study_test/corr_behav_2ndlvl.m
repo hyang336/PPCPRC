@@ -102,7 +102,7 @@ switch effect
             
             %find trials with no pscan ratings and replace it with
             %normative rating
-            emp_trial=cellfun(@(x) isempty(x),event(:,13));
+            emp_trial=cellfun(@(x) isempty(x)|isnan(x),event(:,13));
             %logical index of norm ratings
             norm1=cellfun(@(x)x<=3.19,event(:,3));
             norm2=cellfun(@(x)x>3.19&&x<=4.63,event(:,3));
@@ -185,7 +185,7 @@ switch effect
             
             %find trials with no pscan ratings and replace it with
             %normative rating
-            emp_trial=cellfun(@(x) isempty(x),event(:,13));
+            emp_trial=cellfun(@(x) isempty(x)|isnan(x),event(:,13));
             %logical index of norm ratings
             norm1=cellfun(@(x)x<=3.19,event(:,3));
             norm2=cellfun(@(x)x>3.19&&x<=4.63,event(:,3));
