@@ -1,5 +1,5 @@
 %% correlate across participants the fMRI effect and the behavioral data
-function corr_behav_2ndlvl(project_derivative,sublist,effect)
+function [r,p]=corr_behav_2ndlvl(project_derivative,sublist,effect)
 
 %read in subject IDs
 fid=fopen(sublist,'r');
@@ -177,5 +177,4 @@ switch effect
         %output results
         sprintf('\nThe correlation coefficient is %0.3f, the p-value is %0.3f', r, p);
 end
-
 end
