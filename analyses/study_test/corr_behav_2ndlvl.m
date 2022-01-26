@@ -22,7 +22,7 @@ switch effect
         behav_folder=strcat(project_derivative,'/behavioral/');
         
         for i=1:length(SSID)
-            conimg=niftiread(strcat(lvl1_folder,'/sub-',SSID{i},'/temp/con_0004.nii'))%con_0004 is the pres1vs789 contrast
+            conimg=niftiread(strcat(lvl1_folder,'/sub-',SSID{i},'/temp/con_0004.nii'));%con_0004 is the pres1vs789 contrast
             prc_con_val=nanmean(conimg(find(mask)));
             %behavioral part
             %[~,~,pscan]=xlsread(strcat(project_derivative,'/behavioral/sub-',SSID{i},'/',SSID{i},'_task-pscan_data.xlsx'));
@@ -35,7 +35,7 @@ switch effect
                 expstart_vol=5;
                 TR=2.5;
                 
-                runevent=load_event_test(behav_folder,strcat('sub-',SSID{i}),{task},{run},expstart_vol,TR);
+                runevent=load_event_test(project_derivative,strcat('sub-',SSID{i}),{task},{run},expstart_vol,TR);
                 runevent(:,14)={j};%run number
                 for s=1:size(runevent,1)
                     runevent{s,15}=s;%trial number
@@ -72,7 +72,7 @@ switch effect
         behav_folder=strcat(project_derivative,'/behavioral/');
         
         for i=1:length(SSID)
-            conimg=niftiread(strcat(lvl1_folder,'/sub-',SSID{i},'/temp/con_0001.nii'))%con_0001 is the lifetime_dec contrast
+            conimg=niftiread(strcat(lvl1_folder,'/sub-',SSID{i},'/temp/con_0001.nii'));%con_0001 is the lifetime_dec contrast
             prc_con_val=nanmean(conimg(find(mask)));
             %behavioral part
             [~,~,pscan]=xlsread(strcat(behav_folder,'sub-',SSID{i},'/',SSID{i},'_task-pscan_data.xlsx'));
@@ -85,7 +85,7 @@ switch effect
                 expstart_vol=5;
                 TR=2.5;
                 
-                runevent=load_event_test(behav_folder,strcat('sub-',SSID{i}),{task},{run},expstart_vol,TR);
+                runevent=load_event_test(project_derivative,strcat('sub-',SSID{i}),{task},{run},expstart_vol,TR);
                 runevent(:,14)={j};%run number
                 for s=1:size(runevent{j},1)
                     runevent{s,15}=s;%trial number
@@ -128,7 +128,7 @@ switch effect
         %calculate behavioral variable
         behav_folder=strcat(project_derivative,'/behavioral/');
         for i=1:length(SSID)
-            conimg=niftiread(strcat(lvl1_folder,'/sub-',SSID{i},'/temp/con_0001.nii'))%con_0001 is the lifetime_dec contrast
+            conimg=niftiread(strcat(lvl1_folder,'/sub-',SSID{i},'/temp/con_0001.nii'));%con_0001 is the lifetime_dec contrast
             prc_con_val=nanmean(conimg(find(mask)));
             %behavioral part
             [~,~,pscan]=xlsread(strcat(behav_folder,'sub-',SSID{i},'/',SSID{i},'_task-pscan_data.xlsx'));
@@ -141,7 +141,7 @@ switch effect
                 expstart_vol=5;
                 TR=2.5;
                 
-                runevent=load_event_test(behav_folder,strcat('sub-',SSID{i}),{task},{run},expstart_vol,TR);
+                runevent=load_event_test(project_derivative,strcat('sub-',SSID{i}),{task},{run},expstart_vol,TR);
                 runevent(:,14)={j};%run number
                 for s=1:size(runevent{j},1)
                     runevent{s,15}=s;%trial number
