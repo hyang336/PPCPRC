@@ -31,7 +31,7 @@ switch effect
             for j=1:5 %loop through 4 runs
                 %some hard-coded fields to load events
                 task='task-study_';
-                run=strcat('run-0',num2str(i),'_');
+                run=strcat('run-0',num2str(j),'_');
                 expstart_vol=5;
                 TR=2.5;
                 
@@ -81,7 +81,7 @@ switch effect
             for j=1:5 %loop through 4 runs
                 %some hard-coded fields to load events
                 task='task-study_';
-                run=strcat('run-0',num2str(i),'_');
+                run=strcat('run-0',num2str(j),'_');
                 expstart_vol=5;
                 TR=2.5;
                 
@@ -138,7 +138,7 @@ switch effect
             for j=1:4 %loop through 4 runs
                 %some hard-coded fields to load events
                 task='task-test_';
-                run=strcat('run-0',num2str(i),'_');
+                run=strcat('run-0',num2str(j),'_');
                 expstart_vol=5;
                 TR=2.5;
                 
