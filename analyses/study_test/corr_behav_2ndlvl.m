@@ -87,7 +87,7 @@ switch effect
                 
                 runevent=load_event_test(project_derivative,strcat('sub-',SSID{i}),{task},{run},expstart_vol,TR);
                 runevent(:,14)={j};%run number
-                for s=1:size(runevent{j},1)
+                for s=1:size(runevent,1)
                     runevent{s,15}=s;%trial number
                 end
                 [o,l]=ismember(runevent(:,10),pscan(:,6));%find stimuli
@@ -100,6 +100,31 @@ switch effect
             %taken care of in SPM
             event=event(~cellfun(@(x) isnan(x),event(:,7)),:);
             
+            %find trials with no pscan ratings and replace it with
+            %normative rating
+            emp_trial=cellfun(@(x) isempty(x),event(:,13));
+            %logical index of norm ratings
+            norm1=cellfun(@(x)x<=3.19,event(:,3));
+            norm2=cellfun(@(x)x>3.19&&x<=4.63,event(:,3));
+            norm3=cellfun(@(x)x>4.63&&x<=6.07,event(:,3));
+            norm4=cellfun(@(x)x>6.07&&x<=7.51,event(:,3));
+            norm5=cellfun(@(x)x>7.51,event(:,3));
+            
+            %loop over trial and replace with norm (rescaled) ratings
+            for trial=1:size(event,1)
+                if emp_trial(trial)&norm1(trial)
+                    event(trial,13)={'1'};
+                elseif emp_trial(trial)&norm2(trial)
+                    event(trial,13)={'2'};
+                elseif emp_trial(trial)&norm3(trial)
+                    event(trial,13)={'3'};
+                elseif emp_trial(trial)&norm4(trial)
+                    event(trial,13)={'4'};
+                elseif emp_trial(trial)&norm5(trial)
+                    event(trial,13)={'5'};
+                end
+            end
+
             %regress RT on lifetime and extract slope, for the two outliers
             %need to use normative data
             if ~ismember(SSID{i},{'020','022'})
@@ -107,6 +132,7 @@ switch effect
             else
                 b1=cell2mat(event(:,3))\cell2mat(event(:,7));
             end
+            
             
             %compile results
             prime_res(i,1)=SSID(i);
@@ -144,7 +170,7 @@ switch effect
                 
                 runevent=load_event_test(project_derivative,strcat('sub-',SSID{i}),{task},{run},expstart_vol,TR);
                 runevent(:,14)={j};%run number
-                for s=1:size(runevent{j},1)
+                for s=1:size(runevent,1)
                     runevent{s,15}=s;%trial number
                 end
                 [o,l]=ismember(runevent(:,10),pscan(:,6));%find stimuli
@@ -156,6 +182,31 @@ switch effect
             %remove noresp trials, the prc con img should have that
             %taken care of in SPM
             event=event(~cellfun(@(x) isnan(x),event(:,7)),:);
+            
+            %find trials with no pscan ratings and replace it with
+            %normative rating
+            emp_trial=cellfun(@(x) isempty(x),event(:,13));
+            %logical index of norm ratings
+            norm1=cellfun(@(x)x<=3.19,event(:,3));
+            norm2=cellfun(@(x)x>3.19&&x<=4.63,event(:,3));
+            norm3=cellfun(@(x)x>4.63&&x<=6.07,event(:,3));
+            norm4=cellfun(@(x)x>6.07&&x<=7.51,event(:,3));
+            norm5=cellfun(@(x)x>7.51,event(:,3));
+            
+            %loop over trial and replace with norm (rescaled) ratings
+            for trial=1:size(event,1)
+                if emp_trial(trial)&norm1(trial)
+                    event(trial,13)={'1'};
+                elseif emp_trial(trial)&norm2(trial)
+                    event(trial,13)={'2'};
+                elseif emp_trial(trial)&norm3(trial)
+                    event(trial,13)={'3'};
+                elseif emp_trial(trial)&norm4(trial)
+                    event(trial,13)={'4'};
+                elseif emp_trial(trial)&norm5(trial)
+                    event(trial,13)={'5'};
+                end
+            end
             
             %regress freq_error on lifetime and extract slope, for the two outliers
             %need to use normative data
