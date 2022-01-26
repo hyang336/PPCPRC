@@ -103,7 +103,7 @@ switch effect
             %regress RT on lifetime and extract slope, for the two outliers
             %need to use normative data
             if ~ismember(SSID{i},{'020','022'})
-                b1=cell2mat(event(:,13))\cell2mat(event(:,7));
+                b1=str2num(cell2mat(event(:,13)))\cell2mat(event(:,7));
             else
                 b1=cell2mat(event(:,3))\cell2mat(event(:,7));
             end
@@ -161,7 +161,7 @@ switch effect
             %need to use normative data
             freq_error=str2num(cell2mat(event(:,6)))-rescale(cell2mat(event(:,2)),1,5);
             if ~ismember(SSID{i},{'020','022'})
-                b1=cell2mat(event(:,13))\freq_error;
+                b1=str2num(cell2mat(event(:,13)))\freq_error;
             else
                 b1=cell2mat(event(:,3))\freq_error;
             end
