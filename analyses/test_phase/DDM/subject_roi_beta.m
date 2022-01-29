@@ -4,7 +4,7 @@
 %under derivative, the individual masks (e.g.
 %sub-015_PRC_MNINLin6_resampled.nii) need to be in the ASHS_raw2/ directory
 %under derivative. Note that the individual masks still need to be in MNI
-function subject_roi_beta(sublist,project_derivative,LSSN_foldername,output_dir,use_indi_mask,maskfile)
+function subject_roi_beta(sublist,project_derivative,LSSN_foldername,output_dir,use_indi_mask,maskfile,strict_coding)
 TR=2.5;
 expstart_vol=5;
 fmriprep_foldername='fmriprep_1.5.4_AROMA';
@@ -53,13 +53,17 @@ for i=1:length(SSID)
     ratings=str2num(cell2mat(freq_trials_resp(:,6)));%convert to numeric array
     %if the objective rating differ from the subject rating by most 1, the
     %trial is considered accurate
-    accurate=abs(objfreq-ratings)<2;
+    if ~strict_coding
+        accurate=abs(objfreq-ratings)<2;
+    else
+        accurate=abs(objfreq-ratings)<1;
+    end
     freq_trials_resp(:,13)=num2cell(accurate);
     
     %if using individual mask, load subject ROI, for now only does PrC with
     %ASHS output
     if use_indi_mask
-       roi=niftiread(strcat(project_derivative,'/ASHS_raw2/sub-',SSID{i},'/final/sub-',SSID{i},'_PRC_MNINLin6_resampled.nii')) 
+       roi=niftiread(strcat(project_derivative,'/ASHS_raw2/sub-',SSID{i},'/final/sub-',SSID{i},'_PRC_MNINLin6_resampled.nii'));
     end
     
     %load beta images
