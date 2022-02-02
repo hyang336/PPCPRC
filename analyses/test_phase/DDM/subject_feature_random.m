@@ -2,7 +2,7 @@ cd%% use a random vector as fMRI data, this should definitely not improve fittin
 %% select voxels that are most strongly activated by the frequency task for each subject in the PPC, using testphase-LSSN output
 %% also recode accuracy and output a spreadsheet for HDDM
 %% pass in different ROI mask to extract betas in different region, remember to change line 69 (maxk or mink) where the top voxels are selected based on the regression slope between the single-trial beta and the behavior response
-function subject_PPC_random(sublist,output_dir)
+function subject_feature_random(sublist,output_dir,strict_coding)
 %some hard-coded parameters to load event files
 TR=2.5;
 expstart_vol=5;
@@ -20,7 +20,7 @@ while ischar(tline)
 end
 fclose(fid);
 
-freq_result=cell2table(cell(0,5),'VariableNames',{'subj_idx','stim','rt','response','precuneus_beta'});
+freq_result=cell2table(cell(0,6),'VariableNames',{'subj_idx','stim','rt','response','random_num','roi_z'});
 
 for i=1:length(SSID)
     %load event files and code run/trial numbers
@@ -50,16 +50,23 @@ for i=1:length(SSID)
     ratings=str2num(cell2mat(freq_trials_resp(:,6)));%convert to numeric array
     %if the objective rating differ from the subject rating by most 1, the
     %trial is considered accurate
-    accurate=abs(objfreq-ratings)<2;
+    if ~strict_coding
+        accurate=abs(objfreq-ratings)<2;
+    else
+        accurate=abs(objfreq-ratings)<1;
+    end
     freq_trials_resp(:,13)=num2cell(accurate);
     
     %random numbers
-    precuneus_signal=-1 + (1+1)*rand(size(freq_trials_resp,1),1);
+    roi_signal=-1 + (1+1)*rand(size(freq_trials_resp,1),1);
+    
+    %z-score
+    roi_z=zscore(roi_signal);
     
     %compile results and save RT, accuracy, betas, and subject number
-    temp=[repmat({SSID{i}},[size(freq_trials_resp,1),1]),freq_trials_resp(:,2),freq_trials_resp(:,7),freq_trials_resp(:,13),num2cell(precuneus_signal)];
+    temp=[repmat({SSID{i}},[size(freq_trials_resp,1),1]),freq_trials_resp(:,2),freq_trials_resp(:,7),freq_trials_resp(:,13),num2cell(roi_signal),num2cell(roi_z)];
     freq_result=[freq_result;temp];
     
 end
-writetable(freq_result,strcat(output_dir,'/hddm_data_rand.csv'));
+writetable(freq_result,strcat(output_dir,'/hddm_data_z.csv'));
 end
