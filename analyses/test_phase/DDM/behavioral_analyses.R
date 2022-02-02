@@ -3,7 +3,8 @@
 #load data, all the behavioral part are the same across csv files so just load the prc one
 datapath="C:\\Users\\haozi\\Desktop\\PhD\\fMRI_PrC-PPC_data\\hddm\\"
 
-prc.data=read.csv(paste(datapath,"PrC\\hddm_data_prc.csv",sep=""))
+# prc.data=read.csv(paste(datapath,"PrC\\hddm_data_prc.csv",sep=""))
+prc.data=read.csv(paste(datapath,"PrC_roi_strict\\hddm_data.csv",sep=""))
 
 SSID=unique(prc.data$subj_idx)
 #####################plot accuracy per presentation frequency###################################

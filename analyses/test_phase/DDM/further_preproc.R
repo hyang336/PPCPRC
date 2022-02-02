@@ -5,11 +5,12 @@
 datapath="C:\\Users\\haozi\\Desktop\\PhD\\fMRI_PrC-PPC_data\\hddm\\"
 
 prc.data=read.csv(paste(datapath,"PrC\\hddm_data_prc.csv",sep=""))
-precuneus.data=read.csv(paste(datapath,"precuneus_func-defined\\hddm_data_prec.csv",sep=""))
-mpfc.data=read.csv(paste(datapath,"mPFC_func-defined\\hddm_data_mpfc.csv",sep=""))
-inf_occip.data=read.csv(paste(datapath,"control_WFUaal_inf_occip\\hddm_data_inf_occip.csv",sep=""))
-sup_temporal.data=read.csv(paste(datapath,"control_WFUaal_sup_temporal\\hddm_data.csv",sep=""))
-rand.data=read.csv(paste(datapath,"control_random\\hddm_data_rand.csv",sep=""))
+# precuneus.data=read.csv(paste(datapath,"precuneus_func-defined\\hddm_data_prec.csv",sep=""))
+# mpfc.data=read.csv(paste(datapath,"mPFC_func-defined\\hddm_data_mpfc.csv",sep=""))
+# inf_occip.data=read.csv(paste(datapath,"control_WFUaal_inf_occip\\hddm_data_inf_occip.csv",sep=""))
+# sup_temporal.data=read.csv(paste(datapath,"control_WFUaal_sup_temporal\\hddm_data.csv",sep=""))
+# rand.data=read.csv(paste(datapath,"control_random\\hddm_data_rand.csv",sep=""))
+prc_roi_strict.data=read.csv(paste(datapath,"PrC_roi_strict\\hddm_data.csv",sep=""))
 
 #test whether beta differ in magnitude between regions
 t.test(abs(prc.data$prc_beta),abs(precuneus.data$precuneus_beta), paired=TRUE)
@@ -30,8 +31,11 @@ for (i in c(1:length(SSID))){
   # sup_temporal.beta=sup_temporal.data$sup_temporal_beta[sup_temporal.data$subj_idx==SSID[i]]
   # sup_temporal.data$sup_temporal_z[sup_temporal.data$subj_idx==SSID[i]]=scale(sup_temporal.beta)#z-score
   
-  rand.beta=rand.data$random_num[rand.data$subj_idx==SSID[i]]
-  rand.data$random_z[rand.data$subj_idx==SSID[i]]=scale(rand.beta)#z-score
+  # rand.beta=rand.data$random_num[rand.data$subj_idx==SSID[i]]
+  # rand.data$random_z[rand.data$subj_idx==SSID[i]]=scale(rand.beta)#z-score
+  
+  prc_roi_strict.beta=prc_roi_strict.data$roi_beta[prc_roi_strict.data$subj_idx==SSID[i]]
+  prc_roi_strict.data$roi_z[prc_roi_strict.data$subj_idx==SSID[i]]=scale(prc_roi_strict.beta)#z-score
   
   # #regression
   # m1=lm(precuneus.beta~prc.beta)
@@ -52,4 +56,5 @@ for (i in c(1:length(SSID))){
 # write.csv(mpfc.data,paste(datapath,"mPFC_func-defined\\hddm_data_mpfc_res.csv",sep=""))
 # write.csv(inf_occip.data,paste(datapath,"control_WFUaal_inf_occip\\hddm_data_inf_occip_z.csv",sep=""))
 # write.csv(sup_temporal.data,paste(datapath,"control_WFUaal_sup_temporal\\hddm_data_sup_temporal_z.csv",sep=""))
-write.csv(rand.data,paste(datapath,"control_random\\hddm_data_rand_z.csv",sep=""))
+# write.csv(rand.data,paste(datapath,"control_random\\hddm_data_rand_z.csv",sep=""))
+write.csv(prc_roi_strict.data,paste(datapath,"PrC_roi_strict\\hddm_data_z.csv",sep=""))
