@@ -68,5 +68,8 @@ for i=1:length(SSID)
     freq_result=[freq_result;temp];
     
 end
+if ~exist(output_dir,'dir')
+    mkdir(output_dir);
+end
 writetable(freq_result,strcat(output_dir,'/hddm_data_z.csv'));
 end
