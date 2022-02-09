@@ -19,7 +19,7 @@ while ischar(tline)
 end
 fclose(fid);
 
-freq_result=cell2table(cell(0,6),'VariableNames',{'subj_idx','stim','rt','response','roi_beta','roi_z','rating'});
+freq_result=cell2table(cell(0,7),'VariableNames',{'subj_idx','stim','rt','response','roi_beta','roi_z','rating'});
 
 for i=1:length(SSID)
     %load event files and code run/trial numbers
