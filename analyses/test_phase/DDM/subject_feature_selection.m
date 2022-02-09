@@ -19,7 +19,7 @@ while ischar(tline)
 end
 fclose(fid);
 
-freq_result=cell2table(cell(0,6),'VariableNames',{'subj_idx','stim','rt','response','roi_beta','roi_z'});
+freq_result=cell2table(cell(0,6),'VariableNames',{'subj_idx','stim','rt','response','roi_beta','roi_z','rating'});
 
 for i=1:length(SSID)
     %load event files and code run/trial numbers
@@ -83,7 +83,7 @@ for i=1:length(SSID)
     roi_z=zscore(roi_signal);
     
     %compile results and save RT, accuracy, betas, and subject number
-    temp=[repmat({SSID{i}},[size(freq_trials_resp,1),1]),freq_trials_resp(:,2),freq_trials_resp(:,7),freq_trials_resp(:,13),num2cell(roi_signal),num2cell(roi_z)];    
+    temp=[repmat({SSID{i}},[size(freq_trials_resp,1),1]),freq_trials_resp(:,2),freq_trials_resp(:,7),freq_trials_resp(:,13),num2cell(roi_signal),num2cell(roi_z),num2cell(ratings)];    
     freq_result=[freq_result;temp];
     
 end
