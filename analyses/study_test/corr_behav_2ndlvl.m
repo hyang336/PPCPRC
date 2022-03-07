@@ -155,7 +155,7 @@ switch effect
         behav_folder=strcat(project_derivative,'/behavioral/');
         prime_res=cell(0,3);
         for i=1:length(SSID)
-            conimg=niftiread(strcat(lvl1_folder,'/sub-',SSID{i},'/temp/con_0001.nii'));%con_0001 is the lifetime_dec contrast
+            conimg=niftiread(strcat(lvl1_folder,'/sub-',SSID{i},'/temp/con_0004.nii'));%con_0004 is the lifetime_irr_dec contrast
             prc_con_val=nanmean(conimg(find(mask)));
             %behavioral part
             [~,~,pscan]=xlsread(strcat(behav_folder,'sub-',SSID{i},'/',SSID{i},'_task-pscan_data.xlsx'));

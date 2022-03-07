@@ -119,7 +119,12 @@ p2=ggplot(data = RT.life_sum,aes(x=as.factor(lifetime_ratings),y = rt,group=1)) 
   geom_point()+
   theme(axis.text=element_text(size=(15)),axis.title=element_text(size=(15)))+
   geom_errorbar(aes(ymin=rt-se, ymax=rt+se), width=.2,position=position_dodge(.9))+
-  xlab("normative lifetime familiarity")+
+  xlab("lifetime familiarity rating")+
   ylab("response time (second)")
 ggsave(filename='study_fam_RT.png',path=paste(datapath,'interim_summary\\ch2_figs\\',sep=''),plot=p2,width=4,height=4,units="in",dpi=300,scale = 1)
+
+
+
+
+
 

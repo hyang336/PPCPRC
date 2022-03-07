@@ -75,3 +75,5 @@ freq_err.bar=ggplot(mirror_sum,aes(x=pscan,y=freq_error))+
   xlab("post-scan lifetime familiarity ratings")+
   ylab("frequency overestimation")
 ggsave(filename='freqerror_bar.png',path=paste(datapath,'interim_summary\\ch2_figs\\',sep=''),plot=freq_err.bar,width=4,height=4,units="in",dpi=300,scale = 1)
+
+

@@ -6,7 +6,8 @@ library(psych)
 library(readxl)
 background_ERP=read_excel(paste(datapath,"resource from ERP study\\only_Pearson_R.xlsx",sep=""), sheet = "transposed")
 
-ss_list=c('001','002','003','004','005','006','007','008','010','011','012','013','014','015','016','017','018','019','020','021','022','023','024','095','026','027','028','029','030','031','032')
+ss_list=c('001','002','003','004','005','006','007','008','011','012','013','014','015','016','017','018','019','020','021','022','023','024','095','026','027','028','029','030','031','032')
+#ss_list=c('001','002','003','004','005','006','007','008','010','011','012','013','014','015','016','017','018','019','020','021','022','023','024','095','026','027','028','029','030','031','032')
 #ss_list=c('001','002','003','004','005','006','007','008','011','013','014','016','020','021','022','095','026')
 #create empty dataframes to store the correlation values
 freq_frame=data.frame(matrix(ncol = 3, nrow = length(ss_list)))
@@ -381,10 +382,33 @@ freqRT.plt=ggplot(freqRT.sum,aes(x=resp,y=sub_mean_RT))+
   geom_point()+
   facet_grid(~obj_freq,labeller=labeller(obj_freq=obj.label))+
   geom_errorbar(aes(ymin=sub_mean_RT-sub_se,ymax=sub_mean_RT+sub_se),width=0.2)+
-  theme(strip.text.x = element_text(size=12,face="bold"),axis.text=element_text(size=(15)),axis.title=element_text(size=(15)))
+  theme(strip.text.x = element_text(size=12,face="bold"),axis.text=element_text(size=(15)),axis.title=element_text(size=(15)))+
+  xlab("subjective rating")+
+  ylab("response time")
 ggsave(filename='freqRT_plt.png',path=paste(datapath,'interim_summary\\',sep=''),plot=freqRT.plt,width=8,height=4,units="in",dpi=300,scale = 1)
 
+###########################################################################accuracy coding freq############################################################
+freqRTavg$acc=freqRTavg$resp==rescale(freqRTavg$obj_freq,c(1,5))
+freqRT.sum=freqRTavg %>%
+  group_by(acc,obj_freq) %>%
+  summarise_at(vars(mean_RT),list(sub_mean_RT= ~mean(mean_RT,na.rm=TRUE),sub_sd= ~sd(mean_RT,na.rm=TRUE),cnt_sqrt=~sqrt(sum(!is.na(.)))))
+freqRT.sum$sub_se=freqRT.sum$sub_sd/freqRT.sum$cnt_sqrt
 
+#named character vector for facet label
+obj.label=c("obj_freq:1","obj_freq:3","obj_freq:5","obj_freq:7","obj_freq:9")
+names(obj.label)=c(1,3,5,7,9)
+
+freqRT.plt=ggplot(freqRT.sum,aes(x=acc,y=sub_mean_RT))+
+  geom_point()+
+  facet_grid(~obj_freq,labeller=labeller(obj_freq=obj.label))+
+  geom_errorbar(aes(ymin=sub_mean_RT-sub_se,ymax=sub_mean_RT+sub_se),width=0.2)+
+  theme(strip.text.x = element_text(size=12,face="bold"),axis.text=element_text(size=(12)),axis.title=element_text(size=(15)))+
+  scale_x_discrete(labels=c('incorrect','correct'))+
+  xlab("accuracy")+
+  ylab("response time")
+ggsave(filename='freqRT_acc_plt.png',path=paste(datapath,'interim_summary\\',sep=''),plot=freqRT.plt,width=8,height=4,units="in",dpi=300,scale = 1)
+
+############################################################################################################################################################
 famRT.sum=famRTavg %>%
   group_by(resp) %>%
   summarise(sub_mean_RT=mean(mean_RT),sub_sd=sd(mean_RT),sub_se=sd(mean_RT)/sqrt(n()))
