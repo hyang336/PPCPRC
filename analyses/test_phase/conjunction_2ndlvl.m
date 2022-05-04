@@ -78,7 +78,7 @@ conjunctive_2ndlvl_job;
 for i=1:length(SSID)%loop over subjects
     for j=1:length(contrasts) %loop over contrasts
         confile=strcat(con_dir{j},'/sub-',SSID{i},'/temp/',contrasts{j},'.nii,1');
-        matlabbatch{1}.spm.stats.factorial_design.des.anova.icell(j).scans{i}=confile;
+        matlabbatch{1}.spm.stats.factorial_design.des.anova.icell(j).scans{i,1}=confile;
     end
 end
 matlabbatch{1}.spm.stats.factorial_design.dir = {output_dir};
