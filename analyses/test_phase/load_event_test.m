@@ -8,7 +8,11 @@ lifetime_events=fullfile(strcat(project_derivative,'/behavioral/',sub,'/',sub,'_
 % run and task would be in a cell created by the outer
 % script, otherwise the next line won't work. Check help
 % fullfile
-[~,~,raw]=xlsread(lifetime_events{1});%should have only 1 file, hopefully 
+if iscell(lifetime_events)
+    [~,~,raw]=xlsread(lifetime_events{1});%should have only 1 file, hopefully 
+elseif ischar(lifetime_events)
+    [~,~,raw]=xlsread(lifetime_events);
+end
 [~,~,fo_sheet]=xlsread('stimulus_select_5.2.xlsm',1);%spreadsheet containing feat_overlap
 [~,~,t_sheet]=xlsread('lifetime_episem_regress_29ss.xlsx',1);%spreadsheet containing epi_t and sem_t
 feat_over=fo_sheet(2:91,1:2);%pull out all stimuli and their feat_over for later search
