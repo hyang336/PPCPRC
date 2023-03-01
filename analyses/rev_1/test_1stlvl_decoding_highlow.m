@@ -34,7 +34,7 @@
 % if it doesn't work try group PrC mask first, since the individual mask
 % may have holes in it.
 
-function test_1stlvl_decoding_highlow(project_derivative,GLM_dir,ASHS_dir,sub,c_type,bin_type,varargin)
+function test_1stlvl_decoding_highlow(project_derivative,GLM_dir,ASHS_dir,sub,c_type,bin_type,fs_type,varargin)
 %% set up dir and parameters
 
 output=[project_derivative,'/Rev_1_test-decoding'];
@@ -109,11 +109,11 @@ switch c_type
     case 'rec'
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%         rec h vs l
 
-        %make rec classification output folder
-        if ~exist(strcat(sub_output,'/rec'),'dir')
-            mkdir (sub_output,'rec');
-        end
-        rec_output=[sub_output,'/rec/'];
+        %         %make rec classification output folder
+        %         if ~exist(strcat(sub_output,'/rec'),'dir')
+        %             mkdir (sub_output,'rec');
+        %         end
+        %         rec_output=[sub_output,'/rec/'];
 
         % include only recent trials in both behaviour and LSS beta
         recent_trials=strcmp(raw_rating_cat(1,:),'recent');
@@ -156,12 +156,24 @@ switch c_type
                 % the nminusone
                 subj = create_xvalid_indices(subj,'runs');
 
-                % TODO: compare for selecting both directions (ANOVA) vs.
-                % single direction (inc or dec with t-test)
+                % Compare for selecting both directions (ANOVA) vs.
+                % single direction (inc or dec with t-test), the MVPA
+                % toolbox uses str2fun() to call its customized ANOVA
+                % function (statmap_anova.m), I made a statmap_ttest.m to
+                % do one-tail selection
+                switch fs_type
+                    case 'xgy' %x greater than y, where x and y are the first and second conditions
+                        arg_struct.tail='right';
+                        [subj] = feature_select(subj,'LSS_rec_beta_z','rec','runs_xval','statmap_funct','statmap_ttest','statmap_arg',arg_struct);
+                    case 'xsy' %x smaller than y
+                        arg_struct.tail='left';
+                        [subj] = feature_select(subj,'LSS_rec_beta_z','rec','runs_xval','statmap_funct','statmap_ttest','statmap_arg',arg_struct);
+                    case 'anova' %two-tail selection using anova
+                        % run the anova multiple times, separately for each iteration,
+                        % using the selector indices created above
+                        [subj] = feature_select(subj,'LSS_rec_beta_z','rec','runs_xval');
 
-                    % run the anova multiple times, separately for each iteration,
-                    % using the selector indices created above
-                    [subj] = feature_select(subj,'LSS_rec_beta_z','rec','runs_xval');
+                end
 
 
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -175,10 +187,8 @@ switch c_type
                 % now, run the classification multiple times, training and testing
                 % on different subsets of the data on each iteration
                 [subj results] = cross_validation(subj,'LSS_rec_beta_z','rec','runs_xval','LSS_rec_beta_z_thresh0.05',class_args);
-            
-                % save cross-validated results
-                save([rec_output,'rec_high3.mat'],"results");
-                
+
+
             case 'low3'
                 recbin_3_low=zeros(2,size(raw_rating_cat_rec,2)); %3 as low
                 recbin_3_low(1,cell2mat(raw_rating_cat_rec(2,:))>3)=1;%trials for high rec judgement
@@ -208,12 +218,102 @@ switch c_type
                 % now, create selector indices for the n different iterations of
                 % the nminusone
                 subj = create_xvalid_indices(subj,'runs');
-                % TODO: compare for selecting both directions (ANOVA) vs.
-                % single direction (inc or dec with t-test)
+                % Compare for selecting both directions (ANOVA) vs.
+                % single direction (inc or dec with t-test), the MVPA
+                % toolbox uses str2fun() to call its customized ANOVA
+                % function (statmap_anova.m), I made a statmap_ttest.m to
+                % do one-tail selection
+                switch fs_type
+                    case 'xgy' %x greater than y, where x and y are the first and second conditions
+                        arg_struct.tail='right';
+                        [subj] = feature_select(subj,'LSS_rec_beta_z','rec','runs_xval','statmap_funct','statmap_ttest','statmap_arg',arg_struct);
+                    case 'xsy' %x smaller than y
+                        arg_struct.tail='left';
+                        [subj] = feature_select(subj,'LSS_rec_beta_z','rec','runs_xval','statmap_funct','statmap_ttest','statmap_arg',arg_struct);
+                    case 'anova' %two-tail selection using anova
+                        % run the anova multiple times, separately for each iteration,
+                        % using the selector indices created above
+                        [subj] = feature_select(subj,'LSS_rec_beta_z','rec','runs_xval');
 
-                    % run the anova multiple times, separately for each iteration,
-                    % using the selector indices created above
-                    [subj] = feature_select(subj,'LSS_rec_beta_z','rec','runs_xval');
+                end
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                % CLASSIFICATION - n-minus-one cross-validation
+
+                % set some basic arguments for a backprop classifier
+                class_args.train_funct_name = 'train_bp';
+                class_args.test_funct_name = 'test_bp';
+                class_args.nHidden = 0;
+
+                % now, run the classification multiple times, training and testing
+                % on different subsets of the data on each iteration
+                [subj results] = cross_validation(subj,'LSS_rec_beta_z','rec','runs_xval','LSS_rec_beta_z_thresh0.05',class_args);
+
+
+        end
+
+
+
+    case 'life'
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%         life h vs l
+        % include only recent trials in both behaviour and LSS beta
+        life_trials=strcmp(raw_rating_cat(1,:),'lifetime');
+
+        raw_rating_cat_life=raw_rating_cat(:,life_trials);%ratings
+        LSS_beta_filenames_life=LSS_beta_filenames(:,life_trials);%beta imgs
+        life_runs=runs(:,life_trials);%run indicators
+
+        % create "regressors", split around rating 3 since it is more similar to our univariate results
+        % than using subject-specific medial rating
+        switch bin_type
+            case 'high3'
+                lifebin_3_high=zeros(2,size(raw_rating_cat_life,2));%3 as high
+
+                lifebin_3_high(1,cell2mat(raw_rating_cat_life(2,:))>=3)=1;%trials for high life judgement
+                lifebin_3_high(2,cell2mat(raw_rating_cat_life(2,:))<3)=1;%trials for low life judgement
+
+                %populate subj structure at the inner-most level of the
+                %script
+                % regressor (classes)
+                subj = init_object(subj,'regressors','life');
+                subj = set_mat(subj,'regressors','life',lifebin_3_high);
+                condnames = {'life_high','life_low'};%order matters
+                subj = set_objfield(subj,'regressors','life','condnames',condnames);
+                % run selector
+                subj = init_object(subj,'selector','runs');
+                subj = set_mat(subj,'selector','runs',life_runs);
+
+                %keeping only the voxels active in the mask (see above)
+                subj = load_spm_pattern(subj,'LSS_life_beta',mask_name,LSS_beta_filenames_life);
+
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                % PRE-PROCESSING - z-scoring in time and no-peeking anova
+
+                % z-score the LSS beta (called 'LSS_life_beta'),
+                % individually on each run (using the 'runs' selectors)
+                subj = zscore_runs(subj,'LSS_life_beta','runs');
+
+                % now, create selector indices for the n different iterations of
+                % the nminusone
+                subj = create_xvalid_indices(subj,'runs');
+
+                % Compare for selecting both directions (ANOVA) vs.
+                % single direction (inc or dec with t-test), the MVPA
+                % toolbox uses str2fun() to call its customized ANOVA
+                % function (statmap_anova.m), I made a statmap_ttest.m to
+                % do one-tail selection
+                switch fs_type
+                    case 'xgy' %x greater than y, where x and y are the first and second conditions
+                        arg_struct.tail='right';
+                        [subj] = feature_select(subj,'LSS_life_beta_z','life','runs_xval','statmap_funct','statmap_ttest','statmap_arg',arg_struct);
+                    case 'xsy' %x smaller than y
+                        arg_struct.tail='left';
+                        [subj] = feature_select(subj,'LSS_life_beta_z','life','runs_xval','statmap_funct','statmap_ttest','statmap_arg',arg_struct);
+                    case 'anova' %two-tail selection using anova
+                        % run the anova multiple times, separately for each iteration,
+                        % using the selector indices created above
+                        [subj] = feature_select(subj,'LSS_life_beta_z','life','runs_xval');
+
+                end
 
 
                 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -226,30 +326,142 @@ switch c_type
 
                 % now, run the classification multiple times, training and testing
                 % on different subsets of the data on each iteration
-                [subj results] = cross_validation(subj,'LSS_rec_beta_z','rec','runs_xval','LSS_rec_beta_z_thresh0.05',class_args);
-        
-                % save cross-validated results
-                save([rec_output,'rec_low3.mat'],"results");
+                [subj results] = cross_validation(subj,'LSS_life_beta_z','life','runs_xval','LSS_life_beta_z_thresh0.05',class_args);
+
+            case 'low3'
+                lifebin_3_low=zeros(2,size(raw_rating_cat_life,2)); %3 as low
+                lifebin_3_low(1,cell2mat(raw_rating_cat_life(2,:))>3)=1;%trials for high life judgement
+                lifebin_3_low(2,cell2mat(raw_rating_cat_life(2,:))<=3)=1;%trials for low life judgement
+
+                %populate subj structure at the inner-most level of the
+                %script
+                % regressor (classes)
+                subj = init_object(subj,'regressors','life');
+                subj = set_mat(subj,'regressors','life',lifebin_3_low);
+                condnames = {'life_high','life_low'};%order matters
+                subj = set_objfield(subj,'regressors','life','condnames',condnames);
+                % run selector
+                subj = init_object(subj,'selector','runs');
+                subj = set_mat(subj,'selector','runs',life_runs);
+
+                %keeping only the voxels active in the mask (see above)
+                subj = load_spm_pattern(subj,'LSS_life_beta',mask_name,LSS_beta_filenames_life);
+
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                % PRE-PROCESSING - z-scoring in time and no-peeking anova
+
+                % z-score the LSS beta (called 'LSS_life_beta'),
+                % individually on each run (using the 'runs' selectors)
+                subj = zscore_runs(subj,'LSS_life_beta','runs');
+
+                % now, create selector indices for the n different iterations of
+                % the nminusone
+                subj = create_xvalid_indices(subj,'runs');
+                % Compare for selecting both directions (ANOVA) vs.
+                % single direction (inc or dec with t-test), the MVPA
+                % toolbox uses str2fun() to call its customized ANOVA
+                % function (statmap_anova.m), I made a statmap_ttest.m to
+                % do one-tail selection
+                switch fs_type
+                    case 'xgy' %x greater than y, where x and y are the first and second conditions
+                        arg_struct.tail='right';
+                        [subj] = feature_select(subj,'LSS_life_beta_z','life','runs_xval','statmap_funct','statmap_ttest','statmap_arg',arg_struct);
+                    case 'xsy' %x smaller than y
+                        arg_struct.tail='left';
+                        [subj] = feature_select(subj,'LSS_life_beta_z','life','runs_xval','statmap_funct','statmap_ttest','statmap_arg',arg_struct);
+                    case 'anova' %two-tail selection using anova
+                        % run the anova multiple times, separately for each iteration,
+                        % using the selector indices created above
+                        [subj] = feature_select(subj,'LSS_life_beta_z','life','runs_xval');
+
+                end
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                % CLASSIFICATION - n-minus-one cross-validation
+
+                % set some basic arguments for a backprop classifier
+                class_args.train_funct_name = 'train_bp';
+                class_args.test_funct_name = 'test_bp';
+                class_args.nHidden = 0;
+
+                % now, run the classification multiple times, training and testing
+                % on different subsets of the data on each iteration
+                [subj results] = cross_validation(subj,'LSS_life_beta_z','life','runs_xval','LSS_life_beta_z_thresh0.05',class_args);
+
+
         end
 
-
-
-    case 'life'
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%         life h vs l
-
-        %make rlife classification output folder
-        if ~exist(strcat(sub_output,'/life'),'dir')
-            mkdir (sub_output,life);
-        end
 
     case 'task'
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%         rec vs life
+        % include all trials in both behaviour and LSS beta
 
-        %make task classification output folder
-        if ~exist(strcat(sub_output,'/task'),'dir')
-            mkdir (sub_output,task);
+        %hard code bin_type for task decoding
+        bin_type='na';
+
+        taskbin=zeros(2,size(raw_rating_cat,2)); % init dummy coding
+        taskbin(1,strcmp(raw_rating_cat(1,:),'recent'))=1;%recent trials on row 1
+        taskbin(2,strcmp(raw_rating_cat(1,:),'lifetime'))=1;%lifetime trials on row 2
+
+        %populate subj structure at the inner-most level of the
+        %script
+        % regressor (classes)
+        subj = init_object(subj,'regressors','task');
+        subj = set_mat(subj,'regressors','task',taskbin);
+        condnames = {'recent','lifetime'};%order matters
+        subj = set_objfield(subj,'regressors','task','condnames',condnames);
+        % run selector
+        subj = init_object(subj,'selector','runs');
+        subj = set_mat(subj,'selector','runs',runs);
+
+        %keeping only the voxels active in the mask (see above)
+        subj = load_spm_pattern(subj,'LSS_beta',mask_name,LSS_beta_filenames);
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % PRE-PROCESSING - z-scoring in time and no-peeking anova
+
+        % z-score the LSS beta (called 'LSS_life_beta'),
+        % individually on each run (using the 'runs' selectors)
+        subj = zscore_runs(subj,'LSS_beta','runs');
+
+        % now, create selector indices for the n different iterations of
+        % the nminusone
+        subj = create_xvalid_indices(subj,'runs');
+        % Compare for selecting both directions (ANOVA) vs.
+        % single direction (inc or dec with t-test), the MVPA
+        % toolbox uses str2fun() to call its customized ANOVA
+        % function (statmap_anova.m), I made a statmap_ttest.m to
+        % do one-tail selection
+        switch fs_type
+            case 'xgy' %x greater than y, where x and y are the first and second conditions
+                arg_struct.tail='right';
+                [subj] = feature_select(subj,'LSS_beta_z','task','runs_xval','statmap_funct','statmap_ttest','statmap_arg',arg_struct);
+            case 'xsy' %x smaller than y
+                arg_struct.tail='left';
+                [subj] = feature_select(subj,'LSS_beta_z','task','runs_xval','statmap_funct','statmap_ttest','statmap_arg',arg_struct);
+            case 'anova' %two-tail selection using anova
+                % run the anova multiple times, separately for each iteration,
+                % using the selector indices created above
+                [subj] = feature_select(subj,'LSS_beta_z','task','runs_xval');
+
         end
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % CLASSIFICATION - n-minus-one cross-validation
+
+        % set some basic arguments for a backprop classifier
+        class_args.train_funct_name = 'train_bp';
+        class_args.test_funct_name = 'test_bp';
+        class_args.nHidden = 0;
+
+        % now, run the classification multiple times, training and testing
+        % on different subsets of the data on each iteration
+        [subj results] = cross_validation(subj,'LSS_beta_z','task','runs_xval','LSS_beta_z_thresh0.05',class_args);
+
 end
+
+% save cross-validated results
+filename=[c_type,'_',bin_type,'_',fs_type,'.mat']
+save([sub_output,'/',filename],"results");
+
 end
 
 
