@@ -94,7 +94,7 @@ for i=1:num_run
     raw_rating=[runevent{i}(:,4)';runevent{i}(:,6)'];
     raw_rating_cat=[raw_rating_cat,raw_rating];
     for j=1:num_trial %these include both recent and lifetime trials
-        LSS_beta_filenames = [LSS_beta_filenames,[GLM_dir,'/LSS-N_test/',sub,'/temp/task-test_run_',num2str(i),'/trial_',num2str(j),'/beta_0001.nii']]; %This is a bit hard-coded
+        LSS_beta_filenames = [LSS_beta_filenames,cellstr(strcat(GLM_dir,'/LSS-N_test/',sub,'/temp/task-test_run_',num2str(i),'/trial_',num2str(j),'/beta_0001.nii'))]; %This is a bit hard-coded
     end
 end
 
