@@ -460,8 +460,7 @@ end
 
 % save cross-validated results
 filename=[c_type,'_',bin_type,'_',fs_type,'.mat']
-save([sub_output,'/',filename],"results");
-
+save([sub_output,'/',filename],"results","subj");
 end
 
 
