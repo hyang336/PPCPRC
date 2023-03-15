@@ -78,4 +78,3 @@ for j=2:10
 end
 %other than task recent > life selection, everything is above chance. 
 
-%% extract voxels that are selected for >, < or != for each subject, aggregate across cross-validation folds and generate nifti files
