@@ -1,4 +1,6 @@
 %% function to plot results for the study phase lifetime familiarity effect
+% 2023-03-16 now saving standard deviation of the sample for bar plots
+% since the se is missleading @Russ Poldrack
 function beta_plots_study_lifetime(first_lvl_dir,sublist,mask_dir,ROI_mask,output_dir,analysis)
 %read in subject IDs
 fid=fopen(sublist,'r');
@@ -71,31 +73,36 @@ switch analysis
             sub_life1_ROI_beta=sub_life1_ROI_beta(~cellfun(@isempty, sub_life1_ROI_beta));
             life1_avg=mean(cell2mat(sub_life1_ROI_beta),'omitnan');
             life1_se=std(cell2mat(sub_life1_ROI_beta),'omitnan')/sqrt(length(sub_life1_ROI_beta));
-            save(strcat(output_dir,'/',ROI_mask,'_life1.mat'),'life1_avg','life1_se');
+            life1_sd=std(cell2mat(sub_life1_ROI_beta),1,'omitnan');
+            save(strcat(output_dir,'/',ROI_mask,'_life1.mat'),'life1_avg','life1_se','life1_sd');
         end
         if exist('sub_life2_ROI_beta','var') == 1
             sub_life2_ROI_beta=sub_life2_ROI_beta(~cellfun(@isempty, sub_life2_ROI_beta));
             life2_avg=mean(cell2mat(sub_life2_ROI_beta),'omitnan');
             life2_se=std(cell2mat(sub_life2_ROI_beta),'omitnan')/sqrt(length(sub_life2_ROI_beta));
-            save(strcat(output_dir,'/',ROI_mask,'_life2.mat'),'life2_avg','life2_se');
+            life2_sd=std(cell2mat(sub_life2_ROI_beta),1,'omitnan');
+            save(strcat(output_dir,'/',ROI_mask,'_life2.mat'),'life2_avg','life2_se','life2_sd');
         end
         if exist('sub_life3_ROI_beta','var') == 1
             sub_life3_ROI_beta=sub_life3_ROI_beta(~cellfun(@isempty, sub_life3_ROI_beta));
             life3_avg=mean(cell2mat(sub_life3_ROI_beta),'omitnan');
             life3_se=std(cell2mat(sub_life3_ROI_beta),'omitnan')/sqrt(length(sub_life3_ROI_beta));
-            save(strcat(output_dir,'/',ROI_mask,'_life3.mat'),'life3_avg','life3_se');
+            life3_sd=std(cell2mat(sub_life3_ROI_beta),1,'omitnan');
+            save(strcat(output_dir,'/',ROI_mask,'_life3.mat'),'life3_avg','life3_se','life3_sd');
         end
         if exist('sub_life4_ROI_beta','var') == 1
             sub_life4_ROI_beta=sub_life4_ROI_beta(~cellfun(@isempty, sub_life4_ROI_beta));
             life4_avg=mean(cell2mat(sub_life4_ROI_beta),'omitnan');
             life4_se=std(cell2mat(sub_life4_ROI_beta),'omitnan')/sqrt(length(sub_life4_ROI_beta));
-            save(strcat(output_dir,'/',ROI_mask,'_life4.mat'),'life4_avg','life4_se');
+            life4_sd=std(cell2mat(sub_life4_ROI_beta),1,'omitnan');
+            save(strcat(output_dir,'/',ROI_mask,'_life4.mat'),'life4_avg','life4_se','life4_sd');
         end
         if exist('sub_life5_ROI_beta','var') == 1
             sub_life5_ROI_beta=sub_life5_ROI_beta(~cellfun(@isempty, sub_life5_ROI_beta));
             life5_avg=mean(cell2mat(sub_life5_ROI_beta),'omitnan');
             life5_se=std(cell2mat(sub_life5_ROI_beta),'omitnan')/sqrt(length(sub_life5_ROI_beta));
-            save(strcat(output_dir,'/',ROI_mask,'_life5.mat'),'life5_avg','life5_se');
+            life5_sd=std(cell2mat(sub_life5_ROI_beta),1,'omitnan');
+            save(strcat(output_dir,'/',ROI_mask,'_life5.mat'),'life5_avg','life5_se','life5_sd');
         end
         
     case 'pres1'
@@ -209,31 +216,36 @@ switch analysis
             sub_life1_ROI_beta=sub_life1_ROI_beta(~cellfun(@isempty, sub_life1_ROI_beta));
             life1_avg=mean(cell2mat(sub_life1_ROI_beta),'omitnan');
             life1_se=std(cell2mat(sub_life1_ROI_beta),'omitnan')/sqrt(length(sub_life1_ROI_beta));
-            save(strcat(output_dir,'/',ROI_mask,'_life1_pres1.mat'),'life1_avg','life1_se');
+            life1_sd=std(cell2mat(sub_life1_ROI_beta),1,'omitnan');
+            save(strcat(output_dir,'/',ROI_mask,'_life1_pres1.mat'),'life1_avg','life1_se','life1_sd');
         end
         if exist('sub_life2_ROI_beta','var') == 1
             sub_life2_ROI_beta=sub_life2_ROI_beta(~cellfun(@isempty, sub_life2_ROI_beta));
             life2_avg=mean(cell2mat(sub_life2_ROI_beta),'omitnan');
             life2_se=std(cell2mat(sub_life2_ROI_beta),'omitnan')/sqrt(length(sub_life2_ROI_beta));
-            save(strcat(output_dir,'/',ROI_mask,'_life2_pres1.mat'),'life2_avg','life2_se');
+            life2_sd=std(cell2mat(sub_life2_ROI_beta),1,'omitnan');
+            save(strcat(output_dir,'/',ROI_mask,'_life2_pres1.mat'),'life2_avg','life2_se','life2_sd');
         end
         if exist('sub_life3_ROI_beta','var') == 1
             sub_life3_ROI_beta=sub_life3_ROI_beta(~cellfun(@isempty, sub_life3_ROI_beta));
             life3_avg=mean(cell2mat(sub_life3_ROI_beta),'omitnan');
             life3_se=std(cell2mat(sub_life3_ROI_beta),'omitnan')/sqrt(length(sub_life3_ROI_beta));
-            save(strcat(output_dir,'/',ROI_mask,'_life3_pres1.mat'),'life3_avg','life3_se');
+            life3_sd=std(cell2mat(sub_life3_ROI_beta),1,'omitnan');
+            save(strcat(output_dir,'/',ROI_mask,'_life3_pres1.mat'),'life3_avg','life3_se','life3_sd');
         end
         if exist('sub_life4_ROI_beta','var') == 1
             sub_life4_ROI_beta=sub_life4_ROI_beta(~cellfun(@isempty, sub_life4_ROI_beta));
             life4_avg=mean(cell2mat(sub_life4_ROI_beta),'omitnan');
             life4_se=std(cell2mat(sub_life4_ROI_beta),'omitnan')/sqrt(length(sub_life4_ROI_beta));
-            save(strcat(output_dir,'/',ROI_mask,'_life4_pres1.mat'),'life4_avg','life4_se');
+            life4_sd=std(cell2mat(sub_life4_ROI_beta),1,'omitnan');
+            save(strcat(output_dir,'/',ROI_mask,'_life4_pres1.mat'),'life4_avg','life4_se','life4_sd');
         end
         if exist('sub_life5_ROI_beta','var') == 1
             sub_life5_ROI_beta=sub_life5_ROI_beta(~cellfun(@isempty, sub_life5_ROI_beta));
             life5_avg=mean(cell2mat(sub_life5_ROI_beta),'omitnan');
             life5_se=std(cell2mat(sub_life5_ROI_beta),'omitnan')/sqrt(length(sub_life5_ROI_beta));
-            save(strcat(output_dir,'/',ROI_mask,'_life5_pres1.mat'),'life5_avg','life5_se');
+            life5_sd=std(cell2mat(sub_life5_ROI_beta),1,'omitnan');
+            save(strcat(output_dir,'/',ROI_mask,'_life5_pres1.mat'),'life5_avg','life5_se','life5_sd');
         end
 end
 end
