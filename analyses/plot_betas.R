@@ -31,9 +31,9 @@ p1 <- ggplot(PrC_test_rele_data, aes(x=signal, y=beta_avg, fill=ROI)) +
            legend.background = element_rect(fill="black"),
            legend.title = element_text(color="white", size=13),
            legend.text = element_text(color="white",size=13),
-           axis.text.x = element_text(color="white",size=13,vjust=0.5),
-           axis.text.y = element_text(color="white",size=13),
-           axis.title = element_text(color="white",size=11))+ labs(x = '            Task-relevant lifetime familiarity             Task-relevant recent familiarity (frequency)',y ="Parameter estimates")+scale_x_discrete(labels=c('1','2','3','4','5','1','2','3','4','5'))
+           axis.text.x = element_text(color="white",size=20,vjust=0.5),
+           axis.text.y = element_text(color="white",size=20),
+           axis.title = element_blank())+ labs(x = '            Task-relevant lifetime familiarity             Task-relevant recent familiarity (frequency)',y ="Parameter estimates")+scale_x_discrete(labels=c('1','2','3','4','5','1','2','3','4','5'))
 ggsave(filename='PrC_task-rele_life-recent-conj_bar.png',path=datapath,plot=p1,scale = 0.9,width = 2400,height=1600,units='px')
 
 
@@ -50,11 +50,11 @@ p2.1 <- ggplot(test_lifetime_data[test_lifetime_data$task=="lifetime",], aes(x=s
                                                                                                                           legend.background = element_rect(fill="black"),
                                                                                                                           legend.title = element_text(color="white",size=13),
                                                                                                                           legend.text = element_text(color="white",size=13),
-                                                                                                                          axis.text.x = element_text(color="white",size=13,vjust=0.5),
-                                                                                                                          axis.text.y = element_text(color="white",size=13),
-                                                                                                                          axis.title = element_text(color="white",size=13))+ 
+                                                                                                                          axis.text.x = element_text(color="white",size=20,vjust=0.5),
+                                                                                                                          axis.text.y = element_text(color="white",size=20),
+                                                                                                                          axis.title = element_blank())+ 
   labs(x="Task-relevant lifetime familiarity", y ="Parameter estimates")+scale_x_discrete(labels=c('1','2','3','4','5'))
-ggsave(filename='PrC_task-rele_life-conj_bar.png',path=datapath,plot=p2.1,width = 2400,height=1600,units='px',scale = 0.9)
+ggsave(filename='PrC_task-rele_life-conj_bar.png',path=datapath,plot=p2.1,width = 350*3,height=467*3,units='px',scale = 0.9)
 #frequency judgement
 p2.2 <- ggplot(test_lifetime_data[test_lifetime_data$task=="frequency",], aes(x=signal, y=beta_avg, fill=ROI)) + 
   geom_bar(stat="identity", position=position_dodge(),show.legend = FALSE) +
@@ -67,11 +67,11 @@ p2.2 <- ggplot(test_lifetime_data[test_lifetime_data$task=="frequency",], aes(x=
         legend.background = element_rect(fill="black"),
         legend.title = element_text(color="white",size=13),
         legend.text = element_text(color="white",size=13),
-        axis.text.x = element_text(color="white",size=13,vjust=0.5),
-        axis.text.y = element_text(color="white",size=13),
-        axis.title = element_text(color="white",size=13))+ 
+        axis.text.x = element_text(color="white",size=20,vjust=0.5),
+        axis.text.y = element_text(color="white",size=20),
+        axis.title = element_blank())+ 
   labs(x="Task-irrelevant lifetime familiarity", y ="Parameter estimates")+scale_x_discrete(labels=c('1','2','3','4','5'))
-ggsave(filename='PrC_task-irrele_life-conj_bar.png',path=datapath,plot=p2.2,width = 2400,height=1600,units='px',scale = 0.9)
+ggsave(filename='PrC_task-irrele_life-conj_bar.png',path=datapath,plot=p2.2,width = 350*3,height=467*3,units='px',scale = 0.9)
 
 
 #task-irrelevant recent familiarity in study phase
@@ -86,9 +86,9 @@ p3 <- ggplot(study_recent_data, aes(x=signal, y=beta_avg, fill=color)) +
         legend.background = element_rect(fill="black"),
         legend.title = element_text(color="white",size=13),
         legend.text = element_text(color="white",size=13),
-        axis.text.x = element_text(color="white",size=13,vjust=0.5),
-        axis.text.y = element_text(color="white",size=13),
-        axis.title = element_text(color="white",size=13))+ 
+        axis.text.x = element_text(color="white",size=20,vjust=0.5),
+        axis.text.y = element_text(color="white",size=20),
+        axis.title = element_blank())+ 
   labs(x="Task-irrelevant recent familiarity (frequency)", y ="Parameter estimates")+scale_x_discrete(labels=c('1','2','3','4','5','6','7','8','9'))
 ggsave(filename='PrC_task-irrele_recent_bar.png',path=datapath,plot=p3,width = 2400,height=1600,units='px',scale = 0.9)
 
@@ -105,9 +105,9 @@ p4 <- ggplot(study_lifetime_all_data, aes(x=signal, y=beta_avg, fill=ROI)) +
         legend.background = element_rect(fill="black"),
         legend.title = element_text(color="white",size=13),
         legend.text = element_text(color="white",size=13),
-        axis.text.x = element_text(color="white",size=13,vjust=0.5),
-        axis.text.y = element_text(color="white",size=13),
-        axis.title = element_text(color="white",size=13))+ 
+        axis.text.x = element_text(color="white",size=20,vjust=0.5),
+        axis.text.y = element_text(color="white",size=20),
+        axis.title = element_blank())+ 
   labs(x="Task-irrelevant lifetime familiarity", y ="Parameter estimates")+scale_x_discrete(labels=c('1','2','3','4','5'))
 ggsave(filename='PrC_study_life-all_bar.png',path=datapath,plot=p4,width = 2400,height=1600,units='px',scale = 0.9)
 
@@ -124,9 +124,9 @@ p5 <- ggplot(study_lifetime_pres1_data, aes(x=signal, y=beta_avg, fill=ROI)) +
         legend.background = element_rect(fill="black"),
         legend.title = element_text(color="white",size=13),
         legend.text = element_text(color="white",size=13),
-        axis.text.x = element_text(color="white",size=13,vjust=0.5),
-        axis.text.y = element_text(color="white",size=13),
-        axis.title = element_text(color="white",size=13))+ 
+        axis.text.x = element_text(color="white",size=20,vjust=0.5),
+        axis.text.y = element_text(color="white",size=20),
+        axis.title = element_blank())+ 
   labs(x="Task-irrelevant lifetime familiarity", y ="Parameter estimates")+scale_x_discrete(labels=c('1','2','3','4','5'))
 ggsave(filename='PrC_study_life-pres1_bar.png',path=datapath,plot=p5,width = 2400,height=1600,units='px',scale = 0.9)
 
