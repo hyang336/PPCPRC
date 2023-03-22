@@ -11,6 +11,7 @@ auth_client.oauth2_start_flow(requested_scopes=TransferScopes.all)
 authorize_url = auth_client.oauth2_get_authorize_url()
 print(f"Please go to this URL and login:\n\n{authorize_url}\n")
 
+# auth_code='Q5dv0zipOWDcZHDxE2opl92T5QMOKW'
 auth_code = input("Please enter the code here: ").strip()
 tokens = auth_client.oauth2_exchange_code_for_tokens(auth_code)
 transfer_tokens = tokens.by_resource_server["transfer.api.globus.org"]
@@ -21,9 +22,12 @@ transfer_client = globus_sdk.TransferClient(
     authorizer=globus_sdk.AccessTokenAuthorizer(transfer_tokens["access_token"])
 )
 
-# Globus Tutorial Endpoint 1
+# for ep in transfer_client.endpoint_search("computecanada#graham-globus"):
+#     print("[{}] {}".format(ep["id"], ep["display_name"]))
+
+# Graham data node Endpoint 
 source_endpoint_id = "07baf15f-d7fd-4b6a-bf8a-5b5ef2e229d3"
-# Globus Tutorial Endpoint 2
+# Local laptop Endpoint
 dest_endpoint_id = "92c7a72e-bdf5-11ed-8cec-f9fa098153fc"
 
 # create a Transfer task consisting of one or more items
@@ -33,12 +37,18 @@ task_data = globus_sdk.TransferData(
 
 # directory
 local_des="/C/Users/haozi/OneDrive/Desktop/PhD/fMRI_PrC-PPC_data/ASHS_raw2/"
-source_des="/home/hyang336/scratch/working_dir/PPC_MD/ASHS_raw2/"
+source_des="/home/hyang336/scratch/working_dir/PPC_MD/"
 
-task_data.add_item(
-    "/share/godata/file1.txt",  # source
-    "/~/minimal-example-transfer-script-destination.txt",  # dest
-)
+# ls_result = transfer_client.operation_ls(source_endpoint_id, path=source_des)
+
+ss_list = '.\sub_list_libmotion.txt'
+with open(ss_list) as f:
+    ss = [line.rstrip() for line in f]
+
+# For-loop to add all items
+for i in ss:
+    prc_mask = source_des + 'ASHS_raw2/sub-' + i + '/final/sub-' + i + '_PRC_MNINLin6_resampled.nii'
+    task_data.add_item(prc_mask,local_des)
 
 # submit, getting back the task ID
 task_doc = transfer_client.submit_transfer(task_data)
