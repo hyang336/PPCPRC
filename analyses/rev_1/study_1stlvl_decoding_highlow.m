@@ -23,7 +23,7 @@ function study_1stlvl_decoding_highlow(project_derivative,GLM_dir,ASHS_dir,sub,c
 %% set up dir and parameters
 
 output=[project_derivative,'/Rev_1_study-decoding'];
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA[]
+
 % make subject-specific output dir if not already exist
 if ~exist(strcat(output,'/',sub),'dir')
     mkdir (output,sub);
@@ -34,9 +34,9 @@ sub_output=[output,'/',sub];
 sub_mask_file=[ASHS_dir,'/',sub,'/final/',sub,'_PRC_MNINLin6_resampled.nii'];
 
 %number of trials per run
-num_trial=45;
-%number of test runs
-num_run=4;
+num_trial=9;
+%number of study runs
+num_run=5;
 
 %dummy scan and TR
 expstart_vol=5;
