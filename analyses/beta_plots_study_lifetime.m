@@ -31,7 +31,8 @@ switch analysis
                     life1_beta{j}=niftiread(strcat(first_lvl_dir,'/sub-',SSID{i},'/temp/beta_',num2str(life1_main_col(j),'%04.f'),'.nii'));
                     life1_ROI_beta(j)=nanmean(life1_beta{j}(find(ROI)));%average beta within the ROI
                 end
-                sub_life1_ROI_beta{i}=nanmean(life1_ROI_beta);
+                sub_life1_ROI_beta{i,1}=nanmean(life1_ROI_beta);
+                sub_life1_ROI_beta{i,2}=SSID{i};
             end
             
             if ~isempty(life2_main_col)
@@ -39,7 +40,8 @@ switch analysis
                     life2_beta{j}=niftiread(strcat(first_lvl_dir,'/sub-',SSID{i},'/temp/beta_',num2str(life2_main_col(j),'%04.f'),'.nii'));
                     life2_ROI_beta(j)=nanmean(life2_beta{j}(find(ROI)));
                 end
-                sub_life2_ROI_beta{i}=nanmean(life2_ROI_beta);
+                sub_life2_ROI_beta{i,1}=nanmean(life2_ROI_beta);
+                sub_life2_ROI_beta{i,2}=SSID{i};
             end
             
             if ~isempty(life3_main_col)
@@ -47,7 +49,8 @@ switch analysis
                     life3_beta{j}=niftiread(strcat(first_lvl_dir,'/sub-',SSID{i},'/temp/beta_',num2str(life3_main_col(j),'%04.f'),'.nii'));
                     life3_ROI_beta(j)=nanmean(life3_beta{j}(find(ROI)));
                 end
-                sub_life3_ROI_beta{i}=nanmean(life3_ROI_beta);
+                sub_life3_ROI_beta{i,1}=nanmean(life3_ROI_beta);
+                sub_life3_ROI_beta{i,2}=SSID{i};
             end
             
             if ~isempty(life4_main_col)
@@ -55,7 +58,8 @@ switch analysis
                     life4_beta{j}=niftiread(strcat(first_lvl_dir,'/sub-',SSID{i},'/temp/beta_',num2str(life4_main_col(j),'%04.f'),'.nii'));
                     life4_ROI_beta(j)=nanmean(life4_beta{j}(find(ROI)));
                 end
-                sub_life4_ROI_beta{i}=nanmean(life4_ROI_beta);
+                sub_life4_ROI_beta{i,1}=nanmean(life4_ROI_beta);
+                sub_life4_ROI_beta{i,2}=SSID{i};
             end
             
             if ~isempty(life5_main_col)
@@ -63,46 +67,47 @@ switch analysis
                     life5_beta{j}=niftiread(strcat(first_lvl_dir,'/sub-',SSID{i},'/temp/beta_',num2str(life5_main_col(j),'%04.f'),'.nii'));
                     life5_ROI_beta(j)=nanmean(life5_beta{j}(find(ROI)));
                 end
-                sub_life5_ROI_beta{i}=nanmean(life5_ROI_beta);
+                sub_life5_ROI_beta{i,1}=nanmean(life5_ROI_beta);
+                sub_life5_ROI_beta{i,2}=SSID{i};
             end
             
         end
         
         %% for plot, if statement checks for missing conditions
         if exist('sub_life1_ROI_beta','var') == 1
-            sub_life1_ROI_beta=sub_life1_ROI_beta(~cellfun(@isempty, sub_life1_ROI_beta));
-            life1_avg=mean(cell2mat(sub_life1_ROI_beta),'omitnan');
-            life1_se=std(cell2mat(sub_life1_ROI_beta),'omitnan')/sqrt(length(sub_life1_ROI_beta));
-            life1_sd=std(cell2mat(sub_life1_ROI_beta),1,'omitnan');
-            save(strcat(output_dir,'/',ROI_mask,'_life1.mat'),'life1_avg','life1_se','life1_sd');
+            sub_life1_ROI_beta_noemp=sub_life1_ROI_beta(~cellfun(@isempty, sub_life1_ROI_beta(:,1)));
+            life1_avg=mean(cell2mat(sub_life1_ROI_beta_noemp),'omitnan');
+            life1_se=std(cell2mat(sub_life1_ROI_beta_noemp),'omitnan')/sqrt(length(sub_life1_ROI_beta_noemp));
+            life1_sd=std(cell2mat(sub_life1_ROI_beta_noemp),1,'omitnan');
+            save(strcat(output_dir,'/',ROI_mask,'_life1.mat'),'life1_avg','life1_se','life1_sd','sub_life1_ROI_beta');
         end
         if exist('sub_life2_ROI_beta','var') == 1
-            sub_life2_ROI_beta=sub_life2_ROI_beta(~cellfun(@isempty, sub_life2_ROI_beta));
-            life2_avg=mean(cell2mat(sub_life2_ROI_beta),'omitnan');
-            life2_se=std(cell2mat(sub_life2_ROI_beta),'omitnan')/sqrt(length(sub_life2_ROI_beta));
-            life2_sd=std(cell2mat(sub_life2_ROI_beta),1,'omitnan');
-            save(strcat(output_dir,'/',ROI_mask,'_life2.mat'),'life2_avg','life2_se','life2_sd');
+            sub_life2_ROI_beta_noemp=sub_life2_ROI_beta(~cellfun(@isempty, sub_life2_ROI_beta(:,1)));
+            life2_avg=mean(cell2mat(sub_life2_ROI_beta_noemp),'omitnan');
+            life2_se=std(cell2mat(sub_life2_ROI_beta_noemp),'omitnan')/sqrt(length(sub_life2_ROI_beta_noemp));
+            life2_sd=std(cell2mat(sub_life2_ROI_beta_noemp),1,'omitnan');
+            save(strcat(output_dir,'/',ROI_mask,'_life2.mat'),'life2_avg','life2_se','life2_sd','sub_life2_ROI_beta');
         end
         if exist('sub_life3_ROI_beta','var') == 1
-            sub_life3_ROI_beta=sub_life3_ROI_beta(~cellfun(@isempty, sub_life3_ROI_beta));
-            life3_avg=mean(cell2mat(sub_life3_ROI_beta),'omitnan');
-            life3_se=std(cell2mat(sub_life3_ROI_beta),'omitnan')/sqrt(length(sub_life3_ROI_beta));
-            life3_sd=std(cell2mat(sub_life3_ROI_beta),1,'omitnan');
-            save(strcat(output_dir,'/',ROI_mask,'_life3.mat'),'life3_avg','life3_se','life3_sd');
+            sub_life3_ROI_beta_noemp=sub_life3_ROI_beta(~cellfun(@isempty, sub_life3_ROI_beta(:,1)));
+            life3_avg=mean(cell2mat(sub_life3_ROI_beta_noemp),'omitnan');
+            life3_se=std(cell2mat(sub_life3_ROI_beta_noemp),'omitnan')/sqrt(length(sub_life3_ROI_beta_noemp));
+            life3_sd=std(cell2mat(sub_life3_ROI_beta_noemp),1,'omitnan');
+            save(strcat(output_dir,'/',ROI_mask,'_life3.mat'),'life3_avg','life3_se','life3_sd','sub_life3_ROI_beta');
         end
         if exist('sub_life4_ROI_beta','var') == 1
-            sub_life4_ROI_beta=sub_life4_ROI_beta(~cellfun(@isempty, sub_life4_ROI_beta));
-            life4_avg=mean(cell2mat(sub_life4_ROI_beta),'omitnan');
-            life4_se=std(cell2mat(sub_life4_ROI_beta),'omitnan')/sqrt(length(sub_life4_ROI_beta));
-            life4_sd=std(cell2mat(sub_life4_ROI_beta),1,'omitnan');
-            save(strcat(output_dir,'/',ROI_mask,'_life4.mat'),'life4_avg','life4_se','life4_sd');
+            sub_life4_ROI_beta_noemp=sub_life4_ROI_beta(~cellfun(@isempty, sub_life4_ROI_beta(:,1)));
+            life4_avg=mean(cell2mat(sub_life4_ROI_beta_noemp),'omitnan');
+            life4_se=std(cell2mat(sub_life4_ROI_beta_noemp),'omitnan')/sqrt(length(sub_life4_ROI_beta_noemp));
+            life4_sd=std(cell2mat(sub_life4_ROI_beta_noemp),1,'omitnan');
+            save(strcat(output_dir,'/',ROI_mask,'_life4.mat'),'life4_avg','life4_se','life4_sd','sub_life4_ROI_beta');
         end
         if exist('sub_life5_ROI_beta','var') == 1
-            sub_life5_ROI_beta=sub_life5_ROI_beta(~cellfun(@isempty, sub_life5_ROI_beta));
-            life5_avg=mean(cell2mat(sub_life5_ROI_beta),'omitnan');
-            life5_se=std(cell2mat(sub_life5_ROI_beta),'omitnan')/sqrt(length(sub_life5_ROI_beta));
-            life5_sd=std(cell2mat(sub_life5_ROI_beta),1,'omitnan');
-            save(strcat(output_dir,'/',ROI_mask,'_life5.mat'),'life5_avg','life5_se','life5_sd');
+            sub_life5_ROI_beta_noemp=sub_life5_ROI_beta(~cellfun(@isempty, sub_life5_ROI_beta(:,1)));
+            life5_avg=mean(cell2mat(sub_life5_ROI_beta_noemp),'omitnan');
+            life5_se=std(cell2mat(sub_life5_ROI_beta_noemp),'omitnan')/sqrt(length(sub_life5_ROI_beta_noemp));
+            life5_sd=std(cell2mat(sub_life5_ROI_beta_noemp),1,'omitnan');
+            save(strcat(output_dir,'/',ROI_mask,'_life5.mat'),'life5_avg','life5_se','life5_sd','sub_life5_ROI_beta');
         end
         
     case 'pres1'
@@ -175,7 +180,8 @@ switch analysis
                     life1_beta{j}=niftiread(strcat(first_lvl_dir,'/sub-',SSID{i},'/temp/task-study_run_',num2str(pres_1_event_resp{life1(j),14}),'/trial_',num2str(pres_1_event_resp{life1(j),15}),'/beta_0001.nii'));
                     life1_ROI_beta(j)=nanmean(life1_beta{j}(find(ROI)));%average beta within the ROI
                 end
-                sub_life1_ROI_beta{i}=nanmean(life1_ROI_beta);
+                sub_life1_ROI_beta{i,1}=nanmean(life1_ROI_beta);
+                sub_life1_ROI_beta{i,2}=SSID{i};
             end
             
             if ~isempty(life2)
@@ -183,7 +189,8 @@ switch analysis
                     life2_beta{j}=niftiread(strcat(first_lvl_dir,'/sub-',SSID{i},'/temp/task-study_run_',num2str(pres_1_event_resp{life2(j),14}),'/trial_',num2str(pres_1_event_resp{life2(j),15}),'/beta_0001.nii'));
                     life2_ROI_beta(j)=nanmean(life2_beta{j}(find(ROI)));
                 end
-                sub_life2_ROI_beta{i}=nanmean(life2_ROI_beta);
+                sub_life2_ROI_beta{i,1}=nanmean(life2_ROI_beta);
+                sub_life2_ROI_beta{i,2}=SSID{i};
             end
             
             if ~isempty(life3)
@@ -191,7 +198,8 @@ switch analysis
                     life3_beta{j}=niftiread(strcat(first_lvl_dir,'/sub-',SSID{i},'/temp/task-study_run_',num2str(pres_1_event_resp{life3(j),14}),'/trial_',num2str(pres_1_event_resp{life3(j),15}),'/beta_0001.nii'));
                     life3_ROI_beta(j)=nanmean(life3_beta{j}(find(ROI)));
                 end
-                sub_life3_ROI_beta{i}=nanmean(life3_ROI_beta);
+                sub_life3_ROI_beta{i,1}=nanmean(life3_ROI_beta);
+                sub_life3_ROI_beta{i,2}=SSID{i};
             end
             
             if ~isempty(life4)
@@ -199,7 +207,8 @@ switch analysis
                     life4_beta{j}=niftiread(strcat(first_lvl_dir,'/sub-',SSID{i},'/temp/task-study_run_',num2str(pres_1_event_resp{life4(j),14}),'/trial_',num2str(pres_1_event_resp{life4(j),15}),'/beta_0001.nii'));
                     life4_ROI_beta(j)=nanmean(life4_beta{j}(find(ROI)));
                 end
-                sub_life4_ROI_beta{i}=nanmean(life4_ROI_beta);
+                sub_life4_ROI_beta{i,1}=nanmean(life4_ROI_beta);
+                sub_life4_ROI_beta{i,2}=SSID{i};
             end
             
             if ~isempty(life5)
@@ -207,45 +216,46 @@ switch analysis
                     life5_beta{j}=niftiread(strcat(first_lvl_dir,'/sub-',SSID{i},'/temp/task-study_run_',num2str(pres_1_event_resp{life5(j),14}),'/trial_',num2str(pres_1_event_resp{life5(j),15}),'/beta_0001.nii'));
                     life5_ROI_beta(j)=nanmean(life5_beta{j}(find(ROI)));
                 end
-                sub_life5_ROI_beta{i}=nanmean(life5_ROI_beta);
+                sub_life5_ROI_beta{i,1}=nanmean(life5_ROI_beta);
+                sub_life5_ROI_beta{i,2}=SSID{i};
             end
         end
         
         %% for plot, if statement checks for missing conditions
         if exist('sub_life1_ROI_beta','var') == 1
-            sub_life1_ROI_beta=sub_life1_ROI_beta(~cellfun(@isempty, sub_life1_ROI_beta));
-            life1_avg=mean(cell2mat(sub_life1_ROI_beta),'omitnan');
-            life1_se=std(cell2mat(sub_life1_ROI_beta),'omitnan')/sqrt(length(sub_life1_ROI_beta));
-            life1_sd=std(cell2mat(sub_life1_ROI_beta),1,'omitnan');
-            save(strcat(output_dir,'/',ROI_mask,'_life1_pres1.mat'),'life1_avg','life1_se','life1_sd');
+            sub_life1_ROI_beta_noemp=sub_life1_ROI_beta(~cellfun(@isempty, sub_life1_ROI_beta(:,1)));
+            life1_avg=mean(cell2mat(sub_life1_ROI_beta_noemp),'omitnan');
+            life1_se=std(cell2mat(sub_life1_ROI_beta_noemp),'omitnan')/sqrt(length(sub_life1_ROI_beta_noemp));
+            life1_sd=std(cell2mat(sub_life1_ROI_beta_noemp),1,'omitnan');
+            save(strcat(output_dir,'/',ROI_mask,'_life1_pres1.mat'),'life1_avg','life1_se','life1_sd','sub_life1_ROI_beta');
         end
         if exist('sub_life2_ROI_beta','var') == 1
-            sub_life2_ROI_beta=sub_life2_ROI_beta(~cellfun(@isempty, sub_life2_ROI_beta));
-            life2_avg=mean(cell2mat(sub_life2_ROI_beta),'omitnan');
-            life2_se=std(cell2mat(sub_life2_ROI_beta),'omitnan')/sqrt(length(sub_life2_ROI_beta));
-            life2_sd=std(cell2mat(sub_life2_ROI_beta),1,'omitnan');
-            save(strcat(output_dir,'/',ROI_mask,'_life2_pres1.mat'),'life2_avg','life2_se','life2_sd');
+            sub_life2_ROI_beta_noemp=sub_life2_ROI_beta(~cellfun(@isempty, sub_life2_ROI_beta(:,1)));
+            life2_avg=mean(cell2mat(sub_life2_ROI_beta_noemp),'omitnan');
+            life2_se=std(cell2mat(sub_life2_ROI_beta_noemp),'omitnan')/sqrt(length(sub_life2_ROI_beta_noemp));
+            life2_sd=std(cell2mat(sub_life2_ROI_beta_noemp),1,'omitnan');
+            save(strcat(output_dir,'/',ROI_mask,'_life2_pres1.mat'),'life2_avg','life2_se','life2_sd','sub_life2_ROI_beta');
         end
         if exist('sub_life3_ROI_beta','var') == 1
-            sub_life3_ROI_beta=sub_life3_ROI_beta(~cellfun(@isempty, sub_life3_ROI_beta));
-            life3_avg=mean(cell2mat(sub_life3_ROI_beta),'omitnan');
-            life3_se=std(cell2mat(sub_life3_ROI_beta),'omitnan')/sqrt(length(sub_life3_ROI_beta));
-            life3_sd=std(cell2mat(sub_life3_ROI_beta),1,'omitnan');
-            save(strcat(output_dir,'/',ROI_mask,'_life3_pres1.mat'),'life3_avg','life3_se','life3_sd');
+            sub_life3_ROI_beta_noemp=sub_life3_ROI_beta(~cellfun(@isempty, sub_life3_ROI_beta(:,1)));
+            life3_avg=mean(cell2mat(sub_life3_ROI_beta_noemp),'omitnan');
+            life3_se=std(cell2mat(sub_life3_ROI_beta_noemp),'omitnan')/sqrt(length(sub_life3_ROI_beta_noemp));
+            life3_sd=std(cell2mat(sub_life3_ROI_beta_noemp),1,'omitnan');
+            save(strcat(output_dir,'/',ROI_mask,'_life3_pres1.mat'),'life3_avg','life3_se','life3_sd','sub_life3_ROI_beta');
         end
         if exist('sub_life4_ROI_beta','var') == 1
-            sub_life4_ROI_beta=sub_life4_ROI_beta(~cellfun(@isempty, sub_life4_ROI_beta));
-            life4_avg=mean(cell2mat(sub_life4_ROI_beta),'omitnan');
-            life4_se=std(cell2mat(sub_life4_ROI_beta),'omitnan')/sqrt(length(sub_life4_ROI_beta));
-            life4_sd=std(cell2mat(sub_life4_ROI_beta),1,'omitnan');
-            save(strcat(output_dir,'/',ROI_mask,'_life4_pres1.mat'),'life4_avg','life4_se','life4_sd');
+            sub_life4_ROI_beta_noemp=sub_life4_ROI_beta(~cellfun(@isempty, sub_life4_ROI_beta(:,1)));
+            life4_avg=mean(cell2mat(sub_life4_ROI_beta_noemp),'omitnan');
+            life4_se=std(cell2mat(sub_life4_ROI_beta_noemp),'omitnan')/sqrt(length(sub_life4_ROI_beta_noemp));
+            life4_sd=std(cell2mat(sub_life4_ROI_beta_noemp),1,'omitnan');
+            save(strcat(output_dir,'/',ROI_mask,'_life4_pres1.mat'),'life4_avg','life4_se','life4_sd','sub_life4_ROI_beta');
         end
         if exist('sub_life5_ROI_beta','var') == 1
-            sub_life5_ROI_beta=sub_life5_ROI_beta(~cellfun(@isempty, sub_life5_ROI_beta));
-            life5_avg=mean(cell2mat(sub_life5_ROI_beta),'omitnan');
-            life5_se=std(cell2mat(sub_life5_ROI_beta),'omitnan')/sqrt(length(sub_life5_ROI_beta));
-            life5_sd=std(cell2mat(sub_life5_ROI_beta),1,'omitnan');
-            save(strcat(output_dir,'/',ROI_mask,'_life5_pres1.mat'),'life5_avg','life5_se','life5_sd');
+            sub_life5_ROI_beta_noemp=sub_life5_ROI_beta(~cellfun(@isempty, sub_life5_ROI_beta(:,1)));
+            life5_avg=mean(cell2mat(sub_life5_ROI_beta_noemp),'omitnan');
+            life5_se=std(cell2mat(sub_life5_ROI_beta_noemp),'omitnan')/sqrt(length(sub_life5_ROI_beta_noemp));
+            life5_sd=std(cell2mat(sub_life5_ROI_beta_noemp),1,'omitnan');
+            save(strcat(output_dir,'/',ROI_mask,'_life5_pres1.mat'),'life5_avg','life5_se','life5_sd','sub_life5_ROI_beta');
         end
 end
 end
