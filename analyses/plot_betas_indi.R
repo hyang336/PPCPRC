@@ -40,7 +40,7 @@ stat_sum_single <- function(fun, geom="point", colour = "red", ...) {
 
 #task-relevant lifetime-recent conjunction PrC plot
 p1 <- ggplot(test_rele_data, aes(x=fam, y=beta)) + 
-  geom_boxplot(position=position_dodge(),show.legend = FALSE) +
+  geom_boxplot(position=position_dodge(),show.legend = FALSE,outlier.color='white') +
   #stat_sum_single(median) + 
   #geom_errorbar(aes(ymin=beta_avg-beta_se, ymax=beta_avg+beta_se), width=.2,position=position_dodge(.9),colour="white")+ 
   scale_fill_manual(values="#1F78B4") + theme_minimal()+ theme(plot.background = element_rect(fill="black"),panel.background = element_rect(fill="black", colour="white"),panel.border = element_blank(),
@@ -58,7 +58,7 @@ ggsave(filename='PrC_task-rele_life-recent-conj_box.png',path=datapath,plot=p1,s
 ##task-relevant-irrelevant lifetime conjunction plots (PrC & IT_P)
 #lifetime judgement
 p2.1 <- ggplot(data[data$task=="task_rele_life",], aes(x=fam, y=beta)) + 
-  geom_boxplot(position=position_dodge(),show.legend = FALSE) +
+  geom_boxplot(position=position_dodge(),show.legend = FALSE,outlier.color = 'white') +
   #stat_sum_single(median) + 
   #geom_errorbar(aes(ymin=beta_avg-beta_se, ymax=beta_avg+beta_se), width=.2,position=position_dodge(.9),colour="white")+
   scale_fill_manual(values=c("#1F78B4","#A6CEE3")) + 
@@ -76,7 +76,7 @@ p2.1 <- ggplot(data[data$task=="task_rele_life",], aes(x=fam, y=beta)) +
 ggsave(filename='PrC_task-rele_life-conj_box.png',path=datapath,plot=p2.1,width = 350*3,height=467*3,units='px',scale = 0.9)
 #frequency judgement
 p2.2 <- ggplot(data[data$task=="task_irrele_life(rec)",], aes(x=fam, y=beta)) + 
-  geom_boxplot(position=position_dodge(),show.legend = FALSE) +
+  geom_boxplot(position=position_dodge(),show.legend = FALSE,outlier.color = 'white') +
   #stat_sum_single(median) +
   #geom_errorbar(aes(ymin=beta_avg-beta_se, ymax=beta_avg+beta_se), width=.2,position=position_dodge(.9),colour="white")+
   scale_fill_manual(values=c("#1F78B4","#A6CEE3")) + 
@@ -96,7 +96,7 @@ ggsave(filename='PrC_task-irrele_life-conj_box.png',path=datapath,plot=p2.2,widt
 
 #task-irrelevant recent familiarity in study phase
 p3 <- ggplot(data[data$task=='task_irrele_rec',], aes(x=fam, y=beta)) + 
-  geom_boxplot(position=position_dodge(),show.legend = FALSE) +
+  geom_boxplot(position=position_dodge(),show.legend = FALSE,outlier.color = 'white') +
   #stat_sum_single(median) +
   #geom_errorbar(aes(ymin=beta_avg-beta_se, ymax=beta_avg+beta_se), width=.2,position=position_dodge(.9),colour="white")+
   scale_fill_manual(values=c("#1F78B4","#A6CEE3")) + 
@@ -116,7 +116,7 @@ ggsave(filename='PrC_task-irrele_recent_box.png',path=datapath,plot=p3,width = 2
 
 #task-irrelevant lifetime familiarity in study phase, all trials
 p4 <- ggplot(data[data$task=='task_irrele_life(sa)',], aes(x=fam, y=beta)) + 
-  geom_boxplot(position=position_dodge(),show.legend = FALSE) +
+  geom_boxplot(position=position_dodge(),show.legend = FALSE,outlier.color = 'white') +
   #stat_sum_single(median) +
   #geom_errorbar(aes(ymin=beta_avg-beta_se, ymax=beta_avg+beta_se), width=.2,position=position_dodge(.9),colour="white")+
   scale_fill_manual(values=c("#1F78B4","#A6CEE3","#B2DF8A")) + 
@@ -131,12 +131,29 @@ p4 <- ggplot(data[data$task=='task_irrele_life(sa)',], aes(x=fam, y=beta)) +
         axis.text.y = element_text(color="white",size=20),
         axis.title = element_blank())+ 
   labs(x="Task-irrelevant lifetime familiarity", y ="Parameter estimates")+scale_x_discrete(labels=c('1','2','3','4','5'))
+# p4 <- ggplot(data[data$task=='task_irrele_life(sa)',], aes(x=fam, y=beta)) + 
+#   geom_boxplot(coef=0,outlier.shape = NA) +
+#   ylim(-0.5,0.3)+
+#   #stat_sum_single(median) +
+#   #geom_errorbar(aes(ymin=beta_avg-beta_se, ymax=beta_avg+beta_se), width=.2,position=position_dodge(.9),colour="white")+
+#   scale_fill_manual(values=c("#1F78B4","#A6CEE3","#B2DF8A")) + 
+#   theme_minimal()+ 
+#   theme(plot.background = element_rect(fill="black"),panel.background = element_rect(fill="black", colour="white"),panel.border = element_blank(),
+#         panel.grid.major = element_blank(),
+#         panel.grid.minor = element_blank(),
+#         legend.background = element_rect(fill="black"),
+#         legend.title = element_text(color="white",size=13),
+#         legend.text = element_text(color="white",size=13),
+#         axis.text.x = element_text(color="white",size=20,vjust=0.5),
+#         axis.text.y = element_text(color="white",size=20),
+#         axis.title = element_blank())+ 
+#   labs(x="Task-irrelevant lifetime familiarity", y ="Parameter estimates")+scale_x_discrete(labels=c('1','2','3','4','5'))
 ggsave(filename='PrC_study_life-all_box.png',path=datapath,plot=p4,width = 2400,height=1600,units='px',scale = 0.9)
 
 
 #task-irrelevant lifetime familiarity in study phase, pres 1
 p5 <- ggplot(data[data$task=='task_irrele_life(s1)',], aes(x=fam, y=beta)) + 
-  geom_boxplot(position=position_dodge(),show.legend = FALSE) +
+  geom_boxplot(position=position_dodge(),show.legend = FALSE,outlier.color = 'white') +
   #geom_errorbar(aes(ymin=beta_avg-beta_se, ymax=beta_avg+beta_se), width=.2,position=position_dodge(.9),colour="white")+
   scale_fill_manual(values="#1F78B4") + 
   theme_minimal()+ 
@@ -152,5 +169,22 @@ p5 <- ggplot(data[data$task=='task_irrele_life(s1)',], aes(x=fam, y=beta)) +
   labs(x="Task-irrelevant lifetime familiarity", y ="Parameter estimates")+scale_x_discrete(labels=c('1','2','3','4','5'))
 ggsave(filename='PrC_study_life-pres1_box.png',path=datapath,plot=p5,width = 2400,height=1600,units='px',scale = 0.9)
 
+# p5 <- ggplot(data[data$task=='task_irrele_life(s1)',], aes(x=fam, y=beta)) + 
+#   geom_violin(position=position_dodge(),show.legend = FALSE) +
+#   stat_sum_single(median) +
+#   #geom_errorbar(aes(ymin=beta_avg-beta_se, ymax=beta_avg+beta_se), width=.2,position=position_dodge(.9),colour="white")+
+#   scale_fill_manual(values="#1F78B4") + 
+#   theme_minimal()+ 
+#   theme(plot.background = element_rect(fill="black"),panel.background = element_rect(fill="black", colour="white"),panel.border = element_blank(),
+#         panel.grid.major = element_blank(),
+#         panel.grid.minor = element_blank(),
+#         legend.background = element_rect(fill="black"),
+#         legend.title = element_text(color="white",size=13),
+#         legend.text = element_text(color="white",size=13),
+#         axis.text.x = element_text(color="white",size=20,vjust=0.5),
+#         axis.text.y = element_text(color="white",size=20),
+#         axis.title = element_blank())+ 
+#   labs(x="Task-irrelevant lifetime familiarity", y ="Parameter estimates")+scale_x_discrete(labels=c('1','2','3','4','5'))
+# ggsave(filename='PrC_study_life-pres1_violin.png',path=datapath,plot=p5,width = 2400,height=1600,units='px',scale = 0.9)
 
 
