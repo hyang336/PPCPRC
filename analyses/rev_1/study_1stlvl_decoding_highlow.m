@@ -33,6 +33,9 @@ sub_output=[output,'/',sub];
 %subject specific PrC mask
 sub_mask_file=[ASHS_dir,'/',sub,'/final/',sub,'_PRC_MNINLin6_resampled.nii'];
 
+%postscan behaviour
+[~,~,postscan]=xlsread(strcat(project_derivative,'/behavioral/',sub,'/',erase(sub,'sub-'),'_task-pscan_data.xlsx'));
+
 %number of trials per run
 num_trial=9;
 %number of study runs
@@ -74,12 +77,17 @@ LSS_beta_filenames=cell(0);
 raw_rating_cat=[];
 for i=1:num_run
     %load run-level behavioural file
-    runevent{i}=load_event_test(project_derivative,sub,'task-test_',['run-0',num2str(i),'_'],expstart_vol,TR);
+    runevent{i}=load_event_test(project_derivative,sub,'task-study_',['run-0',num2str(i),'_'],expstart_vol,TR);
+    %loop over study trials to find stim and fill in postscan ratings
+    for s=1:size(runevent{i},1)
+        postscan_rating=postscan{strcmp(postscan(:,6),runevent{i}{s,10}),11};
+        runevent{i}{s,13}=postscan_rating;%add postscan ratings
+    end
     % reshape and concatenate the raw behavioural ratings for data filtering
     raw_rating=[runevent{i}(:,4)';runevent{i}(:,6)'];
     raw_rating_cat=[raw_rating_cat,raw_rating];
     for j=1:num_trial %these include both recent and lifetime trials
-        LSS_beta_filenames = [LSS_beta_filenames,cellstr(strcat(GLM_dir,'/LSS-N_test/',sub,'/temp/task-test_run_',num2str(i),'/trial_',num2str(j),'/beta_0001.nii'))]; %This is a bit hard-coded
+        LSS_beta_filenames = [LSS_beta_filenames,cellstr(strcat(GLM_dir,'/study_1stlvl_LSS-pres_softAROMA_const-epoch_pmod/',sub,'/temp/task-study_run_',num2str(i),'/trial_',num2str(j),'/beta_0001.nii'))]; %This is a bit hard-coded
     end
 end
 
