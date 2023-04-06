@@ -18,6 +18,13 @@ for (i in 1:length(x)){
 colnames(class_sum)=c('classification','mean','se')
 class_sum$mean=as.numeric(class_sum$mean)
 class_sum$se=as.numeric(class_sum$se)
+
+#Stats against chance
+t.test(data$rec_xsy,mu=0.5,alternative='greater')
+
+#compare decoding between task-rel life increase and life decrease
+t.test(data$life_xsy,data$life_xgy,paired = TRUE)
+
 #plot
 decode.bar=ggplot(class_sum,aes(x=classification,y=mean))+
   geom_col()+geom_errorbar(aes(ymin=mean-se,ymax=mean+se),width=0.2)+

@@ -85,6 +85,40 @@ for i=1:length(sub_list)
 
     %save nifti using PrC mask header and nifti mat
     niftiwrite(life_xgy_mat,niiheader.Filename,niiheader);
+
+
+
+
+    % Task-relevant lifetime decrease
+    niiheader.Filename=[working_dir,'/',sub_list{i},'/rel_life_dec_voxels.nii'];
+    % load decoding results
+    life_xsy3l=load([working_dir,'/',sub_list{i},'/life_low3_xsy.mat']);%3 coded as low
+    life_xsy3h=load([working_dir,'/',sub_list{i},'/rec_high3_xsy.mat']);%3 coded as high
+    %detect which voxels were selected in 3 out of 4 feature-selection
+    %folds
+    for j=1:4 %4folde so feature selection
+        voxels3h{j,:}=find(life_xsy3h.subj.masks{1,j+1}.mat);
+        voxels3l{j,:}=find(life_xsy3l.subj.masks{1,j+1}.mat);
+    end
+    %find voxels appearing in 3 out of 4
+    commonV3h = intersect(intersect(voxels3h{1},voxels3h{2}), voxels3h{3});
+    commonV3h = union(commonV3h, intersect(intersect(voxels3h{1},voxels3h{2}), voxels3h{4}));
+    commonV3h = union(commonV3h, intersect(intersect(voxels3h{1},voxels3h{3}), voxels3h{4}));
+    commonV3h = union(commonV3h, intersect(intersect(voxels3h{2},voxels3h{3}), voxels3h{4}));
+
+    commonV3l = intersect(intersect(voxels3l{1},voxels3l{2}), voxels3l{3});
+    commonV3l = union(commonV3l, intersect(intersect(voxels3l{1},voxels3l{2}), voxels3l{4}));
+    commonV3l = union(commonV3l, intersect(intersect(voxels3l{1},voxels3l{3}), voxels3l{4}));
+    commonV3l = union(commonV3l, intersect(intersect(voxels3l{2},voxels3l{3}), voxels3l{4}));
+
+    commonV_life_xsy=union(commonV3l,commonV3h);%combine voxels in both binarization schemes
+
+    %nifti mat
+    life_xsy_mat=niimat;
+    life_xsy_mat(commonV_life_xsy)=1;
+
+    %save nifti using PrC mask header and nifti mat
+    niftiwrite(life_xsy_mat,niiheader.Filename,niiheader);
 end
 
 % For each classification, aggregate across subject, with each voxel value
@@ -92,12 +126,16 @@ end
 % for a particular classification
 rec_xsy_2ndlvl=zeros(size(niimat));
 life_xgy_2ndlvl=zeros(size(niimat));
+life_xsy_2ndlvl=zeros(size(niimat));
 for i=1:length(sub_list)
     % Task-relevant recent decrease
     rec_xsy_2ndlvl=rec_xsy_2ndlvl+niftiread([working_dir,'/',sub_list{i},'/rel_rec_dec_voxels.nii']);
 
     % Task-relevant lifetime increase
     life_xgy_2ndlvl=life_xgy_2ndlvl+niftiread([working_dir,'/',sub_list{i},'/rel_life_inc_voxels.nii']);
+
+    % Task-relevant lifetime decrease
+    life_xsy_2ndlvl=life_xsy_2ndlvl+niftiread([working_dir,'/',sub_list{i},'/rel_life_dec_voxels.nii']);
 end
 niiheader.Filename=[working_dir,'/rel_rec_dec_voxels_2ndlvl.nii'];
 %save nifti using PrC mask header and nifti mat
@@ -106,3 +144,7 @@ niftiwrite(rec_xsy_2ndlvl,niiheader.Filename,niiheader);
 niiheader.Filename=[working_dir,'/rel_life_inc_voxels_2ndlvl.nii'];
 %save nifti using PrC mask header and nifti mat
 niftiwrite(life_xgy_2ndlvl,niiheader.Filename,niiheader);
+
+niiheader.Filename=[working_dir,'/rel_life_dec_voxels_2ndlvl.nii'];
+%save nifti using PrC mask header and nifti mat
+niftiwrite(life_xsy_2ndlvl,niiheader.Filename,niiheader);
