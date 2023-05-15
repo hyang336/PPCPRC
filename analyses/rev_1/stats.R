@@ -22,6 +22,9 @@ class_sum$se=as.numeric(class_sum$se)
 #Stats against chance
 t.test(data$rec_xsy,mu=0.5,alternative='greater')
 
+#stats life inc against chance
+t.test(data$life_xgy,mu=0.5,alternative='greater')
+
 #compare decoding between task-rel life increase and life decrease
 t.test(data$life_xsy,data$life_xgy,paired = TRUE)
 
