@@ -44,7 +44,7 @@ sub_dir=strcat(output,'/LSS-N_test/',sub);
         
         %load the nii files, primarily to get the number of time points
         substr.runexp=spm_vol(strcat(temp_dir,erase(substr.run,'.gz')));
-        substr.runsmooth=crapsmoothspm(temp_dir,erase(substr.run,'.gz'),[4 4 4]);
+        %substr.runsmooth=crapsmoothspm(temp_dir,erase(substr.run,'.gz'),[4 4 4]);
         
         %initil setup for SPM
         spm('defaults', 'FMRI');
