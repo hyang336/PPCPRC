@@ -2,11 +2,11 @@
 %% using testphase-LSSN output.
 %% also recode accuracy and and rebin the response output a spreadsheet for HDDM/HSSM
 %% pass in different ROI mask to extract betas in different regions
-function HSSM_feature_selection(sublist,LSSN_foldername,output_dir,strict_coding)
+function HSSM_feature_selection(sublist,LSSN_foldername,mask_dir,project_derivative,output_dir,strict_coding)
 %some hard-coded parameters to load event files
 TR=2.5;
 expstart_vol=5;
-project_derivative='/scratch/hyang336/working_dir/PPC_MD';
+%project_derivative='/scratch/hyang336/working_dir/PPC_MD';
 fmriprep_foldername='fmriprep_1.5.4_AROMA';
 regions={'random','hippo','PrC','mPFC_recent','prec_recent','mPFC_lifetime','prec_lifetime','lAnG_lifetime','lSFG_lifetime'};
 
@@ -65,23 +65,31 @@ for i=1:length(SSID)
         % specify mask and slope sign for feature-selection based on region
         switch regions{roi}
             case 'random'
-                maskfile=;
+                maskfile='none';
                 slope_sign='NA';
             case 'hippo'
+                maskfile=[mask_dir,'/','bin75_sum_hippo_noPrC.nii'];
                 slope_sign='both';
             case 'PrC'
+                maskfile=[mask_dir,'/','bin75_sum_PRC_MNINLin6_resampled.nii'];
                 slope_sign='negative';
             case 'mPFC_recent'
+                maskfile=[mask_dir,'/','recent_inc_t_mPFC_PeakUncor001_clusterFWE_abovethreshold_mask.nii'];
                 slope_sign='positive';
             case 'prec_recent'
+                maskfile=[mask_dir,'/','recent_inc_t_mPPC_PeakUncor001_clusterFWE_abovethreshold_mask.nii'];
                 slope_sign='positive';
             case 'mPFC_lifetime'
+                maskfile=[mask_dir,'/','lifetime_inc_t_mPFC_PeakUncor001_clusterFWE_abovethreshold_mask.nii'];
                 slope_sign='positive';
             case 'prec_lifetime'
+                maskfile=[mask_dir,'/','lifetime_inc_t_precuneus_PeakUncor001_clusterFWE_abovethreshold_mask.nii'];
                 slope_sign='positive';
             case 'lAnG_lifetime'
+                maskfile=[mask_dir,'/','lifetime_inc_t_lAnG_PeakUncor001_clusterFWE_abovethreshold_mask.nii'];
                 slope_sign='positive';
             case 'lSFG_lifetime'
+                maskfile=[mask_dir,'/','lifetime_inc_t_lSFG_PeakUncor001_clusterFWE_abovethreshold_mask.nii'];
                 slope_sign='positive';
         end
         
