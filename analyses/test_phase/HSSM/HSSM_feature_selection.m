@@ -7,7 +7,7 @@ function HSSM_feature_selection(sublist,LSSN_foldername,mask_dir,project_derivat
 TR=2.5;
 expstart_vol=5;
 %project_derivative='/scratch/hyang336/working_dir/PPC_MD';
-fmriprep_foldername='fmriprep_1.5.4_AROMA';
+%fmriprep_foldername='fmriprep_1.5.4_AROMA';
 regions={'random','hippo','PrC','mPFC_recent','mPPC_recent','mPFC_lifetime','mPPC_lifetime','lAnG_lifetime','lSFG_lifetime'};
 
 
@@ -26,15 +26,17 @@ life_result=cell2table(cell(0,23),'VariableNames',{'subj_idx','norm_fam','rt','r
 
 for i=1:length(SSID)
     %load event files and code run/trial numbers
-    runkey=fullfile(strcat(project_derivative,'/',fmriprep_foldername,'/fmriprep/sub-',SSID{i},'/func/'),'*test*_space-MNI152*smoothAROMAnonaggr*.nii.gz');
-    runfile=dir(runkey);
+    %runkey=fullfile(strcat(project_derivative,'/',fmriprep_foldername,'/fmriprep/sub-',SSID{i},'/func/'),'*test*_space-MNI152*smoothAROMAnonaggr*.nii.gz');
+    %runfile=dir(runkey);
     substr=struct();
-    substr.run=extractfield(runfile,'name');
+    %substr.run=extractfield(runfile,'name');
     runevent=cell(0);
     for j=1:4 %loop through 4 runs
-        task=regexp(substr.run{j},'task-\w*_','match');%this will return something like "task-localizer...._"
-        run=regexp(substr.run{j},'run-\d\d_','match');
-        substr.runevent{j}=load_event_test(project_derivative,strcat('sub-',SSID{i}),task,run,expstart_vol,TR);
+        %task=regexp(substr.run{j},'task-\w*_','match');%this will return something like "task-localizer...._"
+        %disp(task);
+        %run=regexp(substr.run{j},'run-\d\d_','match');
+        %disp(run);
+        substr.runevent{j}=load_event_test(project_derivative,strcat('sub-',SSID{i}),{'task-test_'},{['run-0',num2str(j),'_']},expstart_vol,TR);
         substr.runevent{j}(:,14)={j};%run number
         for s=1:size(substr.runevent{j},1)
             substr.runevent{j}{s,15}=s;%trial number
