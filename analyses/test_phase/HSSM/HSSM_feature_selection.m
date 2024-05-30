@@ -8,7 +8,7 @@ TR=2.5;
 expstart_vol=5;
 %project_derivative='/scratch/hyang336/working_dir/PPC_MD';
 fmriprep_foldername='fmriprep_1.5.4_AROMA';
-regions={'random','hippo','PrC','mPFC_recent','prec_recent','mPFC_lifetime','prec_lifetime','lAnG_lifetime','lSFG_lifetime'};
+regions={'random','hippo','PrC','mPFC_recent','mPPC_recent','mPFC_lifetime','mPPC_lifetime','lAnG_lifetime','lSFG_lifetime'};
 
 
 %read in subject IDs
@@ -21,9 +21,8 @@ while ischar(tline)
 end
 fclose(fid);
 
-freq_result=cell2table(cell(0,18),'VariableNames',{'subj_idx','obj_freq','rt','raw_rating','accuracy','bin12_rating','bin23_rating','bin34_rating','bin45_rating','random_z','hippo_beta','hippo_z','PrC_beta','PrC_z','mPFC_beta','mPFC_z','mPPc_beta','mPPC_z'});
-
-life_result=cell2table(cell(0,21),'VariableNames',{'subj_idx','norm_fam','rt','raw_rating','bin12_rating','bin23_rating','bin34_rating','bin45_rating','random_z','hippo_beta','hippo_z','PrC_beta','PrC_z','mPFC_beta','mPFC_z','mPPc_beta','mPPC_z','lAnG_beta','lAnG_z','lSFG_beta','lSFG_z'});
+freq_result=cell2table(cell(0,20),'VariableNames',{'subj_idx','obj_freq','rt','raw_rating','accuracy','bin12_rating','bin23_rating','bin34_rating','bin45_rating','random_z','hippo_beta_pos','hippo_z_pos','hippo_beta_neg','hippo_z_neg','PrC_beta','PrC_z','mPFC_beta','mPFC_z','mPPc_beta','mPPC_z'});
+life_result=cell2table(cell(0,23),'VariableNames',{'subj_idx','norm_fam','rt','raw_rating','bin12_rating','bin23_rating','bin34_rating','bin45_rating','random_z','hippo_beta_pos','hippo_z_pos','hippo_beta_neg','hippo_z_neg','PrC_beta','PrC_z','mPFC_beta','mPFC_z','mPPc_beta','mPPC_z','lAnG_beta','lAnG_z','lSFG_beta','lSFG_z'});
 
 for i=1:length(SSID)
     %load event files and code run/trial numbers
@@ -94,6 +93,9 @@ for i=1:length(SSID)
     life_ratings_bin45(life_ratings==4|life_ratings==5,1)=4;
     [~,~,life_ratings_bin45]=unique(life_ratings_bin45);%trick to recode an ascending vector to successive nature numbers
 
+    % compile behavioral data
+    freq_temp=[repmat({SSID{i}},[size(freq_trials_resp,1),1]),num2cell(objfreq),freq_trials_resp(:,7),num2cell(freq_ratings),freq_trials_accuracy,num2cell(freq_ratings_bin12),num2cell(freq_ratings_bin23),num2cell(freq_ratings_bin34),num2cell(freq_ratings_bin45)];
+    life_temp=[repmat({SSID{i}},[size(life_trials_resp,1),1]),num2cell(normfam),life_trials_resp(:,7),num2cell(life_ratings),num2cell(life_ratings_bin12),num2cell(life_ratings_bin23),num2cell(life_ratings_bin34),num2cell(life_ratings_bin45)];
 
     %load beta images, loop over ROIs
     for roi=1:length(regions)
@@ -101,67 +103,287 @@ for i=1:length(SSID)
         switch regions{roi}
             case 'random'
                 maskfile='none';
-                slope_sign='NA';
+                rand_beta_freq=rand(size(freq_trials_resp,1),1);
+                rand_beta_freq_z=zscore(rand_beta_freq);
+                rand_beta_life=rand(size(life_trials_resp,1),1);
+                rand_beta_life_z=zscore(rand_beta_life);
             case 'hippo'
                 maskfile=[mask_dir,'/','bin75_sum_hippo_noPrC.nii'];
-                slope_sign='both';
+
+                % load the mask file
+                roiimg=niftiread(maskfile);
+                freq_roi_beta=zeros(0);
+                life_roi_beta=zeros(0);
+
+                %frequency trials
+                for ftrial=1:size(freq_trials_resp,1)
+                    freqbeta=niftiread(strcat(project_derivative,'/',LSSN_foldername,'/sub-',SSID{i},'/temp/task-test_run_',num2str(freq_trials_resp{ftrial,14}),'/trial_',num2str(freq_trials_resp{ftrial,15}),'/beta_0001.nii'));
+                    freq_roi_beta(ftrial,:)=freqbeta(find(roiimg));
+                end
+                %feature selection using linear regression of BOLD~freq_ratings
+                freq_b=zeros(0);
+                for voxel=1:size(freq_roi_beta,2)
+                    freq_b(voxel)=freq_roi_beta(:,voxel)\freq_ratings;%regression slope on freq ratings
+                end
+
+                %lifetime trials
+                for ltrial=1:size(life_trials_resp,1)
+                    lifebeta=niftiread(strcat(project_derivative,'/',LSSN_foldername,'/sub-',SSID{i},'/temp/task-test_run_',num2str(life_trials_resp{ltrial,14}),'/trial_',num2str(life_trials_resp{ltrial,15}),'/beta_0001.nii'));
+                    life_roi_beta(ltrial,:)=lifebeta(find(roiimg));
+                end
+                %feature selection using linear regression of BOLD~life_rating
+                life_b=zeros(0);
+                for voxel=1:size(life_roi_beta,2)
+                    life_b(voxel)=life_roi_beta(:,voxel)\life_ratings;%regression slope on freq ratings
+                end
+
+                % for hippocampus, select both positive and negative slopes
+                [~,freq_posvoxels]=maxk(freq_b,ceil(length(freq_b)*0.05));
+                [~,freq_negvoxels]=mink(freq_b,ceil(length(freq_b)*0.05));
+                [~,life_posvoxels]=maxk(life_b,ceil(length(life_b)*0.05));
+                [~,life_negvoxels]=mink(life_b,ceil(length(life_b)*0.05));
+
+                %average betas among the selected voxels within each trial
+                hippo_freq_pos_signal=mean(freq_roi_beta(:,freq_posvoxels),2);
+                hippo_freq_neg_signal=mean(freq_roi_beta(:,freq_negvoxels),2);
+                hippo_life_pos_signal=mean(life_roi_beta(:,life_posvoxels),2);
+                hippo_life_neg_signal=mean(life_roi_beta(:,life_negvoxels),2);
+
+                %z-score within subject and within ROI
+                hippo_freq_pos_z=zscore(hippo_freq_pos_signal);
+                hippo_freq_neg_z=zscore(hippo_freq_neg_signal);
+                hippo_life_pos_z=zscore(hippo_life_pos_signal);
+                hippo_life_neg_z=zscore(hippo_life_neg_signal);
+
             case 'PrC'
                 maskfile=[mask_dir,'/','bin75_sum_PRC_MNINLin6_resampled.nii'];
-                slope_sign='negative';
+
+                % load the mask file
+                roiimg=niftiread(maskfile);
+                freq_roi_beta=zeros(0);
+                life_roi_beta=zeros(0);
+
+                %frequency trials
+                for ftrial=1:size(freq_trials_resp,1)
+                    freqbeta=niftiread(strcat(project_derivative,'/',LSSN_foldername,'/sub-',SSID{i},'/temp/task-test_run_',num2str(freq_trials_resp{ftrial,14}),'/trial_',num2str(freq_trials_resp{ftrial,15}),'/beta_0001.nii'));
+                    freq_roi_beta(ftrial,:)=freqbeta(find(roiimg));
+                end
+                %feature selection using linear regression of BOLD~freq_ratings
+                freq_b=zeros(0);
+                for voxel=1:size(freq_roi_beta,2)
+                    freq_b(voxel)=freq_roi_beta(:,voxel)\freq_ratings;%regression slope on freq ratings
+                end
+
+                %lifetime trials
+                for ltrial=1:size(life_trials_resp,1)
+                    lifebeta=niftiread(strcat(project_derivative,'/',LSSN_foldername,'/sub-',SSID{i},'/temp/task-test_run_',num2str(life_trials_resp{ltrial,14}),'/trial_',num2str(life_trials_resp{ltrial,15}),'/beta_0001.nii'));
+                    life_roi_beta(ltrial,:)=lifebeta(find(roiimg));
+                end
+                %feature selection using linear regression of BOLD~life_rating
+                life_b=zeros(0);
+                for voxel=1:size(life_roi_beta,2)
+                    life_b(voxel)=life_roi_beta(:,voxel)\life_ratings;%regression slope on freq ratings
+                end
+
+                % for PrC, select negative slopes
+                [~,freq_negvoxels]=mink(freq_b,ceil(length(freq_b)*0.05));
+                [~,life_negvoxels]=mink(life_b,ceil(length(life_b)*0.05));
+
+                %average betas among the selected voxels within each trial
+                PrC_freq_neg_signal=mean(freq_roi_beta(:,freq_negvoxels),2);
+                PrC_life_neg_signal=mean(life_roi_beta(:,life_negvoxels),2);
+
+                %z-score within subject and within ROI
+                PrC_freq_neg_z=zscore(PrC_freq_neg_signal);
+                PrC_life_neg_z=zscore(PrC_life_neg_signal);
+
             case 'mPFC_recent'
                 maskfile=[mask_dir,'/','recent_inc_t_mPFC_PeakUncor001_clusterFWE_abovethreshold_mask.nii'];
-                slope_sign='positive';
-            case 'prec_recent'
+
+                % load the mask file
+                roiimg=niftiread(maskfile);
+                freq_roi_beta=zeros(0);
+
+                %frequency trials
+                for ftrial=1:size(freq_trials_resp,1)
+                    freqbeta=niftiread(strcat(project_derivative,'/',LSSN_foldername,'/sub-',SSID{i},'/temp/task-test_run_',num2str(freq_trials_resp{ftrial,14}),'/trial_',num2str(freq_trials_resp{ftrial,15}),'/beta_0001.nii'));
+                    freq_roi_beta(ftrial,:)=freqbeta(find(roiimg));
+                end
+                %feature selection using linear regression of BOLD~freq_ratings
+                freq_b=zeros(0);
+                for voxel=1:size(freq_roi_beta,2)
+                    freq_b(voxel)=freq_roi_beta(:,voxel)\freq_ratings;%regression slope on freq ratings
+                end
+
+                % for mPFC, select positive slopes
+                [~,freq_posvoxels]=maxk(freq_b,ceil(length(freq_b)*0.05));
+
+                %average betas among the selected voxels within each trial
+                mPFC_freq_pos_signal=mean(freq_roi_beta(:,freq_posvoxels),2);
+
+                %z-score within subject and within ROI
+                mPFC_freq_pos_z=zscore(mPFC_freq_pos_signal);
+
+            case 'mPPC_recent'
                 maskfile=[mask_dir,'/','recent_inc_t_mPPC_PeakUncor001_clusterFWE_abovethreshold_mask.nii'];
-                slope_sign='positive';
+
+                % load the mask file
+                roiimg=niftiread(maskfile);
+                freq_roi_beta=zeros(0);
+
+                %frequency trials
+                for ftrial=1:size(freq_trials_resp,1)
+                    freqbeta=niftiread(strcat(project_derivative,'/',LSSN_foldername,'/sub-',SSID{i},'/temp/task-test_run_',num2str(freq_trials_resp{ftrial,14}),'/trial_',num2str(freq_trials_resp{ftrial,15}),'/beta_0001.nii'));
+                    freq_roi_beta(ftrial,:)=freqbeta(find(roiimg));
+                end
+                %feature selection using linear regression of BOLD~freq_ratings
+                freq_b=zeros(0);
+                for voxel=1:size(freq_roi_beta,2)
+                    freq_b(voxel)=freq_roi_beta(:,voxel)\freq_ratings;%regression slope on freq ratings
+                end
+
+                % for mPPC, select positive slopes
+                [~,freq_posvoxels]=maxk(freq_b,ceil(length(freq_b)*0.05));
+
+                %average betas among the selected voxels within each trial
+                mPPC_freq_pos_signal=mean(freq_roi_beta(:,freq_posvoxels),2);
+
+                %z-score within subject and within ROI
+                mPPC_freq_pos_z=zscore(mPPC_freq_pos_signal);
+
             case 'mPFC_lifetime'
                 maskfile=[mask_dir,'/','lifetime_inc_t_mPFC_PeakUncor001_clusterFWE_abovethreshold_mask.nii'];
-                slope_sign='positive';
-            case 'prec_lifetime'
+
+                % load the mask file
+                roiimg=niftiread(maskfile);
+                life_roi_beta=zeros(0);
+
+                %lifetime trials
+                for ftrial=1:size(life_trials_resp,1)
+                    lifebeta=niftiread(strcat(project_derivative,'/',LSSN_foldername,'/sub-',SSID{i},'/temp/task-test_run_',num2str(life_trials_resp{ftrial,14}),'/trial_',num2str(life_trials_resp{ftrial,15}),'/beta_0001.nii'));
+                    life_roi_beta(ftrial,:)=lifebeta(find(roiimg));
+                end
+                %feature selection using linear regression of BOLD~life_ratings
+                life_b=zeros(0);
+                for voxel=1:size(life_roi_beta,2)
+                    life_b(voxel)=life_roi_beta(:,voxel)\life_ratings;%regression slope on life ratings
+                end
+
+                % for mPFC, select positive slopes
+                [~,life_posvoxels]=maxk(life_b,ceil(length(life_b)*0.05));
+
+                %average betas among the selected voxels within each trial
+                mPFC_life_pos_signal=mean(life_roi_beta(:,life_posvoxels),2);
+
+                %z-score within subject and within ROI
+                mPFC_life_pos_z=zscore(mPFC_life_pos_signal);
+
+            case 'mPPC_lifetime'
                 maskfile=[mask_dir,'/','lifetime_inc_t_precuneus_PeakUncor001_clusterFWE_abovethreshold_mask.nii'];
-                slope_sign='positive';
+
+                % load the mask file
+                roiimg=niftiread(maskfile);
+                life_roi_beta=zeros(0);
+
+                %lifetime trials
+                for ftrial=1:size(life_trials_resp,1)
+                    lifebeta=niftiread(strcat(project_derivative,'/',LSSN_foldername,'/sub-',SSID{i},'/temp/task-test_run_',num2str(life_trials_resp{ftrial,14}),'/trial_',num2str(life_trials_resp{ftrial,15}),'/beta_0001.nii'));
+                    life_roi_beta(ftrial,:)=lifebeta(find(roiimg));
+                end
+                %feature selection using linear regression of BOLD~life_ratings
+                life_b=zeros(0);
+                for voxel=1:size(life_roi_beta,2)
+                    life_b(voxel)=life_roi_beta(:,voxel)\life_ratings;%regression slope on life ratings
+                end
+
+                % for mPPC, select positive slopes
+                [~,life_posvoxels]=maxk(life_b,ceil(length(life_b)*0.05));
+
+                %average betas among the selected voxels within each trial
+                mPPC_life_pos_signal=mean(life_roi_beta(:,life_posvoxels),2);
+
+                %z-score within subject and within ROI
+                mPPC_life_pos_z=zscore(mPPC_life_pos_signal);
+
             case 'lAnG_lifetime'
                 maskfile=[mask_dir,'/','lifetime_inc_t_lAnG_PeakUncor001_clusterFWE_abovethreshold_mask.nii'];
-                slope_sign='positive';
+
+                % load the mask file
+                roiimg=niftiread(maskfile);
+                life_roi_beta=zeros(0);
+
+                %lifetime trials
+                for ftrial=1:size(life_trials_resp,1)
+                    lifebeta=niftiread(strcat(project_derivative,'/',LSSN_foldername,'/sub-',SSID{i},'/temp/task-test_run_',num2str(life_trials_resp{ftrial,14}),'/trial_',num2str(life_trials_resp{ftrial,15}),'/beta_0001.nii'));
+                    life_roi_beta(ftrial,:)=lifebeta(find(roiimg));
+                end
+                %feature selection using linear regression of BOLD~life_ratings
+                life_b=zeros(0);
+                for voxel=1:size(life_roi_beta,2)
+                    life_b(voxel)=life_roi_beta(:,voxel)\life_ratings;%regression slope on life ratings
+                end
+
+                % for lAnG, select positive slopes
+                [~,life_posvoxels]=maxk(life_b,ceil(length(life_b)*0.05));
+
+                %average betas among the selected voxels within each trial
+                lAnG_life_pos_signal=mean(life_roi_beta(:,life_posvoxels),2);
+
+                %z-score within subject and within ROI
+                lAnG_life_pos_z=zscore(lAnG_life_pos_signal);
+
             case 'lSFG_lifetime'
                 maskfile=[mask_dir,'/','lifetime_inc_t_lSFG_PeakUncor001_clusterFWE_abovethreshold_mask.nii'];
-                slope_sign='positive';
-        end
 
-        % load the mask file
-        roiimg=niftiread(maskfile);
-        roi_beta=zeros(0);
-        for trial=1:size(freq_trials_resp,1)
-            beta=niftiread(strcat(project_derivative,'/',LSSN_foldername,'/sub-',SSID{i},'/temp/task-test_run_',num2str(freq_trials_resp{trial,14}),'/trial_',num2str(freq_trials_resp{trial,15}),'/beta_0001.nii'));
-            roi_beta(trial,:)=beta(find(roiimg));
-        end
-        %feature selection using linear regression of BOLD~freq_ratings, then rank
-        %ordering the slope
-        b=zeros(0);
-        for voxel=1:size(roi_beta,2)
-            b(voxel)=roi_beta(:,voxel)\freq_ratings;%regression slope on freq ratings
-        end
+                % load the mask file
+                roiimg=niftiread(maskfile);
+                life_roi_beta=zeros(0);
 
-        if strcmp(slope_sign,'positive')
-            [~,topvoxels]=maxk(b,ceil(length(b)*0.05));%top 5% voxels, need to change maxk to mink when using regions with decreasing signal (e.g. PrC)
-        elseif strcmp(slope_sign,'negative')
-            [~,topvoxels]=mink(b,ceil(length(b)*0.05));
+                %lifetime trials
+                for ftrial=1:size(life_trials_resp,1)
+                    lifebeta=niftiread(strcat(project_derivative,'/',LSSN_foldername,'/sub-',SSID{i},'/temp/task-test_run_',num2str(life_trials_resp{ftrial,14}),'/trial_',num2str(life_trials_resp{ftrial,15}),'/beta_0001.nii'));
+                    life_roi_beta(ftrial,:)=lifebeta(find(roiimg));
+                end
+                %feature selection using linear regression of BOLD~life_ratings
+                life_b=zeros(0);
+                for voxel=1:size(life_roi_beta,2)
+                    life_b(voxel)=life_roi_beta(:,voxel)\life_ratings;%regression slope on life ratings
+                end
+
+                % for lSFG, select positive slopes
+                [~,life_posvoxels]=maxk(life_b,ceil(length(life_b)*0.05));
+
+                %average betas among the selected voxels within each trial
+                lSFG_life_pos_signal=mean(life_roi_beta(:,life_posvoxels),2);
+
+                %z-score within subject and within ROI
+                lSFG_life_pos_z=zscore(lSFG_life_pos_signal);
         end
-        %average betas among the selected voxels within each trial
-        roi_signal=mean(roi_beta(:,topvoxels),2);
-
-        %z-score within subject and within ROI
-        roi_z=zscore(roi_signal);
-
-        %compile results and save RT, accuracy, betas, and subject number
-        temp=[repmat({SSID{i}},[size(freq_trials_resp,1),1]),freq_trials_resp(:,2),freq_trials_resp(:,7),freq_trials_resp(:,13),num2cell(roi_signal),num2cell(roi_z),num2cell(freq_ratings)];
-        freq_result=[freq_result;temp];
     end
-
-
+    %compile results
+    %freq{'subj_idx','obj_freq','rt','raw_rating','accuracy','bin12_rating','bin23_rating','bin34_rating',...
+    % 'bin45_rating','random_z','hippo_beta_pos','hippo_z_pos','hippo_beta_neg','hippo_z_neg','PrC_beta',...
+    % 'PrC_z','mPFC_beta','mPFC_z','mPPc_beta','mPPC_z'});
+    freq_temp=[freq_temp,num2cell(rand_beta_freq_z),num2cell(hippo_freq_pos_signal),num2cell(hippo_freq_pos_z),...
+        num2cell(hippo_freq_neg_signal),num2cell(hippo_freq_neg_z),num2cell(PrC_freq_neg_signal),...
+        num2cell(PrC_freq_neg_z),num2cell(mPFC_freq_pos_signal),num2cell(mPFC_freq_pos_z),...
+        num2cell(mPPC_freq_pos_signal),num2cell(mPPC_freq_pos_z)];
+    %life{'subj_idx','norm_fam','rt','raw_rating','bin12_rating','bin23_rating','bin34_rating','bin45_rating',...
+    % 'random_z','hippo_beta_pos','hippo_z_pos','hippo_beta_neg','hippo_z_neg','PrC_beta','PrC_z','mPFC_beta',...
+    % 'mPFC_z','mPPc_beta','mPPC_z','lAnG_beta','lAnG_z','lSFG_beta','lSFG_z'});
+    life_temp=[life_temp,num2cell(rand_beta_life_z),num2cell(hippo_life_pos_signal),num2cell(hippo_life_pos_z),...
+        num2cell(hippo_life_neg_signal),num2cell(hippo_life_neg_z),num2cell(PrC_life_neg_signal),...
+        num2cell(PrC_life_neg_z),num2cell(mPFC_life_pos_signal),num2cell(mPFC_life_pos_z),...
+        num2cell(mPPC_life_pos_signal),num2cell(mPPC_life_pos_z),num2cell(lAnG_life_pos_signal),...
+        num2cell(lAnG_life_pos_z),num2cell(lSFG_life_pos_signal),num2cell(lSFG_life_pos_z)];
+    
+    % concatenate over subjects
+    freq_result=[freq_result;freq_temp];
+    life_result=[life_result;life_temp];
 end
 if ~exist(output_dir,'dir')
     mkdir(output_dir);
 end
-writetable(freq_result,strcat(output_dir,'/hddm_data_z.csv'));
+writetable(freq_result,strcat(output_dir,'/HSSM_freq_data.csv'));
+writetable(life_result,strcat(output_dir,'/HSSM_life_data.csv'));
 end

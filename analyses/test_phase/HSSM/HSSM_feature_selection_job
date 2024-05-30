@@ -1,0 +1,17 @@
+#!/bin/bash
+#SBATCH --time=8:00:00
+#SBATCH --account=ctb-akhanf
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=2
+#SBATCH --mem=16G
+#SBATCH --job-name=HSSM_FeatSelect
+#SBATCH --output=/home/hyang336/jobs/HSSM_FeatSelect%j.out
+
+ml matlab
+$sublist
+$LSSN_foldername
+$mask_dir
+$project_derivative
+$output_dir
+${strict_coding}
+matlab -nosplash -nodisplay -r "addpath(genpath('"'/home/hyang336/matlab/'"')); addpath(genpath('"'/home/hyang336/PPCPRC/'"')); HSSM_feature_selection('"'$sublist'"','"'$LSSN_foldername'"','"'$mask_dir'"','"'$project_derivative'"','"'$output_dir'"','"${strict_coding}"'); exit;"
