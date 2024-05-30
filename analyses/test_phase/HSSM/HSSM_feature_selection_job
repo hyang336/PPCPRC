@@ -8,10 +8,10 @@
 #SBATCH --output=/home/hyang336/jobs/HSSM_FeatSelect%j.out
 
 ml matlab
-$sublist
-$LSSN_foldername
-$mask_dir
-$project_derivative
-$output_dir
-${strict_coding}
+$sublist='/scratch/hyang336/working_dir/PPCMD_arch/scratch/hyang336/working_dir/PPC_MD/sub_list_libmotion.txt'
+$LSSN_foldername='GLM_avgMask_nosmooth/LSS-N_test/'
+$mask_dir='/scratch/hyang336/working_dir/HDDM_HSSM/HSSM_masks/'
+$project_derivative='/scratch/hyang336/working_dir/PPCMD_arch/scratch/hyang336/working_dir/PPC_MD/'
+$output_dir='/scratch/hyang336/working_dir/HDDM_HSSM/'
+${strict_coding}=1
 matlab -nosplash -nodisplay -r "addpath(genpath('"'/home/hyang336/matlab/'"')); addpath(genpath('"'/home/hyang336/PPCPRC/'"')); HSSM_feature_selection('"'$sublist'"','"'$LSSN_foldername'"','"'$mask_dir'"','"'$project_derivative'"','"'$output_dir'"','"${strict_coding}"'); exit;"
