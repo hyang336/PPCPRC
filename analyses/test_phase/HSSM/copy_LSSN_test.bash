@@ -12,7 +12,10 @@ dest_base_dir="/scratch/hyang336/working_dir/HDDM_HSSM/LSSN_test"  # replace wit
 # Loop over each subject
 for subject in $(ls $base_dir); do
     # Loop over each run
-    for run in $(find $base_dir/$subject/temp -mindepth 1 -maxdepth 1 -type d); do
+    for run_path in $(find $base_dir/$subject/temp -mindepth 1 -maxdepth 1 -type d); do
+        # Extract just the run directory name
+        run=$(basename $run_path)
+        
         # Loop over each trial
         for trial in $(ls $base_dir/$subject/temp/$run); do
             # Construct the source file path
