@@ -23,53 +23,137 @@ if __name__ == '__main__':
     #function, evaluated at the parameters for the beta distribution (a and b). This intercept was the normalizing factor
     #before the log transformation to make sure the function was a distibution (i.e. integrate to 1). Note, larger values
     #of a or b will result in large positive or negative value of v down the line, may need to find a way to rescale it...
-    a0=0.1
+    # These values should generate v in the range of 0 to 2.5, which is the range of v that the LAN model can handle, as long
+    # as the neural data is in the range of 0 to 1. The neural data is generated from a uniform distribution, so it should
+    a0=0
     b0=1
     #intercept0=np.log(1/beta(a0,b0))
-    intercept0=1
+    intercept0=0.85
 
     a1=1.5
     b1=3
     #intercept1=np.log(1/beta(a1,b1))
-    intercept1=3.5
+    intercept1=2.1
 
     a2=3
     b2=1.5
     #intercept2=np.log(1/beta(a2,b2))
-    intercept2=3.5
+    intercept2=2.1
 
     a3=1
-    b3=0.1
+    b3=0
     #intercept3=np.log(1/beta(a3,b3))
-    intercept3=1
+    intercept3=0.85
 
-    simneural = np.random.uniform(0, 1, size=2000)
+    n_subjects=30 #number of subjects
+    n_trials=200 #number of trials per subject
+    param_sv=0.2 #standard deviation of the subject-level parameters
 
-    #simulate linear relationship between v and log-transformed neural data, following HSSM tutorial (i.e. no added noise at this step)
-    #now we need a log link function since we model log(v)=a+b*log(x)+c*log(1-x)
-    v0=np.exp(intercept0 + a0*np.log(simneural) + b0*np.log(1-simneural))
-    v1=np.exp(intercept1 + a1*np.log(simneural) + b1*np.log(1-simneural))
-    v2=np.exp(intercept2 + a2*np.log(simneural) + b2*np.log(1-simneural))
-    v3=np.exp(intercept3 + a3*np.log(simneural) + b3*np.log(1-simneural))
+    # Save trial-level parameters for each subject
+    subject_params={
+        "v0": np.array([]),
+        "v1": np.array([]),
+        "v2": np.array([]),
+        "v3": np.array([]),
+        "simneural": np.array([]),
+        "subID": np.array([])
+    }
 
-    ###IMPORTANT: for interpretable param rec test, make sure generate params within training bounds of LAN###
+    # simulated data list
+    sim_data=[]
 
-    v0_inb= np.where(np.logical_and(v0>= 0,v0<= 2.5))
-    v1_inb= np.where(np.logical_and(v1>= 0,v1<= 2.5))
-    v01_inb=np.intersect1d(v0_inb[0],v1_inb[0])
+    # Generate subject-level parameters
+    for i in range(n_subjects):
+        simneural=np.random.uniform(0, 1, size=n_trials)
+        v0=np.exp(np.random.normal(intercept0, param_sv) + np.random.normal(a0, param_sv)*np.log(simneural) + np.random.normal(b0, param_sv)*np.log(1-simneural))
+        v1=np.exp(np.random.normal(intercept1, param_sv) + np.random.normal(a1, param_sv)*np.log(simneural) + np.random.normal(b1, param_sv)*np.log(1-simneural))
+        v2=np.exp(np.random.normal(intercept2, param_sv) + np.random.normal(a2, param_sv)*np.log(simneural) + np.random.normal(b2, param_sv)*np.log(1-simneural))
+        v3=np.exp(np.random.normal(intercept3, param_sv) + np.random.normal(a3, param_sv)*np.log(simneural) + np.random.normal(b3, param_sv)*np.log(1-simneural))
+        
+        ###IMPORTANT: for interpretable param rec test, make sure generate params within training bounds of LAN###
+        # only keep entries in subject_data that are in bounds
+        v0_inb= np.where(np.logical_and(v0>= 0,v0<= 2.5))
+        v1_inb= np.where(np.logical_and(v1>= 0,v1<= 2.5))
+        v01_inb=np.intersect1d(v0_inb[0],v1_inb[0])
 
-    v2_inb= np.where(np.logical_and(v2>= 0,v2<= 2.5))
-    v3_inb= np.where(np.logical_and(v3>= 0,v3<= 2.5))
-    v23_inb=np.intersect1d(v2_inb[0],v3_inb[0])
+        v2_inb= np.where(np.logical_and(v2>= 0,v2<= 2.5))
+        v3_inb= np.where(np.logical_and(v3>= 0,v3<= 2.5))
+        v23_inb=np.intersect1d(v2_inb[0],v3_inb[0])
 
-    v0123_inb=np.intersect1d(v01_inb,v23_inb)#indices of elements that are in bound for all 4 arrays
+        v0123_inb=np.intersect1d(v01_inb,v23_inb)#indices of elements that are in bound for all 4 arrays
 
-    #only keep inbound elements
-    simneural=simneural[v0123_inb]
-    v0=v0[v0123_inb]
-    v1=v1[v0123_inb]
-    v2=v2[v0123_inb]
-    v3=v3[v0123_inb]
+        #only keep inbound elements
+        simneural=simneural[v0123_inb]
+        v0=v0[v0123_inb]
+        v1=v1[v0123_inb]
+        v2=v2[v0123_inb]
+        v3=v3[v0123_inb]
+        
+        # save to subject_params
+        subject_params["v0"]=np.append(subject_params["v0"],v0)
+        subject_params["v1"]=np.append(subject_params["v1"],v1)
+        subject_params["v2"]=np.append(subject_params["v2"],v2)
+        subject_params["v3"]=np.append(subject_params["v3"],v3)
+        subject_params["simneural"]=np.append(subject_params["simneural"],simneural)
+        subject_params["subID"]=np.append(subject_params["subID"],np.repeat(i,n_trials))
+
+        # simulate RT and choices
+        true_values = np.column_stack(
+        [v0,v1,v2,v3, np.repeat([[2.0, 0.0, 1e-3,0.0]], axis=0, repeats=len(simneural))]
+        )
+        # Get mode simulations
+        race4nba_v = simulator.simulator(true_values, model="race_no_bias_angle_4", n_samples=1)
+
+        sim_data.append(pd.DataFrame(
+            {
+                "rt": race4nba_v["rts"].flatten(),
+                "response": race4nba_v["choices"].flatten(),
+                "x": np.log(simneural),
+                "y": np.log(1-simneural)
+                "subID": i
+            }
+        )
+        )
+
+    #make a single dataframe of subject-wise simulated data
+    sim_data_concat=pd.concat(sim_data)
+
+    # generate some histogram for subject level v0, v1, v2, v3 and save to disk
+    plt.hist(subject_params["v0"], bins=30)
+    plt.savefig(outdir+'v0_hist.png')
+    plt.hist(subject_params["v1"], bins=30)
+    plt.savefig(outdir+'v1_hist.png')
+    plt.hist(subject_params["v2"], bins=30)
+    plt.savefig(outdir+'v2_hist.png')
+    plt.hist(subject_params["v3"], bins=30)
+    plt.savefig(outdir+'v3_hist.png')
+
+    
+    # #simulate linear relationship between v and log-transformed neural data, following HSSM tutorial (i.e. no added noise at this step)
+    # #now we need a log link function since we model log(v)=a+b*log(x)+c*log(1-x)
+    # v0=np.exp(intercept0 + a0*np.log(simneural) + b0*np.log(1-simneural))
+    # v1=np.exp(intercept1 + a1*np.log(simneural) + b1*np.log(1-simneural))
+    # v2=np.exp(intercept2 + a2*np.log(simneural) + b2*np.log(1-simneural))
+    # v3=np.exp(intercept3 + a3*np.log(simneural) + b3*np.log(1-simneural))
+
+    
+
+    # v0_inb= np.where(np.logical_and(v0>= 0,v0<= 2.5))
+    # v1_inb= np.where(np.logical_and(v1>= 0,v1<= 2.5))
+    # v01_inb=np.intersect1d(v0_inb[0],v1_inb[0])
+
+    # v2_inb= np.where(np.logical_and(v2>= 0,v2<= 2.5))
+    # v3_inb= np.where(np.logical_and(v3>= 0,v3<= 2.5))
+    # v23_inb=np.intersect1d(v2_inb[0],v3_inb[0])
+
+    # v0123_inb=np.intersect1d(v01_inb,v23_inb)#indices of elements that are in bound for all 4 arrays
+
+    # #only keep inbound elements
+    # simneural=simneural[v0123_inb]
+    # v0=v0[v0123_inb]
+    # v1=v1[v0123_inb]
+    # v2=v2[v0123_inb]
+    # v3=v3[v0123_inb]
 
 
     # def replace_outbound(cov_ref,arr_in,low_bound,high_bound,intercept,beta1,beta2):
@@ -86,25 +170,25 @@ if __name__ == '__main__':
     #     return arr_in,cov_ref
 
 
-    ###########################################################################################################
-    # HSSM as of 2024-04-25 support race_no_bias_angle_4 as its only >2 response option model
-    #generate trial-wise parameters with fixed a, z, and t, and bnoundary_param, assumed to take the form theta in radian
-    true_values = np.column_stack(
-        [v0,v1,v2,v3, np.repeat([[2.0, 0.0, 1e-3,0.0]], axis=0, repeats=len(simneural))]
-    )
+    # ###########################################################################################################
+    # # HSSM as of 2024-04-25 support race_no_bias_angle_4 as its only >2 response option model
+    # #generate trial-wise parameters with fixed a, z, and t, and bnoundary_param, assumed to take the form theta in radian
+    # true_values = np.column_stack(
+    #     [v0,v1,v2,v3, np.repeat([[2.0, 0.0, 1e-3,0.0]], axis=0, repeats=len(simneural))]
+    # )
 
 
-    # Get mode simulations
-    race4nba_v = simulator.simulator(true_values, model="race_no_bias_angle_4", n_samples=1)
+    # # Get mode simulations
+    # race4nba_v = simulator.simulator(true_values, model="race_no_bias_angle_4", n_samples=1)
 
-    dataset_race4nba_v = pd.DataFrame(
-        {
-            "rt": race4nba_v["rts"].flatten(),
-            "response": race4nba_v["choices"].flatten(),
-            "x": np.log(simneural),
-            "y": np.log(1-simneural)
-        }
-    )
+    # dataset_race4nba_v = pd.DataFrame(
+    #     {
+    #         "rt": race4nba_v["rts"].flatten(),
+    #         "response": race4nba_v["choices"].flatten(),
+    #         "x": np.log(simneural),
+    #         "y": np.log(1-simneural)
+    #     }
+    # )
 
 
     #estimate parameters based on data
@@ -145,7 +229,7 @@ if __name__ == '__main__':
 
 
     #sample from the model, 2500-2500 is not enough for the chain the converge
-    infer_data_race4nba_v = model_race4nba_v.sample(step=pm.Slice(model=model_race4nba_v.pymc_model), sampler="mcmc", chains=2, cores=2, draws=5000, tune=10000)
+    infer_data_race4nba_v = model_race4nba_v.sample(step=pm.Slice(model=model_race4nba_v.pymc_model), sampler="mcmc", chains=4, cores=4, draws=5000, tune=10000)
     #infer_data_race4nba_v = model_race4nba_v.sample(sampler="nuts_numpyro", chains=2, cores=2, draws=5000, tune=10000)
     #infer_data_race4nba_v = model_race4nba_v.sample(sampler="nuts_blackjax", chains=2, cores=2, draws=5000, tune=10000)
     #save model
