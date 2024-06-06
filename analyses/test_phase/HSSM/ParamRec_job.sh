@@ -1,9 +1,9 @@
 #!/bin/bash
-#SBATCH --time=72:00:00
+#SBATCH --time=96:00:00
 #SBATCH --account=ctb-akhanf
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=4
-#SBATCH --mem=64G
+#SBATCH --mem=32G
 #SBATCH --job-name=race4nb_ParRec
 #SBATCH --output=/home/hyang336/jobs/race4nb_ParRec%j.out
 
