@@ -149,25 +149,25 @@ if __name__ == '__main__':
                     {
                         "name": "v0",
                         "prior":{"name": "Uniform", "lower": -1, "upper": 3},
-                        "formula": "v0 ~ 1 + x + y",
+                        "formula": "v0 ~ 1 + (x|subID) + (y|subID)",
                         "link": "log",
                     },
                     {
                         "name": "v1",
                         "prior":{"name": "Uniform", "lower": -1, "upper": 3},
-                        "formula": "v1 ~ 1 + x + y",
+                        "formula": "v1 ~ 1 + (x|subID) + (y|subID)",
                         "link": "log",
                     },
                     {
                         "name": "v2",
                         "prior":{"name": "Uniform", "lower": -1, "upper": 3},
-                        "formula": "v2 ~ 1 + x + y",
+                        "formula": "v2 ~ 1 + (x|subID) + (y|subID)",
                         "link": "log",
                     },
                     {
                         "name": "v3",
                         "prior":{"name": "Uniform", "lower": -1, "upper": 3},
-                        "formula": "v3 ~ 1 + x + y",
+                        "formula": "v3 ~ 1 + (x|subID) + (y|subID)",
                         "link": "log",
                     }
                 ],
@@ -199,18 +199,26 @@ if __name__ == '__main__':
                     {
                         "name": "v0",
                         "prior":{"name": "Uniform", "lower": -1, "upper": 3},
+                        "formula": "v0 ~ 1 + (1|subID)",
+                        "link": "log"
                     },
                     {
                         "name": "v1",
                         "prior":{"name": "Uniform", "lower": -1, "upper": 3},
+                        "formula": "v1 ~ 1 + (1|subID)",
+                        "link": "log"
                     },
                     {
                         "name": "v2",
                         "prior":{"name": "Uniform", "lower": -1, "upper": 3},
+                        "formula": "v2 ~ 1 + (1|subID)",
+                        "link": "log"
                     },
                     {
                         "name": "v3",
                         "prior":{"name": "Uniform", "lower": -1, "upper": 3},
+                        "formula": "v3 ~ 1 + (1|subID)",
+                        "link": "log"
                     }
                 ],
             )
@@ -236,25 +244,25 @@ if __name__ == '__main__':
                     {
                         "name": "v0",
                         "prior":{"name": "Uniform", "lower": -1, "upper": 3},
-                        "formula": "v0 ~ 1 + rand_x + rand_y",
+                        "formula": "v0 ~ 1 + (rand_x|subID) + (rand_y|subID)",
                         "link": "log",
                     },
                     {
                         "name": "v1",
                         "prior":{"name": "Uniform", "lower": -1, "upper": 3},
-                        "formula": "v1 ~ 1 + rand_x + rand_y",
+                        "formula": "v1 ~ 1 + (rand_x|subID) + (rand_y|subID)",
                         "link": "log",
                     },
                     {
                         "name": "v2",
                         "prior":{"name": "Uniform", "lower": -1, "upper": 3},
-                        "formula": "v2 ~ 1 + rand_x + rand_y",
+                        "formula": "v2 ~ 1 + (rand_x|subID) + (rand_y|subID)",
                         "link": "log",
                     },
                     {
                         "name": "v3",
                         "prior":{"name": "Uniform", "lower": -1, "upper": 3},
-                        "formula": "v3 ~ 1 + rand_x + rand_y",
+                        "formula": "v3 ~ 1 + (rand_x|subID) + (rand_y|subID)",
                         "link": "log",
                     }
                 ],
