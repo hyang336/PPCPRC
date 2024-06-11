@@ -10,6 +10,7 @@ import arviz as az
 from matplotlib import pyplot as plt
 import pymc as pm
 import multiprocessing as mp
+import os
 import argparse
 
 if __name__ == '__main__':
@@ -25,6 +26,10 @@ if __name__ == '__main__':
     model=args.model
     outdir=args.outdir
 
+    # make the output directory if it doesn't exist
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+        
     #--------------------------------------We can try several generative model--------------------------------###
     #fake trialwise neural data, the 4 accumulators are simulated to have monotonic or nonmonotonic relationships with 
     #(log-transformed) neural data. This is controlled by take the beta distribution and log transform it, making it a 

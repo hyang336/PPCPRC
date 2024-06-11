@@ -28,6 +28,9 @@ if __name__ == '__main__':
     outdir=args.outdir
     bin_ver=args.bin
     
+    # make the output directory if it doesn't exist
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
 ###################################################################    # load the data###################################################################
     if signalname == 'recent':
         # load the csv
