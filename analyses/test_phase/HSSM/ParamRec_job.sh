@@ -2,9 +2,9 @@
 #SBATCH --time=48:00:00
 #SBATCH --account=ctb-akhanf
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=6
-#SBATCH --gres=gpu:2
-#SBATCH --mem=48G
+#SBATCH --cpus-per-task=12
+#SBATCH --gres=gpu:4
+#SBATCH --mem=96G
 #SBATCH --job-name=race4nb_ParRec
 #SBATCH --output=/home/hyang336/jobs/race4nb_ParRec%j.out
 
