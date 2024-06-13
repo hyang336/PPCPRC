@@ -3,7 +3,7 @@
 #SBATCH --account=ctb-akhanf
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=4
-#SBATCH --gpus-per-node=1
+#SBATCH --gpus-per-node=4
 #SBATCH --mem=32G
 #SBATCH --job-name=race4nb_ParRec
 #SBATCH --output=/home/hyang336/jobs/race4nb_ParRec%j.out
