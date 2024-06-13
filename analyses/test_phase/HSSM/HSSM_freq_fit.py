@@ -192,15 +192,15 @@ if __name__ == '__main__':
 ########################################################################################################################################################
 
     #sample from the model and save the results
-    infer_data_race4nba_v = model.sample(step=pm.Slice(model=model.pymc_model), sampler="mcmc", chains=4, cores=4, draws=5000, tune=10000,idata_kwargs = {'log_likelihood': True})
+    infer_data_race4nba_v = model.sample(sampler="nuts_numpyro", chains=4, cores=4, draws=5000, tune=5000,idata_kwargs = {'log_likelihood': True})
     #save trace
-    az.to_netcdf(infer_data_race4nba_v,outdir +'sample_5000_10000_trace_Fixed_az_' + signalname + '_' + modelname + '_bin' + bin_ver + '.nc4')
+    az.to_netcdf(infer_data_race4nba_v,outdir +'sample_5000_5000_trace_Fixed_az_' + signalname + '_' + modelname + '_bin' + bin_ver + '.nc4')
     #save trace plot
     az.plot_trace(
         infer_data_race4nba_v,
         var_names="~log_likelihood",  # we exclude the log_likelihood traces here
     )
-    plt.savefig(outdir+'posterior_diagnostic_5000_10000_trace_Fixed_az_' + signalname + '_' + modelname + '_bin' + bin_ver + '.png')
+    plt.savefig(outdir+'posterior_diagnostic_5000_5000_trace_Fixed_az_' + signalname + '_' + modelname + '_bin' + bin_ver + '.png')
     #save summary
     res_sum=az.summary(model.traces)
-    res_sum.to_csv(outdir+'summary_5000_10000_trace_Fixed_az_' + signalname + '_' + modelname + '_bin' + bin_ver + '.csv')
+    res_sum.to_csv(outdir+'summary_5000_5000_trace_Fixed_az_' + signalname + '_' + modelname + '_bin' + bin_ver + '.csv')

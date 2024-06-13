@@ -179,23 +179,23 @@ if __name__ == '__main__':
             )
             #sample from the model
             #infer_data_race4nba_v_true = model_race4nba_v_true.sample(step=pm.Slice(model=model_race4nba_v_true.pymc_model), sampler="mcmc", chains=4, cores=4, draws=5000, tune=10000,idata_kwargs = {'log_likelihood': True})
-            infer_data_race4nba_v_true = model_race4nba_v_true.sample(sampler="nuts_numpyro", chains=4, cores=4, draws=5000, tune=5000,idata_kwargs = {'log_likelihood': True})
+            infer_data_race4nba_v_true = model_race4nba_v_true.sample(sampler="nuts_numpyro", chains=4, cores=4, draws=10000, tune=10000,idata_kwargs = {'log_likelihood': True})
             # compute WAIC
             az.waic(infer_data_race4nba_v_true)
             #save trace
             #az.to_netcdf(infer_data_race4nba_v_true,outdir+'sample_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_true.nc4')
-            az.to_netcdf(infer_data_race4nba_v_true,outdir+'sample_5000_5000_trace_ParamInbound_Fixed_az_NutsNumpyro_true.nc4')
+            az.to_netcdf(infer_data_race4nba_v_true,outdir+'sample_10000_10000_trace_ParamInbound_Fixed_az_NutsNumpyro_true.nc4')
             #save trace plot
             az.plot_trace(
                 infer_data_race4nba_v_true,
                 var_names="~log_likelihood",  # we exclude the log_likelihood traces here
             )
             #plt.savefig(outdir+'posterior_diagnostic_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_true.png')
-            plt.savefig(outdir+'posterior_diagnostic_5000_5000_trace_ParamInbound_Fixed_az_NutsNumpyro_true.png')
+            plt.savefig(outdir+'posterior_diagnostic_10000_10000_trace_ParamInbound_Fixed_az_NutsNumpyro_true.png')
             #save summary
             res_sum_true=az.summary(model_race4nba_v_true.traces)
             #res_sum_true.to_csv(outdir+'summary_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_true.csv')
-            res_sum_true.to_csv(outdir+'summary_5000_5000_trace_ParamInbound_Fixed_az_NutsNumpyro_true.csv')
+            res_sum_true.to_csv(outdir+'summary_10000_10000_trace_ParamInbound_Fixed_az_NutsNumpyro_true.csv')
         
         case 'null':
             # model with no relationship between v and neural data
@@ -232,19 +232,19 @@ if __name__ == '__main__':
                 ],
             )
             #infer_data_race4nba_v_null = model_race4nba_v_null.sample(step=pm.Slice(model=model_race4nba_v_null.pymc_model), sampler="mcmc", chains=4, cores=4, draws=5000, tune=10000,idata_kwargs = {'log_likelihood': True})
-            infer_data_race4nba_v_null = model_race4nba_v_null.sample(sampler="nuts_numpyro", chains=4, cores=4, draws=5000, tune=5000,idata_kwargs = {'log_likelihood': True})
+            infer_data_race4nba_v_null = model_race4nba_v_null.sample(sampler="nuts_numpyro", chains=4, cores=4, draws=10000, tune=10000,idata_kwargs = {'log_likelihood': True})
             az.waic(infer_data_race4nba_v_null)
             # az.to_netcdf(infer_data_race4nba_v_null,outdir+'sample_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_null.nc4')
-            az.to_netcdf(infer_data_race4nba_v_null,outdir+'sample_5000_5000_trace_ParamInbound_Fixed_az_NutsNumpyro_null.nc4')
+            az.to_netcdf(infer_data_race4nba_v_null,outdir+'sample_10000_10000_trace_ParamInbound_Fixed_az_NutsNumpyro_null.nc4')
             az.plot_trace(
                 infer_data_race4nba_v_null,
                 var_names="~log_likelihood",  # we exclude the log_likelihood traces here
             )
             # plt.savefig(outdir+'posterior_diagnostic_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_null.png')
-            plt.savefig(outdir+'posterior_diagnostic_5000_5000_trace_ParamInbound_Fixed_az_NutsNumpyro_null.png')
+            plt.savefig(outdir+'posterior_diagnostic_10000_10000_trace_ParamInbound_Fixed_az_NutsNumpyro_null.png')
             res_sum_null=az.summary(model_race4nba_v_null.traces)
             # res_sum_null.to_csv(outdir+'summary_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_null.csv')
-            res_sum_null.to_csv(outdir+'summary_5000_5000_trace_ParamInbound_Fixed_az_NutsNumpyro_null.csv')
+            res_sum_null.to_csv(outdir+'summary_10000_10000_trace_ParamInbound_Fixed_az_NutsNumpyro_null.csv')
 
         case 'rand':
             # model with regression on random vectors (i.e. fake neural data that has the same distribution but was not involved in generating the parameters)
@@ -281,19 +281,19 @@ if __name__ == '__main__':
                 ],
             )
             # infer_data_race4nba_v_rand = model_race4nba_v_rand.sample(step=pm.Slice(model=model_race4nba_v_rand.pymc_model), sampler="mcmc", chains=4, cores=4, draws=5000, tune=10000,idata_kwargs = {'log_likelihood': True})
-            infer_data_race4nba_v_rand = model_race4nba_v_rand.sample(sampler="nuts_numpyro", chains=4, cores=4, draws=5000, tune=5000,idata_kwargs = {'log_likelihood': True})
+            infer_data_race4nba_v_rand = model_race4nba_v_rand.sample(sampler="nuts_numpyro", chains=4, cores=4, draws=10000, tune=10000,idata_kwargs = {'log_likelihood': True})
             az.waic(infer_data_race4nba_v_rand)
             # az.to_netcdf(infer_data_race4nba_v_rand,outdir+'sample_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_rand.nc4')
-            az.to_netcdf(infer_data_race4nba_v_rand,outdir+'sample_5000_5000_trace_ParamInbound_Fixed_az_NutsNumpyro_rand.nc4')
+            az.to_netcdf(infer_data_race4nba_v_rand,outdir+'sample_10000_10000_trace_ParamInbound_Fixed_az_NutsNumpyro_rand.nc4')
             az.plot_trace(
                 infer_data_race4nba_v_rand,
                 var_names="~log_likelihood",  # we exclude the log_likelihood traces here
             )
             # plt.savefig(outdir+'posterior_diagnostic_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_rand.png')
-            plt.savefig(outdir+'posterior_diagnostic_5000_5000_trace_ParamInbound_Fixed_az_NutsNumpyro_rand.png')
+            plt.savefig(outdir+'posterior_diagnostic_10000_10000_trace_ParamInbound_Fixed_az_NutsNumpyro_rand.png')
             res_sum_rand=az.summary(model_race4nba_v_rand.traces)
             # res_sum_rand.to_csv(outdir+'summary_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_rand.csv')
-            res_sum_rand.to_csv(outdir+'summary_5000_5000_trace_ParamInbound_Fixed_az_NutsNumpyro_rand.csv')
+            res_sum_rand.to_csv(outdir+'summary_10000_10000_trace_ParamInbound_Fixed_az_NutsNumpyro_rand.csv')
 
 
 
