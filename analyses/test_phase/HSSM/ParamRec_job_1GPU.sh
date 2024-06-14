@@ -4,7 +4,7 @@
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=3
 #SBATCH --gres=gpu:1
-#SBATCH --mem=24G
+#SBATCH --mem=64G
 #SBATCH --job-name=race4nb_ParRec
 #SBATCH --output=/home/hyang336/jobs/race4nb_ParRec%j.out
 
