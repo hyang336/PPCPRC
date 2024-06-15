@@ -168,25 +168,25 @@ if __name__ == '__main__':
                     include=[
                         {
                             "name": "v0",
-                            "prior":{"name": "Uniform", "lower": -1, "upper": 3},
+                            "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
                             "formula": "v0 ~ 1 + (x|subID) + (y|subID)",
                             "link": "log",
                         },
                         {
                             "name": "v1",
-                            "prior":{"name": "Uniform", "lower": -1, "upper": 3},
+                            "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
                             "formula": "v1 ~ 1 + (x|subID) + (y|subID)",
                             "link": "log",
                         },
                         {
                             "name": "v2",
-                            "prior":{"name": "Uniform", "lower": -1, "upper": 3},
+                            "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
                             "formula": "v2 ~ 1 + (x|subID) + (y|subID)",
                             "link": "log",
                         },
                         {
                             "name": "v3",
-                            "prior":{"name": "Uniform", "lower": -1, "upper": 3},
+                            "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
                             "formula": "v3 ~ 1 + (x|subID) + (y|subID)",
                             "link": "log",
                         }
@@ -202,25 +202,25 @@ if __name__ == '__main__':
                     include=[
                         {
                             "name": "v0",
-                            "prior":{"name": "Uniform", "lower": -1, "upper": 3},
+                            "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
                             "formula": "v0 ~ 1 + x + y + (1|subID)",
                             "link": "log",
                         },
                         {
                             "name": "v1",
-                            "prior":{"name": "Uniform", "lower": -1, "upper": 3},
+                            "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
                             "formula": "v1 ~ 1 + x + y + (1|subID)",
                             "link": "log",
                         },
                         {
                             "name": "v2",
-                            "prior":{"name": "Uniform", "lower": -1, "upper": 3},
+                            "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
                             "formula": "v2 ~ 1 + x + y + (1|subID)",
                             "link": "log",
                         },
                         {
                             "name": "v3",
-                            "prior":{"name": "Uniform", "lower": -1, "upper": 3},
+                            "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
                             "formula": "v3 ~ 1 + x + y + (1|subID)",
                             "link": "log",
                         }
@@ -228,7 +228,7 @@ if __name__ == '__main__':
                 )
             #sample from the model
             #infer_data_race4nba_v_true = model_race4nba_v_true.sample(step=pm.Slice(model=model_race4nba_v_true.pymc_model), sampler="mcmc", chains=4, cores=4, draws=5000, tune=10000,idata_kwargs = {'log_likelihood': True})
-            infer_data_race4nba_v_true = model_race4nba_v_true.sample(sampler="nuts_numpyro", chains=4, cores=4, draws=samples, tune=burnin,idata_kwargs = {'log_likelihood': True})            
+            infer_data_race4nba_v_true = model_race4nba_v_true.sample(sampler="nuts_numpyro", chains=4, cores=4, draws=samples, tune=burnin,idata_kwargs = {'log_likelihood': True}, target_accept=0.95)            
             #save trace
             #az.to_netcdf(infer_data_race4nba_v_true,outdir+'sample_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_true.nc4')
             az.to_netcdf(infer_data_race4nba_v_true,outdir+'sample_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_Fixed_az_NutsNumpyro_true.nc4')
@@ -254,32 +254,32 @@ if __name__ == '__main__':
                 include=[
                     {
                         "name": "v0",
-                        "prior":{"name": "Uniform", "lower": -1, "upper": 3},
+                        "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
                         "formula": "v0 ~ 1 + (1|subID)",
                         "link": "log"
                     },
                     {
                         "name": "v1",
-                        "prior":{"name": "Uniform", "lower": -1, "upper": 3},
+                        "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
                         "formula": "v1 ~ 1 + (1|subID)",
                         "link": "log"
                     },
                     {
                         "name": "v2",
-                        "prior":{"name": "Uniform", "lower": -1, "upper": 3},
+                        "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
                         "formula": "v2 ~ 1 + (1|subID)",
                         "link": "log"
                     },
                     {
                         "name": "v3",
-                        "prior":{"name": "Uniform", "lower": -1, "upper": 3},
+                        "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
                         "formula": "v3 ~ 1 + (1|subID)",
                         "link": "log"
                     }
                 ],
             )
             #infer_data_race4nba_v_null = model_race4nba_v_null.sample(step=pm.Slice(model=model_race4nba_v_null.pymc_model), sampler="mcmc", chains=4, cores=4, draws=5000, tune=10000,idata_kwargs = {'log_likelihood': True})
-            infer_data_race4nba_v_null = model_race4nba_v_null.sample(sampler="nuts_numpyro", chains=4, cores=4, draws=samples, tune=burnin,idata_kwargs = {'log_likelihood': True})
+            infer_data_race4nba_v_null = model_race4nba_v_null.sample(sampler="nuts_numpyro", chains=4, cores=4, draws=samples, tune=burnin,idata_kwargs = {'log_likelihood': True}, target_accept=0.95)
             # az.to_netcdf(infer_data_race4nba_v_null,outdir+'sample_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_null.nc4')
             az.to_netcdf(infer_data_race4nba_v_null,outdir+'sample_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_Fixed_az_NutsNumpyro_null.nc4')
             az.plot_trace(
@@ -303,25 +303,25 @@ if __name__ == '__main__':
                     include=[
                         {
                             "name": "v0",
-                            "prior":{"name": "Uniform", "lower": -1, "upper": 3},
+                            "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
                             "formula": "v0 ~ 1 + (rand_x|subID) + (rand_y|subID)",
                             "link": "log",
                         },
                         {
                             "name": "v1",
-                            "prior":{"name": "Uniform", "lower": -1, "upper": 3},
+                            "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
                             "formula": "v1 ~ 1 + (rand_x|subID) + (rand_y|subID)",
                             "link": "log",
                         },
                         {
                             "name": "v2",
-                            "prior":{"name": "Uniform", "lower": -1, "upper": 3},
+                            "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
                             "formula": "v2 ~ 1 + (rand_x|subID) + (rand_y|subID)",
                             "link": "log",
                         },
                         {
                             "name": "v3",
-                            "prior":{"name": "Uniform", "lower": -1, "upper": 3},
+                            "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
                             "formula": "v3 ~ 1 + (rand_x|subID) + (rand_y|subID)",
                             "link": "log",
                         }
@@ -337,32 +337,32 @@ if __name__ == '__main__':
                     include=[
                         {
                             "name": "v0",
-                            "prior":{"name": "Uniform", "lower": -1, "upper": 3},
+                            "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
                             "formula": "v0 ~ 1 + rand_x + rand_y + (1|subID)",
                             "link": "log",
                         },
                         {
                             "name": "v1",
-                            "prior":{"name": "Uniform", "lower": -1, "upper": 3},
+                            "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
                             "formula": "v1 ~ 1 + rand_x + rand_y + (1|subID)",
                             "link": "log",
                         },
                         {
                             "name": "v2",
-                            "prior":{"name": "Uniform", "lower": -1, "upper": 3},
+                            "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
                             "formula": "v2 ~ 1 + rand_x + rand_y + (1|subID)",
                             "link": "log",
                         },
                         {
                             "name": "v3",
-                            "prior":{"name": "Uniform", "lower": -1, "upper": 3},
+                            "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
                             "formula": "v3 ~ 1 + rand_x + rand_y + (1|subID)",
                             "link": "log",
                         }
                     ],
                 )
             # infer_data_race4nba_v_rand = model_race4nba_v_rand.sample(step=pm.Slice(model=model_race4nba_v_rand.pymc_model), sampler="mcmc", chains=4, cores=4, draws=5000, tune=10000,idata_kwargs = {'log_likelihood': True})
-            infer_data_race4nba_v_rand = model_race4nba_v_rand.sample(sampler="nuts_numpyro", chains=4, cores=4, draws=samples, tune=burnin,idata_kwargs = {'log_likelihood': True})
+            infer_data_race4nba_v_rand = model_race4nba_v_rand.sample(sampler="nuts_numpyro", chains=4, cores=4, draws=samples, tune=burnin,idata_kwargs = {'log_likelihood': True}, target_accept=0.95)
             # az.to_netcdf(infer_data_race4nba_v_rand,outdir+'sample_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_rand.nc4')
             az.to_netcdf(infer_data_race4nba_v_rand,outdir+'sample_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_Fixed_az_NutsNumpyro_rand.nc4')
             az.plot_trace(
