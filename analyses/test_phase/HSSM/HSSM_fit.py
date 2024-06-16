@@ -10,13 +10,14 @@ from matplotlib import pyplot as plt
 import pymc as pm
 import multiprocessing as mp
 import os
+import argparse
 
 if __name__ == '__main__':
     mp.freeze_support()    
     mp.set_start_method('spawn', force=True)
 
     #parse arguments
-    parser = argparse.ArgumentParser(description='Simulate data and fit HSSM model')
+    parser = argparse.ArgumentParser(description='fit HSSM model with real data')
     parser.add_argument('--samples', type=str, help='how many samples to draw from MCMC chains',default=5000)
     parser.add_argument('--burnin', type=str, help='how many samples to burn in from MCMC chains',default=5000)
     parser.add_argument('--cores', type=str, help='how many CPU/GPU cores to use for sampling',default=4)
