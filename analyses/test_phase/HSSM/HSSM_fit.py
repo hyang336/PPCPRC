@@ -17,12 +17,18 @@ if __name__ == '__main__':
 
     #parse arguments
     parser = argparse.ArgumentParser(description='Simulate data and fit HSSM model')
+    parser.add_argument('--samples', type=str, help='how many samples to draw from MCMC chains',default=5000)
+    parser.add_argument('--burnin', type=str, help='how many samples to burn in from MCMC chains',default=5000)
+    parser.add_argument('--cores', type=str, help='how many CPU/GPU cores to use for sampling',default=4)
     parser.add_argument('--signal', type=str, help='which familiarity signal to model',default='recent')
     parser.add_argument('--model', type=str, help='which model to run')
     parser.add_argument('--outdir', type=str, help='outpu directory to save results',default='/scratch/hyang336/working_dir/HDDM_HSSM/ROIs/')
     parser.add_argument('--bin', type=str, help='which two responses to bin together',default='12')
     args = parser.parse_args()
 
+    samples=int(args.samples)
+    burnin=int(args.burnin)
+    ncores=int(args.cores)
     signalname=args.signal
     modelname=args.model
     outdir=args.outdir
@@ -85,25 +91,25 @@ if __name__ == '__main__':
             include=[
                 {
                     "name": "v0",
-                    "prior":{"name": "Uniform", "lower": -1, "upper": 3},
+                    "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
                     "formula": "v0 ~ 1 + (1|subj_idx)",
                     "link": "log",
                 },
                 {
                     "name": "v1",
-                    "prior":{"name": "Uniform", "lower": -1, "upper": 3},
+                    "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
                     "formula": "v1 ~ 1 + (1|subj_idx)",
                     "link": "log",
                 },
                 {
                     "name": "v2",
-                    "prior":{"name": "Uniform", "lower": -1, "upper": 3},
+                    "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
                     "formula": "v2 ~ 1 + (1|subj_idx)",
                     "link": "log",
                 },
                 {
                     "name": "v3",
-                    "prior":{"name": "Uniform", "lower": -1, "upper": 3},
+                    "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
                     "formula": "v3 ~ 1 + (1|subj_idx)",
                     "link": "log",
                 }
@@ -165,26 +171,26 @@ if __name__ == '__main__':
             include=[
                 {
                     "name": "v0",
-                    "prior":{"name": "Uniform", "lower": -1, "upper": 3},
-                    "formula": "v0 ~ 1 + (x|subj_idx) + (y|subj_idx)",
+                    "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
+                    "formula": "v0 ~ 1 + x + y + (1|subj_idx)",
                     "link": "log",
                 },
                 {
                     "name": "v1",
-                    "prior":{"name": "Uniform", "lower": -1, "upper": 3},
-                    "formula": "v1 ~ 1 + (x|subj_idx) + (y|subj_idx)",
+                    "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
+                    "formula": "v1 ~ 1 + x + y + (1|subj_idx)",
                     "link": "log",
                 },
                 {
                     "name": "v2",
-                    "prior":{"name": "Uniform", "lower": -1, "upper": 3},
-                    "formula": "v2 ~ 1 + (x|subj_idx) + (y|subj_idx)",
+                    "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
+                    "formula": "v2 ~ 1 + x + y + (1|subj_idx)",
                     "link": "log",
                 },
                 {
                     "name": "v3",
-                    "prior":{"name": "Uniform", "lower": -1, "upper": 3},
-                    "formula": "v3 ~ 1 + (x|subj_idx) + (y|subj_idx)",
+                    "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
+                    "formula": "v3 ~ 1 + x + y + (1|subj_idx)",
                     "link": "log",
                 }
             ],
@@ -192,7 +198,7 @@ if __name__ == '__main__':
 ########################################################################################################################################################
 
     #sample from the model and save the results
-    infer_data_race4nba_v = model.sample(sampler="nuts_numpyro", chains=4, cores=4, draws=5000, tune=5000,idata_kwargs = {'log_likelihood': True})
+    infer_data_race4nba_v = model.sample(sampler="nuts_numpyro", chains=4, cores=ncores, draws=samples, tune=burnin, idata_kwargs = {'log_likelihood': True})
     #save trace
     az.to_netcdf(infer_data_race4nba_v,outdir +'sample_5000_5000_trace_Fixed_az_' + signalname + '_' + modelname + '_bin' + bin_ver + '.nc4')
     #save trace plot

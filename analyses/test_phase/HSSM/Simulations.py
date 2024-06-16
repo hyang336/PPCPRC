@@ -21,7 +21,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Simulate data and fit HSSM model')
     parser.add_argument('--samples', type=str, help='how many samples to draw from MCMC chains',default=5000)
     parser.add_argument('--burnin', type=str, help='how many samples to burn in from MCMC chains',default=5000)
-    parser.add_argument('--cores', type=str, help='how many CPU/GPU cores to use for sampling',default=2)
+    parser.add_argument('--cores', type=str, help='how many CPU/GPU cores to use for sampling',default=4)
     parser.add_argument('--SubSlope', type=str, help='whether to include subject-specific slope in the generated data',default=False) #Having subject slopes make the model very difficult to converge. With the constraints on computational resources, we cannnot afford to sample too long of a chain.
     parser.add_argument('--model', type=str, help='which model to run')
     parser.add_argument('--outdir', type=str, help='outpu directory to save results',default='/scratch/hyang336/working_dir/HDDM_HSSM/simulations/')
