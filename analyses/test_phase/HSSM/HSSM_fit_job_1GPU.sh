@@ -5,8 +5,8 @@
 #SBATCH --cpus-per-task=3
 #SBATCH --gres=gpu:v100:1
 #SBATCH --mem=64G
-#SBATCH --job-name=race4nb_ParRec
-#SBATCH --output=/home/hyang336/jobs/race4nb_ParRec%j.out
+#SBATCH --job-name=race4nb_fit
+#SBATCH --output=/home/hyang336/jobs/race4nb_fit%j.out
 
 #set up environment
 module load gcc cuda cudnn python/3.11
