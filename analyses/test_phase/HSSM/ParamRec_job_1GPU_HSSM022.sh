@@ -12,4 +12,4 @@
 module load gcc cuda cudnn python/3.11
 source ~/HSSM022_tempENV/bin/activate
 
-PYTENSOR_FLAGS='blas__ldflags=-lflexiblas -lgfortran' python /home/hyang336/PPCPRC/analyses/test_phase/HSSM/Simulations.py --model $1 --burnin $2
+PYTENSOR_FLAGS='blas__ldflags=-lflexiblas -lgfortran' python /home/hyang336/PPCPRC/analyses/test_phase/HSSM/Simulations022.py --model $1 --burnin $2
