@@ -26,6 +26,7 @@ if __name__ == '__main__':
     parser.add_argument('--SubSlope', type=str, help='whether to include subject-specific slope in the generated data',default=False) #Having subject slopes make the model very difficult to converge. With the constraints on computational resources, we cannnot afford to sample too long of a chain.
     parser.add_argument('--model', type=str, help='which model to run')
     parser.add_argument('--outdir', type=str, help='outpu directory to save results',default='/scratch/hyang336/working_dir/HDDM_HSSM/simulations/')
+    parser.add_argument('--TA', type=str, help='target_accept for NUTS sampler',default=0.8)
     args = parser.parse_args()
 
     model=args.model
@@ -34,6 +35,7 @@ if __name__ == '__main__':
     burnin=int(args.burnin)
     ncores=int(args.cores)
     SubSlope=args.SubSlope
+    TA=float(args.TA)
 
     # make the output directory if it doesn't exist
     if not os.path.exists(outdir):
@@ -233,7 +235,7 @@ if __name__ == '__main__':
                 )
             #sample from the model
             #infer_data_race4nba_v_true = model_race4nba_v_true.sample(step=pm.Slice(model=model_race4nba_v_true.pymc_model), sampler="mcmc", chains=4, cores=4, draws=5000, tune=10000,idata_kwargs = {'log_likelihood': True})
-            infer_data_race4nba_v_true = model_race4nba_v_true.sample(sampler="nuts_numpyro", chains=4, cores=ncores, draws=samples, tune=burnin,idata_kwargs = {'log_likelihood': True}, target_accept=0.95)            
+            infer_data_race4nba_v_true = model_race4nba_v_true.sample(sampler="nuts_numpyro", chains=4, cores=ncores, draws=samples, tune=burnin,idata_kwargs = {'log_likelihood': True}, target_accept=TA)            
             #save trace
             #az.to_netcdf(infer_data_race4nba_v_true,outdir+'sample_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_true.nc4')
             az.to_netcdf(infer_data_race4nba_v_true,outdir+'sample_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_Fixed_az_NutsNumpyro_true.nc4')
@@ -285,7 +287,7 @@ if __name__ == '__main__':
                 ],
             )
             #infer_data_race4nba_v_null = model_race4nba_v_null.sample(step=pm.Slice(model=model_race4nba_v_null.pymc_model), sampler="mcmc", chains=4, cores=4, draws=5000, tune=10000,idata_kwargs = {'log_likelihood': True})
-            infer_data_race4nba_v_null = model_race4nba_v_null.sample(sampler="nuts_numpyro", chains=4, cores=ncores, draws=samples, tune=burnin,idata_kwargs = {'log_likelihood': True}, target_accept=0.95)
+            infer_data_race4nba_v_null = model_race4nba_v_null.sample(sampler="nuts_numpyro", chains=4, cores=ncores, draws=samples, tune=burnin,idata_kwargs = {'log_likelihood': True}, target_accept=TA)
             # az.to_netcdf(infer_data_race4nba_v_null,outdir+'sample_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_null.nc4')
             az.to_netcdf(infer_data_race4nba_v_null,outdir+'sample_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_Fixed_az_NutsNumpyro_null.nc4')
             az.plot_trace(
@@ -370,7 +372,7 @@ if __name__ == '__main__':
                     ],
                 )
             # infer_data_race4nba_v_rand = model_race4nba_v_rand.sample(step=pm.Slice(model=model_race4nba_v_rand.pymc_model), sampler="mcmc", chains=4, cores=4, draws=5000, tune=10000,idata_kwargs = {'log_likelihood': True})
-            infer_data_race4nba_v_rand = model_race4nba_v_rand.sample(sampler="nuts_numpyro", chains=4, cores=ncores, draws=samples, tune=burnin,idata_kwargs = {'log_likelihood': True}, target_accept=0.95)
+            infer_data_race4nba_v_rand = model_race4nba_v_rand.sample(sampler="nuts_numpyro", chains=4, cores=ncores, draws=samples, tune=burnin,idata_kwargs = {'log_likelihood': True}, target_accept=TA)
             # az.to_netcdf(infer_data_race4nba_v_rand,outdir+'sample_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_rand.nc4')
             az.to_netcdf(infer_data_race4nba_v_rand,outdir+'sample_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_Fixed_az_NutsNumpyro_rand.nc4')
             az.plot_trace(

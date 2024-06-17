@@ -25,6 +25,7 @@ if __name__ == '__main__':
     parser.add_argument('--model', type=str, help='which model to run')
     parser.add_argument('--outdir', type=str, help='outpu directory to save results',default='/scratch/hyang336/working_dir/HDDM_HSSM/ROIs/')
     parser.add_argument('--bin', type=str, help='which two responses to bin together',default='12')
+    parser.add_argument('--TA', type=str, help='target_accept for NUTS sampler',default=0.8)
     args = parser.parse_args()
 
     samples=int(args.samples)
@@ -34,7 +35,8 @@ if __name__ == '__main__':
     modelname=args.model
     outdir=args.outdir
     bin_ver=args.bin
-    
+    TA=float(args.TA)
+
     # make the output directory if it doesn't exist
     if not os.path.exists(outdir):
         os.makedirs(outdir)
@@ -199,7 +201,7 @@ if __name__ == '__main__':
 ########################################################################################################################################################
 
     #sample from the model and save the results
-    infer_data_race4nba_v = model.sample(sampler="nuts_numpyro", chains=4, cores=ncores, draws=samples, tune=burnin, idata_kwargs = {'log_likelihood': True})
+    infer_data_race4nba_v = model.sample(sampler="nuts_numpyro", chains=4, cores=ncores, draws=samples, tune=burnin, idata_kwargs = {'log_likelihood': True}, target_accept=TA)
     #save trace
     az.to_netcdf(infer_data_race4nba_v,outdir +'sample_5000_5000_trace_Fixed_az_' + signalname + '_' + modelname + '_bin' + bin_ver + '.nc4')
     #save trace plot
