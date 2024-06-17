@@ -77,11 +77,11 @@ if __name__ == '__main__':
 ################    ## Define model, null model is a special case since it doesn't have regressor###################################################################
     if modelname == 'null':
         # format data to be fed into the model, NOTE that "rt" and "response" are reserved keywords
-        data = {
+        data = pd.DataFrame({
             'rt':sim_data['rt'],
             'response':sim_data['response'],
             'subj_idx':sim_data['subj_idx']
-        }
+        })
         
         # define the model
         model= hssm.HSSM(
@@ -155,13 +155,13 @@ if __name__ == '__main__':
         sim_data['y'] = 1-sim_data['x']
 
         # format data to be fed into the model, NOTE that "rt" and "response" are reserved keywords
-        data = {
+        data = pd.DataFrame({
             'rt':sim_data['rt'],
             'response':sim_data['response'],
             'x':sim_data['x'],
             'y':sim_data['y'],
             'subj_idx':sim_data['subj_idx']
-        }
+        })
 
         # define the model
         model= hssm.HSSM(
