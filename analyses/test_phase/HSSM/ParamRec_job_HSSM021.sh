@@ -2,11 +2,11 @@
 #SBATCH --time=48:00:00
 #SBATCH --account=ctb-akhanf
 #SBATCH --ntasks-per-node=1
-#SBATCH --cpus-per-task=3
-#SBATCH --gres=gpu:v100:1
+#SBATCH --cpus-per-task=6
+#SBATCH --gres=gpu:v100:2
 #SBATCH --mem=64G
-#SBATCH --job-name=race4nb_fit
-#SBATCH --output=/home/hyang336/jobs/race4nb_fit%j.out
+#SBATCH --job-name=race4nb_ParRec
+#SBATCH --output=/home/hyang336/jobs/race4nb_ParRec%j.out
 
 #set up environment
 module load gcc cuda cudnn python/3.11
@@ -15,4 +15,4 @@ source $SLURM_TMPDIR/ENV/bin/activate
 pip install --no-index --upgrade pip
 pip install --no-index -r /home/hyang336/PPCPRC/analyses/test_phase/HSSM/hssm-0.2.1-reqs.txt
 
-PYTENSOR_FLAGS='blas__ldflags=-lflexiblas -lgfortran' python /home/hyang336/PPCPRC/analyses/test_phase/HSSM/HSSM_fit.py --signal $1 --model $2 --burnin $3
+PYTENSOR_FLAGS='blas__ldflags=-lflexiblas -lgfortran' python /home/hyang336/PPCPRC/analyses/test_phase/HSSM/Simulations021.py --model $1 --burnin $2 --samples $3

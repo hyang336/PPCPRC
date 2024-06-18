@@ -15,4 +15,4 @@ source $SLURM_TMPDIR/ENV/bin/activate
 pip install --no-index --upgrade pip
 pip install --no-index -r /home/hyang336/PPCPRC/analyses/test_phase/HSSM/hssm-0.2.1-reqs.txt
 
-PYTENSOR_FLAGS='blas__ldflags=-lflexiblas -lgfortran' python /home/hyang336/PPCPRC/analyses/test_phase/HSSM/Simulations.py --model $1 --burnin $2
+PYTENSOR_FLAGS='blas__ldflags=-lflexiblas -lgfortran' python /home/hyang336/PPCPRC/analyses/test_phase/HSSM/Simulations021.py --model $1 --burnin $2
