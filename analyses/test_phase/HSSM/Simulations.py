@@ -36,6 +36,15 @@ if __name__ == '__main__':
     SubSlope=args.SubSlope
     TA=float(args.TA)
 
+    # print out the arguments for debugging
+    print('model:',model)
+    print('outdir:',outdir)
+    print('samples:',samples)
+    print('burnin:',burnin)
+    print('ncores:',ncores)
+    print('SubSlope:',SubSlope)
+    print('TA:',TA)
+
     # make the output directory if it doesn't exist
     if not os.path.exists(outdir):
         os.makedirs(outdir)
@@ -49,23 +58,23 @@ if __name__ == '__main__':
     #of a or b will result in large positive or negative value of v down the line, may need to find a way to rescale it...
     # These values should generate v in the range of 0 to 2.5, which is the range of v that the LAN model can handle, as long
     # as the neural data is in the range of 0 to 1. The neural data is generated from a uniform distribution, so it should
-    a0=0
-    b0=1
+    a0=1
+    b0=2
     #intercept0=np.log(1/beta(a0,b0))
     intercept0=0.85
 
-    a1=1.5
-    b1=3
+    a1=2.5
+    b1=4
     #intercept1=np.log(1/beta(a1,b1))
     intercept1=2.1
 
-    a2=3
-    b2=1.5
+    a2=4
+    b2=2.5
     #intercept2=np.log(1/beta(a2,b2))
     intercept2=2.1
 
-    a3=1
-    b3=0
+    a3=2
+    b3=1
     #intercept3=np.log(1/beta(a3,b3))
     intercept3=0.85
 
@@ -90,21 +99,23 @@ if __name__ == '__main__':
     for i in range(n_subjects):
         # set the seed for each subject deterministically so all models are based on the same data
         np.random.seed(i)
-        # generate neural data
-        simneural=np.random.uniform(0, 1, size=n_trials)
+        # generate neural data, standard normal as the real data
+        simneural=np.random.normal(size=n_trials)
+        # rescale to 0-1
+        simneural=(simneural - np.min(simneural))/(np.max(simneural) - np.min(simneural))
         # Whether to include subject-specific slope, default is False
         if SubSlope:
             # generate v0, v1, v2, v3
-            v0=np.exp(np.random.normal(intercept0, param_sv) + np.random.normal(a0, param_sv)*np.log(simneural) + np.random.normal(b0, param_sv)*np.log(1-simneural))
-            v1=np.exp(np.random.normal(intercept1, param_sv) + np.random.normal(a1, param_sv)*np.log(simneural) + np.random.normal(b1, param_sv)*np.log(1-simneural))
-            v2=np.exp(np.random.normal(intercept2, param_sv) + np.random.normal(a2, param_sv)*np.log(simneural) + np.random.normal(b2, param_sv)*np.log(1-simneural))
-            v3=np.exp(np.random.normal(intercept3, param_sv) + np.random.normal(a3, param_sv)*np.log(simneural) + np.random.normal(b3, param_sv)*np.log(1-simneural))
+            v0=np.exp(np.random.normal(intercept0, param_sv) + np.random.normal((a0-1), param_sv)*np.log(simneural) + np.random.normal((b0-1), param_sv)*np.log(1-simneural))
+            v1=np.exp(np.random.normal(intercept1, param_sv) + np.random.normal((a1-1), param_sv)*np.log(simneural) + np.random.normal((b1-1), param_sv)*np.log(1-simneural))
+            v2=np.exp(np.random.normal(intercept2, param_sv) + np.random.normal((a2-1), param_sv)*np.log(simneural) + np.random.normal((b2-1), param_sv)*np.log(1-simneural))
+            v3=np.exp(np.random.normal(intercept3, param_sv) + np.random.normal((a3-1), param_sv)*np.log(simneural) + np.random.normal((b3-1), param_sv)*np.log(1-simneural))
         else:
             # generate v0, v1, v2, v3
-            v0=np.exp(np.random.normal(intercept0, param_sv) + a0*np.log(simneural) + b0*np.log(1-simneural))
-            v1=np.exp(np.random.normal(intercept1, param_sv) + a1*np.log(simneural) + b1*np.log(1-simneural))
-            v2=np.exp(np.random.normal(intercept2, param_sv) + a2*np.log(simneural) + b2*np.log(1-simneural))
-            v3=np.exp(np.random.normal(intercept3, param_sv) + a3*np.log(simneural) + b3*np.log(1-simneural))
+            v0=np.exp(np.random.normal(intercept0, param_sv) + (a0-1)*np.log(simneural) + (b0-1)*np.log(1-simneural))
+            v1=np.exp(np.random.normal(intercept1, param_sv) + (a1-1)*np.log(simneural) + (b1-1)*np.log(1-simneural))
+            v2=np.exp(np.random.normal(intercept2, param_sv) + (a2-1)*np.log(simneural) + (b2-1)*np.log(1-simneural))
+            v3=np.exp(np.random.normal(intercept3, param_sv) + (a3-1)*np.log(simneural) + (b3-1)*np.log(1-simneural))
 
         ###IMPORTANT: for interpretable param rec test, make sure generate params within training bounds of LAN###
         # only keep entries in subject_data that are in bounds
@@ -141,7 +152,9 @@ if __name__ == '__main__':
         race4nba_v = simulator.simulator(true_values, model="race_no_bias_angle_4", n_samples=1)
 
         # Random regressor as control
-        rand_x = np.random.uniform(0, 1, size=len(simneural))
+        rand_x = np.random.normal(size=len(simneural))
+        rand_x = (rand_x - np.min(rand_x))/(np.max(rand_x) - np.min(rand_x))
+
         sim_data.append(
             pd.DataFrame(
                 {
@@ -159,7 +172,116 @@ if __name__ == '__main__':
     #make a single dataframe of subject-wise simulated data
     sim_data_concat=pd.concat(sim_data)
 
-    # Define models
+    ############################################### construct prior settings for true model, rand model and null model ###############################################
+    slope_prior_true={"Intercept": {
+                    "name": "Normal",
+                    "mu": 0.0,
+                    "sigma": 10.0
+                },
+                "(x|subID)": {
+                    "name": "Normal",
+                    "mu": 0.0,
+                    "sigma": {
+                        "name": "HalfNormal",
+                        "sigma": 10.0
+                    }
+                },
+                "(y|subID)": {
+                    "name": "Normal",
+                    "mu": 0.0,
+                    "sigma": {
+                        "name": "HalfNormal",
+                        "sigma": 10.0
+                    }
+                }
+            }
+    intercept_prior_true={"Intercept": {
+                        "name": "Normal",
+                        "mu": 0.0,
+                        "sigma": 10.0
+                    },
+                    "x": {
+                        "name": "Normal",
+                        "mu": 0.0,
+                        "sigma": 10.0
+                        },
+                    "y": {
+                        "name": "Normal",
+                        "mu": 0.0,
+                        "sigma": 10.0
+                    },
+                    "(1|subID)": {
+                        "name": "Normal",
+                        "mu": 0.0,
+                        "sigma": {
+                            "name": "HalfNormal",
+                            "sigma": 10.0
+                        }
+                    }
+                }
+    
+    null_prior={"Intercept": {
+                        "name": "Normal",
+                        "mu": 0.0,
+                        "sigma": 10.0
+                    },
+                "(1|subID)": {
+                    "name": "Normal",
+                    "mu": 0.0,
+                    "sigma": {
+                        "name": "HalfNormal",
+                        "sigma": 10.0
+                    }
+                }
+                }
+    
+    slope_prior_rand={"Intercept": {
+                    "name": "Normal",
+                    "mu": 0.0,
+                    "sigma": 10.0
+                },
+                "(rand_x|subID)": {
+                    "name": "Normal",
+                    "mu": 0.0,
+                    "sigma": {
+                        "name": "HalfNormal",
+                        "sigma": 10.0
+                    }
+                },
+                "(rand_y|subID)": {
+                    "name": "Normal",
+                    "mu": 0.0,
+                    "sigma": {
+                        "name": "HalfNormal",
+                        "sigma": 10.0
+                    }
+                }
+            }
+    intercept_prior_rand={"Intercept": {
+                        "name": "Normal",
+                        "mu": 0.0,
+                        "sigma": 10.0
+                    },
+                    "rand_x": {
+                        "name": "Normal",
+                        "mu": 0.0,
+                        "sigma": 10.0
+                        },
+                    "rand_y": {
+                        "name": "Normal",
+                        "mu": 0.0,
+                        "sigma": 10.0
+                    },
+                    "(1|subID)": {
+                        "name": "Normal",
+                        "mu": 0.0,
+                        "sigma": {
+                            "name": "HalfNormal",
+                            "sigma": 10.0
+                        }
+                    }
+                }
+    ####################################################################################### Define models ################################################################################################
     match model:
         case 'true':
             if SubSlope:
@@ -167,32 +289,37 @@ if __name__ == '__main__':
                 model_race4nba_v_true = hssm.HSSM(
                     data=sim_data_concat,
                     model='race_no_bias_angle_4',
+                    choices=4,
                     a=2.0,
                     z=0.0,
                     include=[
                         {
-                            "name": "v0",
-                            "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
+                            "name": "v0",                            
                             "formula": "v0 ~ 1 + (x|subID) + (y|subID)",
+                            "prior":slope_prior_true,
                             "link": "log",
+                            "bounds": (0, 2.5)
                         },
                         {
-                            "name": "v1",
-                            "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
+                            "name": "v1",                            
                             "formula": "v1 ~ 1 + (x|subID) + (y|subID)",
+                            "prior":slope_prior_true,
                             "link": "log",
+                            "bounds": (0, 2.5)
                         },
                         {
-                            "name": "v2",
-                            "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
+                            "name": "v2",                            
                             "formula": "v2 ~ 1 + (x|subID) + (y|subID)",
+                            "prior":slope_prior_true,
                             "link": "log",
+                            "bounds": (0, 2.5)
                         },
                         {
-                            "name": "v3",
-                            "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
+                            "name": "v3",                            
                             "formula": "v3 ~ 1 + (x|subID) + (y|subID)",
+                            "prior":slope_prior_true,
                             "link": "log",
+                            "bounds": (0, 2.5)
                         }
                     ],
                 )
@@ -201,32 +328,37 @@ if __name__ == '__main__':
                 model_race4nba_v_true = hssm.HSSM(
                     data=sim_data_concat,
                     model='race_no_bias_angle_4',
+                    choices=4,
                     a=2.0,
                     z=0.0,
                     include=[
                         {
-                            "name": "v0",
-                            "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
+                            "name": "v0",                            
                             "formula": "v0 ~ 1 + x + y + (1|subID)",
+                            "prior":intercept_prior_true,
                             "link": "log",
+                            "bounds": (0, 2.5)
                         },
                         {
-                            "name": "v1",
-                            "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
+                            "name": "v1",                            
                             "formula": "v1 ~ 1 + x + y + (1|subID)",
+                            "prior":intercept_prior_true,
                             "link": "log",
+                            "bounds": (0, 2.5)
                         },
                         {
-                            "name": "v2",
-                            "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
+                            "name": "v2",                            
                             "formula": "v2 ~ 1 + x + y + (1|subID)",
+                            "prior":intercept_prior_true,
                             "link": "log",
+                            "bounds": (0, 2.5)
                         },
                         {
-                            "name": "v3",
-                            "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
+                            "name": "v3",                            
                             "formula": "v3 ~ 1 + x + y + (1|subID)",
+                            "prior":intercept_prior_true,
                             "link": "log",
+                            "bounds": (0, 2.5)
                         }
                     ],
                 )
@@ -253,32 +385,37 @@ if __name__ == '__main__':
             model_race4nba_v_null = hssm.HSSM(
                 data=sim_data_concat,
                 model='race_no_bias_angle_4',
+                choices=4,
                 a=2.0,
                 z=0.0,
                 include=[
                     {
-                        "name": "v0",
-                        "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
+                        "name": "v0",                        
                         "formula": "v0 ~ 1 + (1|subID)",
-                        "link": "log"
+                        "prior":null_prior,
+                        "link": "log",
+                        "bounds": (0, 2.5)
                     },
                     {
-                        "name": "v1",
-                        "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
+                        "name": "v1",                        
                         "formula": "v1 ~ 1 + (1|subID)",
-                        "link": "log"
+                        "prior":null_prior,
+                        "link": "log",
+                        "bounds": (0, 2.5)
                     },
                     {
-                        "name": "v2",
-                        "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
+                        "name": "v2",                        
                         "formula": "v2 ~ 1 + (1|subID)",
-                        "link": "log"
+                        "prior":null_prior,
+                        "link": "log",
+                        "bounds": (0, 2.5)
                     },
                     {
-                        "name": "v3",
-                        "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
+                        "name": "v3",                        
                         "formula": "v3 ~ 1 + (1|subID)",
-                        "link": "log"
+                        "prior":null_prior,
+                        "link": "log",
+                        "bounds": (0, 2.5)
                     }
                 ],
             )
@@ -302,32 +439,37 @@ if __name__ == '__main__':
                 model_race4nba_v_rand = hssm.HSSM(
                     data=sim_data_concat,
                     model='race_no_bias_angle_4',
+                    choices=4,
                     a=2.0,
                     z=0.0,
                     include=[
                         {
-                            "name": "v0",
-                            "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
+                            "name": "v0",                            
                             "formula": "v0 ~ 1 + (rand_x|subID) + (rand_y|subID)",
+                            "prior":slope_prior_rand,
                             "link": "log",
+                            "bounds": (0, 2.5)
                         },
                         {
-                            "name": "v1",
-                            "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
+                            "name": "v1",                            
                             "formula": "v1 ~ 1 + (rand_x|subID) + (rand_y|subID)",
+                            "prior":slope_prior_rand,
                             "link": "log",
+                            "bounds": (0, 2.5)
                         },
                         {
-                            "name": "v2",
-                            "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
+                            "name": "v2",                            
                             "formula": "v2 ~ 1 + (rand_x|subID) + (rand_y|subID)",
+                            "prior":slope_prior_rand,
                             "link": "log",
+                            "bounds": (0, 2.5)
                         },
                         {
-                            "name": "v3",
-                            "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
+                            "name": "v3",                            
                             "formula": "v3 ~ 1 + (rand_x|subID) + (rand_y|subID)",
+                            "prior":slope_prior_rand,
                             "link": "log",
+                            "bounds": (0, 2.5)
                         }
                     ],
                 )
@@ -336,32 +478,37 @@ if __name__ == '__main__':
                 model_race4nba_v_rand = hssm.HSSM(
                     data=sim_data_concat,
                     model='race_no_bias_angle_4',
+                    choices=4,
                     a=2.0,
                     z=0.0,
                     include=[
                         {
-                            "name": "v0",
-                            "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
+                            "name": "v0",                            
                             "formula": "v0 ~ 1 + rand_x + rand_y + (1|subID)",
+                            "prior":intercept_prior_rand,
                             "link": "log",
+                            "bounds": (0, 2.5)
                         },
                         {
-                            "name": "v1",
-                            "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
+                            "name": "v1",                            
                             "formula": "v1 ~ 1 + rand_x + rand_y + (1|subID)",
+                            "prior":intercept_prior_rand,
                             "link": "log",
+                            "bounds": (0, 2.5)
                         },
                         {
-                            "name": "v2",
-                            "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
+                            "name": "v2",                            
                             "formula": "v2 ~ 1 + rand_x + rand_y + (1|subID)",
+                            "prior":intercept_prior_rand,
                             "link": "log",
+                            "bounds": (0, 2.5)
                         },
                         {
-                            "name": "v3",
-                            "prior":{"name": "Uniform", "lower": 0, "upper": 2.5},
+                            "name": "v3",                            
                             "formula": "v3 ~ 1 + rand_x + rand_y + (1|subID)",
+                            "prior":intercept_prior_rand,
                             "link": "log",
+                            "bounds": (0, 2.5)
                         }
                     ],
                 )
