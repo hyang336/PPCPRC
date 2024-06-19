@@ -24,7 +24,7 @@ if __name__ == '__main__':
     parser.add_argument('--signal', type=str, help='which familiarity signal to model',default='recent')
     parser.add_argument('--model', type=str, help='which model to run')
     parser.add_argument('--outdir', type=str, help='outpu directory to save results',default='/scratch/hyang336/working_dir/HDDM_HSSM/ROIs/')
-    parser.add_argument('--bin', type=str, help='which two responses to bin together',default='12')
+    parser.add_argument('--bin', type=str, help='which two responses to bin together',default='45') # default based on bins with the fewest responses in both tasks
     parser.add_argument('--TA', type=str, help='target_accept for NUTS sampler',default=0.8)
     args = parser.parse_args()
 

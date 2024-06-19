@@ -118,24 +118,30 @@ if __name__ == '__main__':
             v3=np.exp(np.random.normal(intercept3, param_sv) + (a3-1)*np.log(simneural) + (b3-1)*np.log(1-simneural))
 
         ###IMPORTANT: for interpretable param rec test, make sure generate params within training bounds of LAN###
-        # only keep entries in subject_data that are in bounds
-        v0_inb= np.where(np.logical_and(v0>= 0,v0<= 2.5))
-        v1_inb= np.where(np.logical_and(v1>= 0,v1<= 2.5))
-        v01_inb=np.intersect1d(v0_inb[0],v1_inb[0])
+        # # only keep entries in subject_data that are in bounds
+        # v0_inb= np.where(np.logical_and(v0>= 0,v0<= 2.5))
+        # v1_inb= np.where(np.logical_and(v1>= 0,v1<= 2.5))
+        # v01_inb=np.intersect1d(v0_inb[0],v1_inb[0])
 
-        v2_inb= np.where(np.logical_and(v2>= 0,v2<= 2.5))
-        v3_inb= np.where(np.logical_and(v3>= 0,v3<= 2.5))
-        v23_inb=np.intersect1d(v2_inb[0],v3_inb[0])
+        # v2_inb= np.where(np.logical_and(v2>= 0,v2<= 2.5))
+        # v3_inb= np.where(np.logical_and(v3>= 0,v3<= 2.5))
+        # v23_inb=np.intersect1d(v2_inb[0],v3_inb[0])
 
-        v0123_inb=np.intersect1d(v01_inb,v23_inb)#indices of elements that are in bound for all 4 arrays
+        # v0123_inb=np.intersect1d(v01_inb,v23_inb)#indices of elements that are in bound for all 4 arrays
 
-        #only keep inbound elements
-        simneural=simneural[v0123_inb]
-        v0=v0[v0123_inb]
-        v1=v1[v0123_inb]
-        v2=v2[v0123_inb]
-        v3=v3[v0123_inb]
-        
+        # #only keep inbound elements
+        # simneural=simneural[v0123_inb]
+        # v0=v0[v0123_inb]
+        # v1=v1[v0123_inb]
+        # v2=v2[v0123_inb]
+        # v3=v3[v0123_inb]
+
+        # instead of removing out-of-bound elements, we can replace the out-of-bound elements with the boundary values to avoid discontinuity
+        v0 = np.clip(v0, 0, 2.5)
+        v1 = np.clip(v1, 0, 2.5)
+        v2 = np.clip(v2, 0, 2.5)
+        v3 = np.clip(v3, 0, 2.5)
+
         # save to subject_params
         subject_params["v0"]=np.append(subject_params["v0"],v0)
         subject_params["v1"]=np.append(subject_params["v1"],v1)
