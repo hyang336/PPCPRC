@@ -173,23 +173,23 @@ if __name__ == '__main__':
     sim_data_concat=pd.concat(sim_data)
 
     ############################################### construct prior settings for true model, rand model and null model ###############################################
-    slope_prior_true={"(x|subID)": {
-                    "name": "Normal",
-                    "mu": 0.0,
-                    "sigma": {
-                        "name": "HalfNormal",
-                        "sigma": 10.0
-                    }
-                },
-                "(y|subID)": {
-                    "name": "Normal",
-                    "mu": 0.0,
-                    "sigma": {
-                        "name": "HalfNormal",
-                        "sigma": 10.0
-                    }
-                }
-            }
+    # slope_prior_true={"(x|subID)": {
+    #                 "name": "Normal",
+    #                 "mu": 0.0,
+    #                 "sigma": {
+    #                     "name": "HalfNormal",
+    #                     "sigma": 10.0
+    #                 }
+    #             },
+    #             "(y|subID)": {
+    #                 "name": "Normal",
+    #                 "mu": 0.0,
+    #                 "sigma": {
+    #                     "name": "HalfNormal",
+    #                     "sigma": 10.0
+    #                 }
+    #             }
+    #         }
     intercept_prior_true={"x": {
                         "name": "Normal",
                         "mu": 0.0,
@@ -199,44 +199,26 @@ if __name__ == '__main__':
                         "name": "Normal",
                         "mu": 0.0,
                         "sigma": 10.0
-                    },
-                    "(1|subID)": {
-                        "name": "Normal",
-                        "mu": 0.0,
-                        "sigma": {
-                            "name": "HalfNormal",
-                            "sigma": 10.0
-                        }
-                    }
+                    }                    
                 }
     
-    null_prior={"(1|subID)": {
-                    "name": "Normal",
-                    "mu": 0.0,
-                    "sigma": {
-                        "name": "HalfNormal",
-                        "sigma": 10.0
-                    }
-                }
-                }
-    
-    slope_prior_rand={"(rand_x|subID)": {
-                    "name": "Normal",
-                    "mu": 0.0,
-                    "sigma": {
-                        "name": "HalfNormal",
-                        "sigma": 10.0
-                    }
-                },
-                "(rand_y|subID)": {
-                    "name": "Normal",
-                    "mu": 0.0,
-                    "sigma": {
-                        "name": "HalfNormal",
-                        "sigma": 10.0
-                    }
-                }
-            }
+    # slope_prior_rand={"(rand_x|subID)": {
+    #                 "name": "Normal",
+    #                 "mu": 0.0,
+    #                 "sigma": {
+    #                     "name": "HalfNormal",
+    #                     "sigma": 10.0
+    #                 }
+    #             },
+    #             "(rand_y|subID)": {
+    #                 "name": "Normal",
+    #                 "mu": 0.0,
+    #                 "sigma": {
+    #                     "name": "HalfNormal",
+    #                     "sigma": 10.0
+    #                 }
+    #             }
+    #         }
     intercept_prior_rand={"rand_x": {
                         "name": "Normal",
                         "mu": 0.0,
@@ -246,14 +228,6 @@ if __name__ == '__main__':
                         "name": "Normal",
                         "mu": 0.0,
                         "sigma": 10.0
-                    },
-                    "(1|subID)": {
-                        "name": "Normal",
-                        "mu": 0.0,
-                        "sigma": {
-                            "name": "HalfNormal",
-                            "sigma": 10.0
-                        }
                     }
                 }
     ####################################################################################### Define models ################################################################################################
@@ -272,28 +246,28 @@ if __name__ == '__main__':
                         {
                             "name": "v0",                            
                             "formula": "v0 ~ 0 + (x|subID) + (y|subID)",
-                            "prior":slope_prior_true,
+                            #"prior":slope_prior_true,
                             "link": "log",
                             "bounds": (0, 2.5)
                         },
                         {
                             "name": "v1",                            
                             "formula": "v1 ~ 0 + (x|subID) + (y|subID)",
-                            "prior":slope_prior_true,
+                            #"prior":slope_prior_true,
                             "link": "log",
                             "bounds": (0, 2.5)
                         },
                         {
                             "name": "v2",                            
                             "formula": "v2 ~ 0 + (x|subID) + (y|subID)",
-                            "prior":slope_prior_true,
+                            #"prior":slope_prior_true,
                             "link": "log",
                             "bounds": (0, 2.5)
                         },
                         {
                             "name": "v3",                            
                             "formula": "v3 ~ 0 + (x|subID) + (y|subID)",
-                            "prior":slope_prior_true,
+                            #"prior":slope_prior_true,
                             "link": "log",
                             "bounds": (0, 2.5)
                         }
@@ -370,28 +344,28 @@ if __name__ == '__main__':
                     {
                         "name": "v0",                        
                         "formula": "v0 ~ 0 + (1|subID)",
-                        "prior":null_prior,
+                        #"prior":null_prior,
                         "link": "log",
                         "bounds": (0, 2.5)
                     },
                     {
                         "name": "v1",                        
                         "formula": "v1 ~ 0 + (1|subID)",
-                        "prior":null_prior,
+                        #"prior":null_prior,
                         "link": "log",
                         "bounds": (0, 2.5)
                     },
                     {
                         "name": "v2",                        
                         "formula": "v2 ~ 0 + (1|subID)",
-                        "prior":null_prior,
+                        #"prior":null_prior,
                         "link": "log",
                         "bounds": (0, 2.5)
                     },
                     {
                         "name": "v3",                        
                         "formula": "v3 ~ 0 + (1|subID)",
-                        "prior":null_prior,
+                        #"prior":null_prior,
                         "link": "log",
                         "bounds": (0, 2.5)
                     }
@@ -425,28 +399,28 @@ if __name__ == '__main__':
                         {
                             "name": "v0",                            
                             "formula": "v0 ~ 0 + (rand_x|subID) + (rand_y|subID)",
-                            "prior":slope_prior_rand,
+                            #"prior":slope_prior_rand,
                             "link": "log",
                             "bounds": (0, 2.5)
                         },
                         {
                             "name": "v1",                            
                             "formula": "v1 ~ 0 + (rand_x|subID) + (rand_y|subID)",
-                            "prior":slope_prior_rand,
+                            #"prior":slope_prior_rand,
                             "link": "log",
                             "bounds": (0, 2.5)
                         },
                         {
                             "name": "v2",                            
                             "formula": "v2 ~ 0 + (rand_x|subID) + (rand_y|subID)",
-                            "prior":slope_prior_rand,
+                            #"prior":slope_prior_rand,
                             "link": "log",
                             "bounds": (0, 2.5)
                         },
                         {
                             "name": "v3",                            
                             "formula": "v3 ~ 0 + (rand_x|subID) + (rand_y|subID)",
-                            "prior":slope_prior_rand,
+                            #"prior":slope_prior_rand,
                             "link": "log",
                             "bounds": (0, 2.5)
                         }
