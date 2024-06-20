@@ -22,7 +22,7 @@ if __name__ == '__main__':
     parser.add_argument('--burnin', type=str, help='how many samples to burn in from MCMC chains',default=5000)
     parser.add_argument('--cores', type=str, help='how many CPU/GPU cores to use for sampling',default=4)
     parser.add_argument('--signal', type=str, help='which familiarity signal to model',default='recent')
-    parser.add_argument('--regressor', type=str, help='which data as regressor',default=None)
+    parser.add_argument('--regressor', type=str, help='which data as regressor',default='null')
     parser.add_argument('--model', type=str, help='which parameters to regress on',default='v')
     parser.add_argument('--outdir', type=str, help='outpu directory to save results',default='/scratch/hyang336/working_dir/HDDM_HSSM/resp_binarized/')
     parser.add_argument('--TA', type=str, help='target_accept for NUTS sampler',default=0.8)
@@ -56,7 +56,7 @@ if __name__ == '__main__':
 ########################################################################################################################################################
     
 ################    ## Define model, null model is a special case since it doesn't have regressor###################################################################
-    if regressor is None:
+    if regressor == 'null':
         # format data to be fed into the model, NOTE that "rt" and "response" are reserved keywords
         data = pd.DataFrame({
             'rt':sim_data['rt'],
