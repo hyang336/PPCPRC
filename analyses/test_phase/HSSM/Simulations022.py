@@ -63,13 +63,13 @@ if __name__ == '__main__':
     #intercept0=np.log(1/beta(a0,b0))
     intercept0=0.85
 
-    a1=2.5
-    b1=4
+    a1=1.75
+    b1=2.25
     #intercept1=np.log(1/beta(a1,b1))
     intercept1=2.1
 
-    a2=4
-    b2=2.5
+    a2=2.25
+    b2=1.75
     #intercept2=np.log(1/beta(a2,b2))
     intercept2=2.1
 
@@ -80,7 +80,8 @@ if __name__ == '__main__':
 
     n_subjects=30 #number of subjects
     n_trials=200 #number of trials per subject
-    param_sv=0.2 #standard deviation of the subject-level parameters
+    param_sv=0.1 #standard deviation of the subject-level parameters
+    epsilon=1e-10 #small number to avoid log(0) in the log transformation
 
     # Save trial-level parameters for each subject
     subject_params={
@@ -103,6 +104,9 @@ if __name__ == '__main__':
         simneural=np.random.normal(size=n_trials)
         # rescale to 0-1
         simneural=(simneural - np.min(simneural))/(np.max(simneural) - np.min(simneural))
+        # make sure there no exact 0 or 1 otherwise the log becomes undefined
+        simneural=np.clip(simneural,epsilon,1-epsilon)
+
         # Whether to include subject-specific slope, default is False
         if SubSlope:
             # generate v0, v1, v2, v3
@@ -118,24 +122,6 @@ if __name__ == '__main__':
             v3=np.exp(np.random.normal(intercept3, param_sv) + (a3-1)*np.log(simneural) + (b3-1)*np.log(1-simneural))
 
         ###IMPORTANT: for interpretable param rec test, make sure generate params within training bounds of LAN###
-        # # only keep entries in subject_data that are in bounds
-        # v0_inb= np.where(np.logical_and(v0>= 0,v0<= 2.5))
-        # v1_inb= np.where(np.logical_and(v1>= 0,v1<= 2.5))
-        # v01_inb=np.intersect1d(v0_inb[0],v1_inb[0])
-
-        # v2_inb= np.where(np.logical_and(v2>= 0,v2<= 2.5))
-        # v3_inb= np.where(np.logical_and(v3>= 0,v3<= 2.5))
-        # v23_inb=np.intersect1d(v2_inb[0],v3_inb[0])
-
-        # v0123_inb=np.intersect1d(v01_inb,v23_inb)#indices of elements that are in bound for all 4 arrays
-
-        # #only keep inbound elements
-        # simneural=simneural[v0123_inb]
-        # v0=v0[v0123_inb]
-        # v1=v1[v0123_inb]
-        # v2=v2[v0123_inb]
-        # v3=v3[v0123_inb]
-
         # instead of removing out-of-bound elements, we can replace the out-of-bound elements with the boundary values to avoid discontinuity
         v0 = np.clip(v0, 0, 2.5)
         v1 = np.clip(v1, 0, 2.5)
@@ -160,7 +146,8 @@ if __name__ == '__main__':
         # Random regressor as control
         rand_x = np.random.normal(size=len(simneural))
         rand_x = (rand_x - np.min(rand_x))/(np.max(rand_x) - np.min(rand_x))
-
+        rand_x = np.clip(rand_x,epsilon,1-epsilon)
+        
         sim_data.append(
             pd.DataFrame(
                 {
@@ -178,71 +165,6 @@ if __name__ == '__main__':
     #make a single dataframe of subject-wise simulated data
     sim_data_concat=pd.concat(sim_data)
 
-    ############################################### construct prior settings for true model, rand model and null model ###############################################
-    # slope_prior_true={"Intercept": {
-    #                     "name": "Normal",
-    #                     "mu": 0.0,
-    #                     "sigma": 10.0
-    #                     },
-    #             "x": {
-    #                 "name": "Normal",
-    #                 "mu": 0.0,
-    #                 "sigma": 10.0
-    #             },
-    #             "y": {
-    #                 "name": "Normal",
-    #                 "mu": 0.0,
-    #                 "sigma": 10.0
-    #             },
-    #             "(1 + x + y|subID)": {
-    #                 "name": "Normal",
-    #                 "mu": 0.0,
-    #                 "sigma": {
-    #                     "name": "HalfNormal",
-    #                     "sigma": 10.0
-    #                 }
-    #             }
-    #         }
-    # intercept_prior_true={"x": {
-    #                     "name": "Normal",
-    #                     "mu": 0.0,
-    #                     "sigma": 10.0
-    #                     },
-    #                 "y": {
-    #                     "name": "Normal",
-    #                     "mu": 0.0,
-    #                     "sigma": 10.0
-    #                 }                    
-    #             }
-    
-    # slope_prior_rand={"(rand_x|subID)": {
-    #                 "name": "Normal",
-    #                 "mu": 0.0,
-    #                 "sigma": {
-    #                     "name": "HalfNormal",
-    #                     "sigma": 10.0
-    #                 }
-    #             },
-    #             "(rand_y|subID)": {
-    #                 "name": "Normal",
-    #                 "mu": 0.0,
-    #                 "sigma": {
-    #                     "name": "HalfNormal",
-    #                     "sigma": 10.0
-    #                 }
-    #             }
-    #         }
-    # intercept_prior_rand={"rand_x": {
-    #                     "name": "Normal",
-    #                     "mu": 0.0,
-    #                     "sigma": 10.0
-    #                     },
-    #                 "rand_y": {
-    #                     "name": "Normal",
-    #                     "mu": 0.0,
-    #                     "sigma": 10.0
-    #                 }
-    #             }
     ####################################################################################### Define models ################################################################################################
     match model:
         case 'true':
