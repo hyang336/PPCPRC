@@ -179,15 +179,22 @@ if __name__ == '__main__':
     sim_data_concat=pd.concat(sim_data)
 
     ############################################### construct prior settings for true model, rand model and null model ###############################################
-    # slope_prior_true={"(x|subID)": {
+    # slope_prior_true={"Intercept": {
+    #                     "name": "Normal",
+    #                     "mu": 0.0,
+    #                     "sigma": 10.0
+    #                     },
+    #             "x": {
     #                 "name": "Normal",
     #                 "mu": 0.0,
-    #                 "sigma": {
-    #                     "name": "HalfNormal",
-    #                     "sigma": 10.0
-    #                 }
+    #                 "sigma": 10.0
     #             },
-    #             "(y|subID)": {
+    #             "y": {
+    #                 "name": "Normal",
+    #                 "mu": 0.0,
+    #                 "sigma": 10.0
+    #             },
+    #             "(1 + x + y|subID)": {
     #                 "name": "Normal",
     #                 "mu": 0.0,
     #                 "sigma": {
@@ -196,17 +203,17 @@ if __name__ == '__main__':
     #                 }
     #             }
     #         }
-    intercept_prior_true={"x": {
-                        "name": "Normal",
-                        "mu": 0.0,
-                        "sigma": 10.0
-                        },
-                    "y": {
-                        "name": "Normal",
-                        "mu": 0.0,
-                        "sigma": 10.0
-                    }                    
-                }
+    # intercept_prior_true={"x": {
+    #                     "name": "Normal",
+    #                     "mu": 0.0,
+    #                     "sigma": 10.0
+    #                     },
+    #                 "y": {
+    #                     "name": "Normal",
+    #                     "mu": 0.0,
+    #                     "sigma": 10.0
+    #                 }                    
+    #             }
     
     # slope_prior_rand={"(rand_x|subID)": {
     #                 "name": "Normal",
@@ -225,17 +232,17 @@ if __name__ == '__main__':
     #                 }
     #             }
     #         }
-    intercept_prior_rand={"rand_x": {
-                        "name": "Normal",
-                        "mu": 0.0,
-                        "sigma": 10.0
-                        },
-                    "rand_y": {
-                        "name": "Normal",
-                        "mu": 0.0,
-                        "sigma": 10.0
-                    }
-                }
+    # intercept_prior_rand={"rand_x": {
+    #                     "name": "Normal",
+    #                     "mu": 0.0,
+    #                     "sigma": 10.0
+    #                     },
+    #                 "rand_y": {
+    #                     "name": "Normal",
+    #                     "mu": 0.0,
+    #                     "sigma": 10.0
+    #                 }
+    #             }
     ####################################################################################### Define models ################################################################################################
     match model:
         case 'true':
@@ -245,35 +252,35 @@ if __name__ == '__main__':
                     data=sim_data_concat,
                     model='race_no_bias_angle_4',
                     choices=4,
-                    noncentered=True,
+                    prior_settings="safe",
                     a=2.0,
                     z=0.0,
                     include=[
                         {
                             "name": "v0",                            
-                            "formula": "v0 ~ 0 + (x|subID) + (y|subID)",
-                            #"prior":slope_prior_true,
+                            "formula": "v0 ~ 1 + x + y + (1 + x + y|subID)",
+                            # "prior":slope_prior_true,
                             "link": "log",
                             "bounds": (0, 2.5)
                         },
                         {
                             "name": "v1",                            
-                            "formula": "v1 ~ 0 + (x|subID) + (y|subID)",
-                            #"prior":slope_prior_true,
+                            "formula": "v1 ~ 1 + x + y + (1 + x + y|subID)",
+                            # "prior":slope_prior_true,
                             "link": "log",
                             "bounds": (0, 2.5)
                         },
                         {
                             "name": "v2",                            
-                            "formula": "v2 ~ 0 + (x|subID) + (y|subID)",
-                            #"prior":slope_prior_true,
+                            "formula": "v2 ~ 1 + x + y + (1 + x + y|subID)",
+                            # "prior":slope_prior_true,
                             "link": "log",
                             "bounds": (0, 2.5)
                         },
                         {
                             "name": "v3",                            
-                            "formula": "v3 ~ 0 + (x|subID) + (y|subID)",
-                            #"prior":slope_prior_true,
+                            "formula": "v3 ~ 1 + x + y + (1 + x + y|subID)",
+                            # "prior":slope_prior_true,
                             "link": "log",
                             "bounds": (0, 2.5)
                         }
@@ -286,34 +293,35 @@ if __name__ == '__main__':
                     model='race_no_bias_angle_4',
                     choices=4,
                     noncentered=True,
+                    prior_settings="safe",
                     a=2.0,
                     z=0.0,
                     include=[
                         {
                             "name": "v0",                            
-                            "formula": "v0 ~ 0 + x + y + (1|subID)",
-                            "prior":intercept_prior_true,
+                            "formula": "v0 ~ 1 + x + y + (1|subID)",
+                            # "prior":intercept_prior_true,
                             "link": "log",
                             "bounds": (0, 2.5)
                         },
                         {
                             "name": "v1",                            
-                            "formula": "v1 ~ 0 + x + y + (1|subID)",
-                            "prior":intercept_prior_true,
+                            "formula": "v1 ~ 1 + x + y + (1|subID)",
+                            # "prior":intercept_prior_true,
                             "link": "log",
                             "bounds": (0, 2.5)
                         },
                         {
                             "name": "v2",                            
-                            "formula": "v2 ~ 0 + x + y + (1|subID)",
-                            "prior":intercept_prior_true,
+                            "formula": "v2 ~ 1 + x + y + (1|subID)",
+                            # "prior":intercept_prior_true,
                             "link": "log",
                             "bounds": (0, 2.5)
                         },
                         {
                             "name": "v3",                            
-                            "formula": "v3 ~ 0 + x + y + (1|subID)",
-                            "prior":intercept_prior_true,
+                            "formula": "v3 ~ 1 + x + y + (1|subID)",
+                            # "prior":intercept_prior_true,
                             "link": "log",
                             "bounds": (0, 2.5)
                         }
@@ -344,33 +352,34 @@ if __name__ == '__main__':
                 model='race_no_bias_angle_4',
                 choices=4,
                 noncentered=True,
+                prior_settings="safe",
                 a=2.0,
                 z=0.0,
                 include=[
                     {
                         "name": "v0",                        
-                        "formula": "v0 ~ 0 + (1|subID)",
+                        "formula": "v0 ~ 1 + (1|subID)",
                         #"prior":null_prior,
                         "link": "log",
                         "bounds": (0, 2.5)
                     },
                     {
                         "name": "v1",                        
-                        "formula": "v1 ~ 0 + (1|subID)",
+                        "formula": "v1 ~ 1 + (1|subID)",
                         #"prior":null_prior,
                         "link": "log",
                         "bounds": (0, 2.5)
                     },
                     {
                         "name": "v2",                        
-                        "formula": "v2 ~ 0 + (1|subID)",
+                        "formula": "v2 ~ 1 + (1|subID)",
                         #"prior":null_prior,
                         "link": "log",
                         "bounds": (0, 2.5)
                     },
                     {
                         "name": "v3",                        
-                        "formula": "v3 ~ 0 + (1|subID)",
+                        "formula": "v3 ~ 1 + (1|subID)",
                         #"prior":null_prior,
                         "link": "log",
                         "bounds": (0, 2.5)
@@ -399,33 +408,34 @@ if __name__ == '__main__':
                     model='race_no_bias_angle_4',
                     choices=4,
                     noncentered=True,
+                    prior_settings="safe",
                     a=2.0,
                     z=0.0,
                     include=[
                         {
                             "name": "v0",                            
-                            "formula": "v0 ~ 0 + (rand_x|subID) + (rand_y|subID)",
+                            "formula": "v0 ~ 1 + rand_x + rand_y + (1 + rand_x + rand_y|subID)",
                             #"prior":slope_prior_rand,
                             "link": "log",
                             "bounds": (0, 2.5)
                         },
                         {
                             "name": "v1",                            
-                            "formula": "v1 ~ 0 + (rand_x|subID) + (rand_y|subID)",
+                            "formula": "v1 ~ 1 + rand_x + rand_y + (1 + rand_x + rand_y|subID)",
                             #"prior":slope_prior_rand,
                             "link": "log",
                             "bounds": (0, 2.5)
                         },
                         {
                             "name": "v2",                            
-                            "formula": "v2 ~ 0 + (rand_x|subID) + (rand_y|subID)",
+                            "formula": "v2 ~ 1 + rand_x + rand_y + (1 + rand_x + rand_y|subID)",
                             #"prior":slope_prior_rand,
                             "link": "log",
                             "bounds": (0, 2.5)
                         },
                         {
                             "name": "v3",                            
-                            "formula": "v3 ~ 0 + (rand_x|subID) + (rand_y|subID)",
+                            "formula": "v3 ~ 1 + rand_x + rand_y + (1 + rand_x + rand_y|subID)",
                             #"prior":slope_prior_rand,
                             "link": "log",
                             "bounds": (0, 2.5)
@@ -439,34 +449,35 @@ if __name__ == '__main__':
                     model='race_no_bias_angle_4',
                     choices=4,
                     noncentered=True,
+                    prior_settings="safe",
                     a=2.0,
                     z=0.0,
                     include=[
                         {
                             "name": "v0",                            
-                            "formula": "v0 ~ 0 + rand_x + rand_y + (1|subID)",
-                            "prior":intercept_prior_rand,
+                            "formula": "v0 ~ 1 + rand_x + rand_y + (1|subID)",
+                            # "prior":intercept_prior_rand,
                             "link": "log",
                             "bounds": (0, 2.5)
                         },
                         {
                             "name": "v1",                            
-                            "formula": "v1 ~ 0 + rand_x + rand_y + (1|subID)",
-                            "prior":intercept_prior_rand,
+                            "formula": "v1 ~ 1 + rand_x + rand_y + (1|subID)",
+                            # "prior":intercept_prior_rand,
                             "link": "log",
                             "bounds": (0, 2.5)
                         },
                         {
                             "name": "v2",                            
-                            "formula": "v2 ~ 0 + rand_x + rand_y + (1|subID)",
-                            "prior":intercept_prior_rand,
+                            "formula": "v2 ~ 1 + rand_x + rand_y + (1|subID)",
+                            # "prior":intercept_prior_rand,
                             "link": "log",
                             "bounds": (0, 2.5)
                         },
                         {
                             "name": "v3",                            
-                            "formula": "v3 ~ 0 + rand_x + rand_y + (1|subID)",
-                            "prior":intercept_prior_rand,
+                            "formula": "v3 ~ 1 + rand_x + rand_y + (1|subID)",
+                            # "prior":intercept_prior_rand,
                             "link": "log",
                             "bounds": (0, 2.5)
                         }
