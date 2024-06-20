@@ -31,7 +31,7 @@ v2=exp(i2+(a2-1)*log(x)+(b2-1)*log(1-x))+rnorm(n=n_sub*n_trial,sd=0.2)
 v3=exp(i3+(a3-1)*log(x)+(b3-1)*log(1-x))+rnorm(n=n_sub*n_trial,sd=0.2)
 data=data.frame(x=x,v0=v0,v1=v1,v2=v2,v3=v3)
 
-# ground truth glm
+# ground truth glm (throws an error)
 beta0=glm(formula = 'v0~1 + I(log(x)) + I(log(1-x))',data=data,family = gaussian(link='log'), start=c(0,0,0))
 beta1=glm(formula = 'v1~1 + I(log(x)) + I(log(1-x))',data=data,family = gaussian(link='log'), start=c(0,0,0))
 beta2=glm(formula = 'v2~1 + I(log(x)) + I(log(1-x))',data=data,family = gaussian(link='log'), start=c(0,0,0))
