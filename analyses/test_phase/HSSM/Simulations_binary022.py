@@ -179,21 +179,57 @@ if __name__ == '__main__':
                     {
                         "name": "v",                            
                         "formula": "v ~ 1 + (1|subID)",
+                        "prior": {
+                            "Intercept": {"name": "Normal", "mu": 1, "sigma": 2, "initval": 1},
+                            "1|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                "sigma": 2
+                                }, "initval": 0.5
+                                }
+                        },
                         "link": "identity"
                     },
                     {
                         "name": "a",                            
                         "formula": "a ~ 1 + (1|subID)",
+                        "prior": {
+                            "Intercept": {"name": "Gamma", "mu": 0.5, "sigma": 2, "initval": 1},
+                            "1|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                "sigma": 2
+                                }, "initval": 0.5
+                                }
+                        },
                         "link": "identity"
                     },
                     {
                         "name": "z",                            
                         "formula": "z ~ 1 + (1|subID)",
+                        "prior": {
+                            "Intercept": {"name": "Normal", "mu": 0, "sigma": 2, "initval": 0},
+                            "1|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                "sigma": 2
+                                }, "initval": 0.5
+                                }
+                        },
                         "link": "identity"
                     },
                     {
                         "name": "t",                            
                         "formula": "t ~ 1 + (1|subID)",
+                        "prior": {
+                            "Intercept": {"name": "Normal", "mu": 0, "sigma": 2, "initval": 0.3},
+                            "1|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                "sigma": 2
+                                }, "initval": 0.5
+                                }
+                        },
                         "link": "identity"
                     }
                 ],
