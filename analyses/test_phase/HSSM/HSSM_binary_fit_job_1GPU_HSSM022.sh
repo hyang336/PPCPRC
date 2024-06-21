@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --time=48:00:00
+#SBATCH --time=4:00:00
 #SBATCH --account=ctb-akhanf
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=3
