@@ -98,7 +98,7 @@ if __name__ == '__main__':
         subject_params["subID"]=np.append(subject_params["subID"],np.repeat(i,len(simneural)))
 
         # simulate RT and choices
-        true_values = np.column_stack([v,a,z,t])
+        true_values = np.column_stack([v,np.repeat([[a,z,t]], axis=0, repeats=len(simneural))])
 
         # Get mode simulations
         ddm_all = simulator.simulator(true_values, model="ddm", n_samples=1)
