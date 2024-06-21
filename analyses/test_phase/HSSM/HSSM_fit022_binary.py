@@ -228,7 +228,6 @@ if __name__ == '__main__':
         # define the model
         model= hssm.HSSM(
             data=data,
-            model='ddm',
             prior_settings="safe",
             include=[
                 {
@@ -255,7 +254,8 @@ if __name__ == '__main__':
         )   
             
 ########################################################################################################################################################
-
+    model
+    
     #sample from the model and save the results
     infer_data_race4nba_v = model.sample(sampler="nuts_numpyro", chains=4, cores=ncores, draws=samples, tune=burnin, idata_kwargs = {'log_likelihood': True}, target_accept=TA)
     #save trace
