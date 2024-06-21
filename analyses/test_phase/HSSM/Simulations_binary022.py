@@ -40,7 +40,6 @@ if __name__ == '__main__':
     print('samples:',samples)
     print('burnin:',burnin)
     print('ncores:',ncores)
-    print('SubSlope:',SubSlope)
     print('TA:',TA)
 
     # make the output directory if it doesn't exist
