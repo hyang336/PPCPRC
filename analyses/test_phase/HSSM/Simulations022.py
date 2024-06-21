@@ -165,6 +165,30 @@ if __name__ == '__main__':
     #make a single dataframe of subject-wise simulated data
     sim_data_concat=pd.concat(sim_data)
 
+    ################################################################################################ Define priors ################################################################################################
+    # Define priors for the true model
+    # slope_prior_true = pm.Normal("slope_prior_true", mu=0, sigma=1)
+    intercept_prior_true = {
+        "Intercept": {"name": "Normal", "mu": 1, "sigma": 2, "initval": 1},
+        "x": {"name": "Normal", "mu": 0, "sigma": 1, "initval": 0},
+        "y": {"name": "Normal", "mu": 0, "sigma": 1, "initval": 0},
+        "1|subID": {"name": "Normal",
+            "mu": 0,
+            "sigma": {"name": "HalfNormal",
+            "sigma": 2
+            }, "initval": 0.5
+            }
+    }
+
+
+    # Define priors for the null model
+    # slope_prior_null = pm.Normal("slope_prior_null", mu=0, sigma=1)
+    # intercept_prior_null = pm.Normal("intercept_prior_null", mu=0, sigma=1)
+
+    # Define priors for the random model
+    # slope_prior_rand = pm.Normal("slope_prior_rand", mu=0, sigma=1)
+    # intercept_prior_rand = pm.Normal("intercept_prior_rand", mu=0, sigma=1)
+
     ####################################################################################### Define models ################################################################################################
     match model:
         case 'true':
@@ -222,28 +246,28 @@ if __name__ == '__main__':
                         {
                             "name": "v0",                            
                             "formula": "v0 ~ 1 + x + y + (1|subID)",
-                            # "prior":intercept_prior_true,
+                            "prior":intercept_prior_true,
                             "link": "log",
                             "bounds": (0, 2.5)
                         },
                         {
                             "name": "v1",                            
                             "formula": "v1 ~ 1 + x + y + (1|subID)",
-                            # "prior":intercept_prior_true,
+                            "prior":intercept_prior_true,
                             "link": "log",
                             "bounds": (0, 2.5)
                         },
                         {
                             "name": "v2",                            
                             "formula": "v2 ~ 1 + x + y + (1|subID)",
-                            # "prior":intercept_prior_true,
+                            "prior":intercept_prior_true,
                             "link": "log",
                             "bounds": (0, 2.5)
                         },
                         {
                             "name": "v3",                            
                             "formula": "v3 ~ 1 + x + y + (1|subID)",
-                            # "prior":intercept_prior_true,
+                            "prior":intercept_prior_true,
                             "link": "log",
                             "bounds": (0, 2.5)
                         }
