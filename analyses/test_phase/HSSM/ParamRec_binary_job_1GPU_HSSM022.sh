@@ -12,4 +12,10 @@
 module load gcc cuda cudnn python/3.11
 source ~/HSSM022_tempENV/bin/activate
 
-PYTENSOR_FLAGS='blas__ldflags=-lflexiblas -lgfortran' python /home/hyang336/PPCPRC/analyses/test_phase/HSSM/Simulations_binary022.py --model $1 --outdir '/scratch/hyang336/working_dir/HDDM_HSSM/simulations022/'
+# whether to run the simple simulations (only v depends on regressor) or the full simulations
+if [ $1 == "simple" ]; then
+    PYTENSOR_FLAGS='blas__ldflags=-lflexiblas -lgfortran' python /home/hyang336/PPCPRC/analyses/test_phase/HSSM/Simulations_binary022_simple.py --model $2 --outdir '/scratch/hyang336/working_dir/HDDM_HSSM/simulations022/'
+else
+    PYTENSOR_FLAGS='blas__ldflags=-lflexiblas -lgfortran' python /home/hyang336/PPCPRC/analyses/test_phase/HSSM/Simulations_binary022.py --model $2 --outdir '/scratch/hyang336/working_dir/HDDM_HSSM/simulations022/'
+fi
+
