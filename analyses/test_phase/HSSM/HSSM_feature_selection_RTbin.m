@@ -100,8 +100,8 @@ for i=1:length(SSID)
     freq_ratings_bin=freq_ratings;
     freq_ratings_low=ismember(freq_ratings,low_resp);
     freq_ratings_high=ismember(freq_ratings,high_resp);
-    freq_ratings_bin(freq_ratings_low)=1;
-    freq_ratings_bin(freq_ratings_high)=2;
+    freq_ratings_bin(freq_ratings_low)=-1;
+    freq_ratings_bin(freq_ratings_high)=1;
    
     %% lifetime
     %extract lifetime trials
@@ -166,8 +166,8 @@ for i=1:length(SSID)
     life_ratings_bin=life_ratings;
     life_ratings_low=ismember(life_ratings,low_resp);
     life_ratings_high=ismember(life_ratings,high_resp);
-    life_ratings_bin(life_ratings_low)=1;
-    life_ratings_bin(life_ratings_high)=2;
+    life_ratings_bin(life_ratings_low)=-1;
+    life_ratings_bin(life_ratings_high)=1;
 
     % compile behavioral data 'subj_idx','obj_freq'/'normfam','rt','raw_rating','bin_rating','bin_scheme'
     freq_temp=[repmat({SSID{i}},[size(freq_trials_resp,1),1]),num2cell(objfreq),freq_trials_resp(:,7),num2cell(freq_ratings),num2cell(freq_ratings_bin),repmat({freq_bin_scheme},[size(freq_trials_resp,1),1])];
