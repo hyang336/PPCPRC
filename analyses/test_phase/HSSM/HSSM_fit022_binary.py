@@ -68,6 +68,7 @@ if __name__ == '__main__':
         model= hssm.HSSM(
             data=data,
             model='ddm',
+            loglik="analytical",
             prior_settings="safe",
             include=[
                 {
