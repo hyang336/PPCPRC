@@ -49,8 +49,8 @@ if __name__ == '__main__':
     #--------------------------------------We can try several generative model--------------------------------###
     v_slope=0.45
     v_intercept=0
-    a_intercept=2
-    z_intercept=0
+    a_intercept=1.5
+    z_intercept=0.5
     t_intercept=0.05
 
     n_subjects=30 #number of subjects
@@ -133,18 +133,18 @@ if __name__ == '__main__':
                         "name": "v",                            
                         "formula": "v ~ 1 + x + (1 + x|subID)",
                         "prior": {
-                            "Intercept": {"name": "Normal", "mu": 1, "sigma": 2, "initval": 1},
-                            "x": {"name": "Normal", "mu": 0, "sigma": 2, "initval": 0},
+                            "Intercept": {"name": "Normal", "mu": 1, "sigma": 1, "initval": 1},
+                            "x": {"name": "Normal", "mu": 0, "sigma": 1, "initval": 0},
                             "1|subID": {"name": "Normal",
                                 "mu": 0,
                                 "sigma": {"name": "HalfNormal",
-                                "sigma": 2
+                                "sigma": 1
                                 }, "initval": 0.5
                                 },
                             "x|subID": {"name": "Normal",
                                 "mu": 0,
                                 "sigma": {"name": "HalfNormal",
-                                "sigma": 2
+                                "sigma": 1
                                 }, "initval": 0.5
                                 }
                             },
@@ -154,11 +154,11 @@ if __name__ == '__main__':
                         "name": "a",                            
                         "formula": "a ~ 1 + (1|subID)",
                         "prior": {
-                            "Intercept": {"name": "Gamma", "mu": 0.5, "sigma": 2, "initval": 1},
+                            "Intercept": {"name": "Gamma", "mu": 0.5, "sigma": 1, "initval": 1},
                             "1|subID": {"name": "Normal",
                                 "mu": 0,
                                 "sigma": {"name": "HalfNormal",
-                                "sigma": 2
+                                "sigma": 1
                                 }, "initval": 0.5
                                 }
                         },
@@ -168,12 +168,12 @@ if __name__ == '__main__':
                         "name": "z",                            
                         "formula": "z ~ 1 + (1|subID)",
                         "prior": {
-                            "Intercept": {"name": "Normal", "mu": 0, "sigma": 2, "initval": 0},
+                            "Intercept": {"name": "Normal", "mu": 0, "sigma": 0.5, "initval": 0},
                             "1|subID": {"name": "Normal",
                                 "mu": 0,
                                 "sigma": {"name": "HalfNormal",
-                                "sigma": 2
-                                }, "initval": 0.5
+                                "sigma": 0.05
+                                }, "initval": 0.05
                                 }
                         },
                         "link": "identity"
@@ -182,11 +182,11 @@ if __name__ == '__main__':
                         "name": "t",                            
                         "formula": "t ~ 1 + (1|subID)",
                         "prior": {
-                            "Intercept": {"name": "Normal", "mu": 0, "sigma": 2, "initval": 0.3},
+                            "Intercept": {"name": "Normal", "mu": 0, "sigma": 1, "initval": 0.3},
                             "1|subID": {"name": "Normal",
                                 "mu": 0,
                                 "sigma": {"name": "HalfNormal",
-                                "sigma": 2
+                                "sigma": 0.5
                                 }, "initval": 0.5
                                 }
                         },
@@ -220,11 +220,11 @@ if __name__ == '__main__':
                         "name": "v",                            
                         "formula": "v ~ 1 + (1|subID)",
                         "prior": {
-                            "Intercept": {"name": "Normal", "mu": 1, "sigma": 2, "initval": 1},
+                            "Intercept": {"name": "Normal", "mu": 1, "sigma": 1, "initval": 1},
                             "1|subID": {"name": "Normal",
                                 "mu": 0,
                                 "sigma": {"name": "HalfNormal",
-                                "sigma": 2
+                                "sigma": 1
                                 }, "initval": 0.5
                                 }
                         },
@@ -234,11 +234,11 @@ if __name__ == '__main__':
                         "name": "a",                            
                         "formula": "a ~ 1 + (1|subID)",
                         "prior": {
-                            "Intercept": {"name": "Gamma", "mu": 0.5, "sigma": 2, "initval": 1},
+                            "Intercept": {"name": "Gamma", "mu": 0.5, "sigma": 1, "initval": 1},
                             "1|subID": {"name": "Normal",
                                 "mu": 0,
                                 "sigma": {"name": "HalfNormal",
-                                "sigma": 2
+                                "sigma": 1
                                 }, "initval": 0.5
                                 }
                         },
@@ -248,12 +248,12 @@ if __name__ == '__main__':
                         "name": "z",                            
                         "formula": "z ~ 1 + (1|subID)",
                         "prior": {
-                            "Intercept": {"name": "Normal", "mu": 0, "sigma": 2, "initval": 0},
+                            "Intercept": {"name": "Normal", "mu": 0, "sigma": 0.5, "initval": 0},
                             "1|subID": {"name": "Normal",
                                 "mu": 0,
                                 "sigma": {"name": "HalfNormal",
-                                "sigma": 2
-                                }, "initval": 0.5
+                                "sigma": 0.05
+                                }, "initval": 0.05
                                 }
                         },
                         "link": "identity"
@@ -262,11 +262,11 @@ if __name__ == '__main__':
                         "name": "t",                            
                         "formula": "t ~ 1 + (1|subID)",
                         "prior": {
-                            "Intercept": {"name": "Normal", "mu": 0, "sigma": 2, "initval": 0.3},
+                            "Intercept": {"name": "Normal", "mu": 0, "sigma": 1, "initval": 0.3},
                             "1|subID": {"name": "Normal",
                                 "mu": 0,
                                 "sigma": {"name": "HalfNormal",
-                                "sigma": 2
+                                "sigma": 0.5
                                 }, "initval": 0.5
                                 }
                         },
@@ -298,18 +298,18 @@ if __name__ == '__main__':
                         "name": "v",                            
                         "formula": "v ~ 1 + rand_x + (1 + rand_x|subID)",
                         "prior": {
-                            "Intercept": {"name": "Normal", "mu": 1, "sigma": 2, "initval": 1},
-                            "rand_x": {"name": "Normal", "mu": 0, "sigma": 2, "initval": 0},
+                            "Intercept": {"name": "Normal", "mu": 1, "sigma": 1, "initval": 1},
+                            "rand_x": {"name": "Normal", "mu": 0, "sigma": 1, "initval": 0},
                             "1|subID": {"name": "Normal",
                                 "mu": 0,
                                 "sigma": {"name": "HalfNormal",
-                                "sigma": 2
+                                "sigma": 1
                                 }, "initval": 0.5
                                 },
                             "rand_x|subID": {"name": "Normal",
                                 "mu": 0,
                                 "sigma": {"name": "HalfNormal",
-                                "sigma": 2
+                                "sigma": 1
                                 }, "initval": 0.5
                                 }
                             },
@@ -319,11 +319,11 @@ if __name__ == '__main__':
                         "name": "a",                            
                         "formula": "a ~ 1 + (1|subID)",
                         "prior": {
-                            "Intercept": {"name": "Gamma", "mu": 0.5, "sigma": 2, "initval": 1},
+                            "Intercept": {"name": "Gamma", "mu": 0.5, "sigma": 1, "initval": 1},
                             "1|subID": {"name": "Normal",
                                 "mu": 0,
                                 "sigma": {"name": "HalfNormal",
-                                "sigma": 2
+                                "sigma": 1
                                 }, "initval": 0.5
                                 }
                         },
@@ -333,12 +333,12 @@ if __name__ == '__main__':
                         "name": "z",                            
                         "formula": "z ~ 1 + (1|subID)",
                         "prior": {
-                            "Intercept": {"name": "Normal", "mu": 0, "sigma": 2, "initval": 0},
+                            "Intercept": {"name": "Normal", "mu": 0, "sigma": 0.5, "initval": 0},
                             "1|subID": {"name": "Normal",
                                 "mu": 0,
                                 "sigma": {"name": "HalfNormal",
-                                "sigma": 2
-                                }, "initval": 0.5
+                                "sigma": 0.05
+                                }, "initval": 0.05
                                 }
                         },
                         "link": "identity"
@@ -347,11 +347,11 @@ if __name__ == '__main__':
                         "name": "t",                            
                         "formula": "t ~ 1 + (1|subID)",
                         "prior": {
-                            "Intercept": {"name": "Normal", "mu": 0, "sigma": 2, "initval": 0.3},
+                            "Intercept": {"name": "Normal", "mu": 0, "sigma": 1, "initval": 0.3},
                             "1|subID": {"name": "Normal",
                                 "mu": 0,
                                 "sigma": {"name": "HalfNormal",
-                                "sigma": 2
+                                "sigma": 0.5
                                 }, "initval": 0.5
                                 }
                         },
