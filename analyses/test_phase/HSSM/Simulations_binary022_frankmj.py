@@ -24,6 +24,8 @@ if __name__ == '__main__':
     parser.add_argument('--TA', type=str, help='target_accept for NUTS sampler',default=0.8)
     args = parser.parse_args()
 
+    outdir=args.outdir
+    
     # make the output directory if it doesn't exist
     if not os.path.exists(outdir):
         os.makedirs(outdir)
