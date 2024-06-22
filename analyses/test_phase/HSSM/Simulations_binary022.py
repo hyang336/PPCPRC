@@ -90,7 +90,7 @@ if __name__ == '__main__':
         v = np.clip(v, -3, 3)
         a = np.clip(a, 0.3, 2.5)
         z = np.clip(z, 0, 1)
-        t = np.clip(t, 0.3, 2)
+        t = np.clip(t, 0, 2)
 
         # save to subject_params
         subject_params["v"]=np.append(subject_params["v"],v)
@@ -112,7 +112,7 @@ if __name__ == '__main__':
         sim_data.append(
             pd.DataFrame(
                 {
-                    "rt": ddm_all["rts"].flatten(),
+                    "rt": ddm_all["rts"].flatten() + 0.3, # hack to work around the issue on parameter t in HSSM 0.2.2
                     "response": ddm_all["choices"].flatten(),
                     "x": simneural,                    
                     "rand_x": rand_x,                    
