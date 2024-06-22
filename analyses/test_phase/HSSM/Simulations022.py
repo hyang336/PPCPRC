@@ -138,7 +138,7 @@ if __name__ == '__main__':
 
         # simulate RT and choices
         true_values = np.column_stack(
-        [v0,v1,v2,v3, np.repeat([[2.0, 0.0, 1e-3,0.0]], axis=0, repeats=len(simneural))]
+        [v0,v1,v2,v3, np.repeat([[2.0, 0.5, 1e-3,0.0]], axis=0, repeats=len(simneural))]
         )
         # Get mode simulations
         race4nba_v = simulator.simulator(true_values, model="race_no_bias_angle_4", n_samples=1)
@@ -168,16 +168,39 @@ if __name__ == '__main__':
     ################################################################################################ Define priors ################################################################################################
     # Define priors for the true model
     # slope_prior_true = pm.Normal("slope_prior_true", mu=0, sigma=1)
-    intercept_prior_true = {
+    v_intercept_prior = {
         "Intercept": {"name": "Normal", "mu": 1, "sigma": 2, "initval": 1},
         "x": {"name": "Normal", "mu": 0, "sigma": 1, "initval": 0},
         "y": {"name": "Normal", "mu": 0, "sigma": 1, "initval": 0},
         "1|subID": {"name": "Normal",
+            "mu": 0, # using non-centered approach so mu's of indiv subject offsets should be 0
+            "sigma": {"name": "HalfNormal",
+                "sigma": 1
+                }, "initval": 0.5
+            },
+    }
+    v_slope_prior = {
+        "Intercept": {"name": "Normal", "mu": 1, "sigma": 2, "initval": 1},
+        "x": {"name": "Normal", "mu": 0, "sigma": 1, "initval": 0},
+        "y": {"name": "Normal", "mu": 0, "sigma": 1, "initval": 0},
+        "x|subID": {"name": "Normal",
             "mu": 0,
             "sigma": {"name": "HalfNormal",
-            "sigma": 2
-            }, "initval": 0.5
-            }
+                "sigma": 0.5,
+                }, "initval": 0.5
+            },
+        "y|subID": {"name": "Normal",
+            "mu": 0,
+            "sigma": {"name": "HalfNormal",
+                "sigma": 0.5,
+                }, "initval": 0.5
+            },
+        "1|subID": {"name": "Normal",
+            "mu": 0,
+            "sigma": {"name": "HalfNormal",
+                "sigma": 1, "initval": 0.3
+                },
+            },
     }
 
 
@@ -246,28 +269,28 @@ if __name__ == '__main__':
                         {
                             "name": "v0",                            
                             "formula": "v0 ~ 1 + x + y + (1|subID)",
-                            "prior":intercept_prior_true,
+                            "prior":v_intercept_prior,
                             "link": "log",
                             "bounds": (0, 2.5)
                         },
                         {
                             "name": "v1",                            
                             "formula": "v1 ~ 1 + x + y + (1|subID)",
-                            "prior":intercept_prior_true,
+                            "prior":v_intercept_prior,
                             "link": "log",
                             "bounds": (0, 2.5)
                         },
                         {
                             "name": "v2",                            
                             "formula": "v2 ~ 1 + x + y + (1|subID)",
-                            "prior":intercept_prior_true,
+                            "prior":v_intercept_prior,
                             "link": "log",
                             "bounds": (0, 2.5)
                         },
                         {
                             "name": "v3",                            
                             "formula": "v3 ~ 1 + x + y + (1|subID)",
-                            "prior":intercept_prior_true,
+                            "prior":v_intercept_prior,
                             "link": "log",
                             "bounds": (0, 2.5)
                         }
