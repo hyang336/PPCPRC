@@ -425,13 +425,13 @@ if __name__ == '__main__':
     #sample from the model and save the results
     infer_data_race4nba_v = model.sample(sampler="nuts_numpyro", chains=4, cores=ncores, draws=samples, tune=burnin, idata_kwargs = {'log_likelihood': True}, target_accept=TA)
     #save trace
-    az.to_netcdf(infer_data_race4nba_v,outdir +'sample_' + str(burnin) + '_' + str(samples) + '_trace_binarized_NoT_' + signalname + '_' + modelname + '_on_' + regressor + '.nc4')
+    az.to_netcdf(infer_data_race4nba_v,outdir +'sample_' + str(burnin) + '_' + str(samples) + '_TA_' + str(TA) + '_trace_binarized_NoT_' + signalname + '_' + modelname + '_on_' + regressor + '.nc4')
     #save trace plot
     az.plot_trace(
         infer_data_race4nba_v,
         var_names="~log_likelihood",  # we exclude the log_likelihood traces here
     )
-    plt.savefig(outdir+'posterior_diagnostic_' + str(burnin) + '_' + str(samples) + '_trace_binarized_NoT_' + signalname + '_' + modelname + '_on_' + regressor + '.png')
+    plt.savefig(outdir+'posterior_diagnostic_' + str(burnin) + '_' + str(samples) + '_TA_' + str(TA) + '_trace_binarized_NoT_' + signalname + '_' + modelname + '_on_' + regressor + '.png')
     #save summary
     res_sum=az.summary(model.traces)
-    res_sum.to_csv(outdir+'summary_' + str(burnin) + '_' + str(samples) + '_trace_binarized_NoT_' + signalname + '_' + modelname + '_on_' + regressor + '.csv')
+    res_sum.to_csv(outdir+'summary_' + str(burnin) + '_' + str(samples) + '_TA_' + str(TA) + '_trace_binarized_NoT_' + signalname + '_' + modelname + '_on_' + regressor + '.csv')
