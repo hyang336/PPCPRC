@@ -57,23 +57,13 @@ if __name__ == '__main__':
     n_trials=200 #number of trials per subject
     param_sv=0.2 #standard deviation of the subject-level parameters
 
-    # Save trial-level parameters for each subject
-    subject_params={
-        "v": np.array([]),
-        "a": np.array([]),
-        "z": np.array([]),
-        "t": np.array([]),
-        "simneural": np.array([]),
-        "subID": np.array([])
-    }
-
     # simulated data list
     sim_data=[]
 
     # Generate subject-level parameters
     for i in range(n_subjects):
-        # set the seed for each subject deterministically so all models are based on the same data
-        np.random.seed(i)
+        # # set the seed for each subject deterministically so all models are based on the same data
+        # np.random.seed(i)
         # generate neural data, standard normal as the real data
         simneural=np.random.normal(size=n_trials)
 
@@ -88,14 +78,6 @@ if __name__ == '__main__':
         a = np.clip(a, 0.3, 2.5)
         z = np.clip(z, 0, 1)
         t = np.clip(t, 0, 2)
-
-        # save to subject_params
-        subject_params["v"]=np.append(subject_params["v"],v)
-        subject_params["a"]=np.append(subject_params["a"],a)
-        subject_params["z"]=np.append(subject_params["z"],z)
-        subject_params["t"]=np.append(subject_params["t"],t)
-        subject_params["simneural"]=np.append(subject_params["simneural"],simneural)
-        subject_params["subID"]=np.append(subject_params["subID"],np.repeat(i,len(simneural)))
 
         # simulate RT and choices
         true_values = np.column_stack([v,np.repeat([[a,z,t]], axis=0, repeats=len(simneural))])
