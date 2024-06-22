@@ -81,8 +81,10 @@ if __name__ == '__main__':
         z = np.clip(z_i, 0, 1)
         t = np.clip(t_i, 0, 2)
 
+        azt=np.repeat([[a,z,t]], axis=0, repeats=len(simneural))
+        azt=azt.squeeze()
         # simulate RT and choices
-        true_values = np.column_stack([v,np.repeat([[a,z,t]], axis=0, repeats=len(simneural))])
+        true_values = np.column_stack([v,azt])
 
         # Get mode simulations
         ddm_all = hssm.simulate_data(model="ddm", theta=true_values, size=1)
