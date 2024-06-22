@@ -195,6 +195,80 @@ if __name__ == '__main__':
             res_sum_true=az.summary(model_ddm_true.traces)
             res_sum_true.to_csv(outdir+'summary_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_ddm_simple_NutsNumpyro_true.csv')
         
+        case 'true_no_t':            
+            # True model
+            model_ddm_true = hssm.HSSM(
+                data=sim_data_concat,                
+                prior_settings="safe",
+                include=[
+                    {
+                        "name": "v",                            
+                        "formula": "v ~ 1 + x + (1 + x|subID)",
+                        "prior": {
+                            "Intercept": {"name": "Normal", "mu": 1, "sigma": 2, "initval": 1},
+                            "x": {"name": "Normal", "mu": 0, "sigma": 1, "initval": 0},
+                            "1|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                    "sigma": 1
+                                    }, "initval": 0.5
+                                },
+                            "x|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                    "sigma": 0.5
+                                    }, "initval": 0.5
+                                }
+                            },
+                        "link": "identity"
+                    },
+                    {
+                        "name": "a",                            
+                        "formula": "a ~ 1 + (1|subID)",
+                        "prior": {
+                            "Intercept": {"name": "Gamma", "mu": 0.5, "sigma": 1.75, "initval": 1},
+                            "1|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                    "sigma": 1, "initval": 0.3
+                                    },
+                                }
+                        },
+                        "link": "identity"
+                    },
+                    {
+                        "name": "z",                            
+                        "formula": "z ~ 1 + (1|subID)",
+                        "prior": {
+                            # "Intercept": {"name": "HalfNormal", "sigma": 1, "initval": .5},
+                            "1|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                    "sigma": 0.05,  "initval": 0.01
+                                    },
+                                }
+                        },
+                        "link": "identity"
+                    },
+                ],
+            )
+            
+            #sample from the model
+            #infer_data_race4nba_v_true = model_race4nba_v_true.sample(step=pm.Slice(model=model_race4nba_v_true.pymc_model), sampler="mcmc", chains=4, cores=4, draws=5000, tune=10000,idata_kwargs = {'log_likelihood': True})
+            infer_data_ddm_true = model_ddm_true.sample(sampler="nuts_numpyro", chains=4, cores=ncores, draws=samples, tune=burnin,idata_kwargs = {'log_likelihood': True}, target_accept=TA)            
+            #save trace
+            az.to_netcdf(infer_data_ddm_true,outdir+'sample_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_ddm_simpleNoT_NutsNumpyro_true.nc4')
+            #save trace plot
+            az.plot_trace(
+                infer_data_ddm_true,
+                var_names="~log_likelihood",  # we exclude the log_likelihood traces here
+            )
+            plt.savefig(outdir+'posterior_diagnostic_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_ddm_simpleNoT_NutsNumpyro_true.png')
+            #save summary
+            res_sum_true=az.summary(model_ddm_true.traces)
+            res_sum_true.to_csv(outdir+'summary_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_ddm_simpleNoT_NutsNumpyro_true.csv')
+        
+
         case 'null':
             # model with no relationship between v and neural data
             model_ddm_null = hssm.HSSM(

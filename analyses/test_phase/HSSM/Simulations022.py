@@ -200,7 +200,7 @@ if __name__ == '__main__':
                     choices=4,
                     prior_settings="safe",
                     a=2.0,
-                    z=0.0,
+                    z=0.5,
                     include=[
                         {
                             "name": "v0",                            
@@ -241,7 +241,7 @@ if __name__ == '__main__':
                     noncentered=True,
                     prior_settings="safe",
                     a=2.0,
-                    z=0.0,
+                    z=0.5,
                     include=[
                         {
                             "name": "v0",                            
@@ -300,7 +300,7 @@ if __name__ == '__main__':
                 noncentered=True,
                 prior_settings="safe",
                 a=2.0,
-                z=0.0,
+                z=0.5,
                 include=[
                     {
                         "name": "v0",                        
