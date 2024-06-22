@@ -1,5 +1,5 @@
 #generate data using race_4 model, there are separate v and z for each accumulator, but a and t are shared
-from ssms.basic_simulators import simulator
+#from ssms.basic_simulators import simulator
 import numpy as np
 import pandas as pd
 from scipy.special import softmax
@@ -101,16 +101,16 @@ if __name__ == '__main__':
         true_values = np.column_stack([v,np.repeat([[a,z,t]], axis=0, repeats=len(simneural))])
 
         # Get mode simulations
-        ddm_all = simulator.simulator(true_values, model="ddm", n_samples=1)
-
+        #ddm_all = simulator.simulator(true_values, model="ddm", n_samples=1)
+        ddm_all = hssm.simulate_data(model="ddm", theta=true_values, size=1)
         # Random regressor as control
         rand_x = np.random.normal(size=len(simneural))
         
         sim_data.append(
             pd.DataFrame(
                 {
-                    "rt": ddm_all["rts"].flatten(),
-                    "response": ddm_all["choices"].flatten(),
+                    "rt": ddm_all["rt"],
+                    "response": ddm_all["response"],
                     "x": simneural,                    
                     "rand_x": rand_x,                    
                     "subID": i
