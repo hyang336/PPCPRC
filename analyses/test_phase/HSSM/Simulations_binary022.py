@@ -205,16 +205,16 @@ if __name__ == '__main__':
             #infer_data_race4nba_v_true = model_race4nba_v_true.sample(step=pm.Slice(model=model_race4nba_v_true.pymc_model), sampler="mcmc", chains=4, cores=4, draws=5000, tune=10000,idata_kwargs = {'log_likelihood': True})
             infer_data_ddm_true = model_ddm_true.sample(sampler="nuts_numpyro", chains=4, cores=ncores, draws=samples, tune=burnin,idata_kwargs = {'log_likelihood': True}, target_accept=TA)            
             #save trace
-            az.to_netcdf(infer_data_ddm_true,outdir+'sample_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_ddm_NutsNumpyro_true.nc4')
+            az.to_netcdf(infer_data_ddm_true,outdir+'sample_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_ddm_NutsNumpyro_true_NoT.nc4')
             #save trace plot
             az.plot_trace(
                 infer_data_ddm_true,
                 var_names="~log_likelihood",  # we exclude the log_likelihood traces here
             )
-            plt.savefig(outdir+'posterior_diagnostic_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_ddm_NutsNumpyro_true.png')
+            plt.savefig(outdir+'posterior_diagnostic_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_ddm_NutsNumpyro_true_NoT.png')
             #save summary
             res_sum_true=az.summary(model_ddm_true.traces)
-            res_sum_true.to_csv(outdir+'summary_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_ddm_NutsNumpyro_true.csv')
+            res_sum_true.to_csv(outdir+'summary_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_ddm_NutsNumpyro_true_NoT.csv')
         
         case 'null':
             # model with no relationship between v and neural data
@@ -269,16 +269,16 @@ if __name__ == '__main__':
             #infer_data_race4nba_v_null = model_race4nba_v_null.sample(step=pm.Slice(model=model_race4nba_v_null.pymc_model), sampler="mcmc", chains=4, cores=4, draws=5000, tune=10000,idata_kwargs = {'log_likelihood': True})
             infer_data_ddm_null = model_ddm_null.sample(sampler="nuts_numpyro", chains=4, cores=ncores, draws=samples, tune=burnin,idata_kwargs = {'log_likelihood': True}, target_accept=TA)
             # az.to_netcdf(infer_data_race4nba_v_null,outdir+'sample_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_null.nc4')
-            az.to_netcdf(infer_data_ddm_null,outdir+'sample_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_ddm_NutsNumpyro_null.nc4')
+            az.to_netcdf(infer_data_ddm_null,outdir+'sample_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_ddm_NutsNumpyro_null_NoT.nc4')
             az.plot_trace(
                 infer_data_ddm_null,
                 var_names="~log_likelihood",  # we exclude the log_likelihood traces here
             )
             # plt.savefig(outdir+'posterior_diagnostic_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_null.png')
-            plt.savefig(outdir+'posterior_diagnostic_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_ddm_NutsNumpyro_null.png')
+            plt.savefig(outdir+'posterior_diagnostic_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_ddm_NutsNumpyro_null_NoT.png')
             res_sum_null=az.summary(model_ddm_null.traces)
             # res_sum_null.to_csv(outdir+'summary_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_null.csv')
-            res_sum_null.to_csv(outdir+'summary_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_ddm_NutsNumpyro_null.csv')
+            res_sum_null.to_csv(outdir+'summary_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_ddm_NutsNumpyro_null_NoT.csv')
 
         case 'rand':                        
             # model with regression on random vectors (i.e. fake neural data that has the same distribution but was not involved in generating the parameters)
@@ -355,16 +355,16 @@ if __name__ == '__main__':
             # infer_data_race4nba_v_rand = model_race4nba_v_rand.sample(step=pm.Slice(model=model_race4nba_v_rand.pymc_model), sampler="mcmc", chains=4, cores=4, draws=5000, tune=10000,idata_kwargs = {'log_likelihood': True})
             infer_data_ddm_rand = model_ddm_rand.sample(sampler="nuts_numpyro", chains=4, cores=ncores, draws=samples, tune=burnin,idata_kwargs = {'log_likelihood': True}, target_accept=TA)
             # az.to_netcdf(infer_data_race4nba_v_rand,outdir+'sample_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_rand.nc4')
-            az.to_netcdf(infer_data_ddm_rand,outdir+'sample_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_ddm_NutsNumpyro_rand.nc4')
+            az.to_netcdf(infer_data_ddm_rand,outdir+'sample_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_ddm_NutsNumpyro_rand_NoT.nc4')
             az.plot_trace(
                 infer_data_ddm_rand,
                 var_names="~log_likelihood",  # we exclude the log_likelihood traces here
             )
             # plt.savefig(outdir+'posterior_diagnostic_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_rand.png')
-            plt.savefig(outdir+'posterior_diagnostic_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_ddm_NutsNumpyro_rand.png')
+            plt.savefig(outdir+'posterior_diagnostic_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_ddm_NutsNumpyro_rand_NoT.png')
             res_sum_rand=az.summary(model_ddm_rand.traces)
             # res_sum_rand.to_csv(outdir+'summary_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_rand.csv')
-            res_sum_rand.to_csv(outdir+'summary_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_ddm_NutsNumpyro_rand.csv')
+            res_sum_rand.to_csv(outdir+'summary_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_ddm_NutsNumpyro_rand_NoT.csv')
 
 
 
