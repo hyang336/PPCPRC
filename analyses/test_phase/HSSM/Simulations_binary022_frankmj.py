@@ -24,8 +24,10 @@ if __name__ == '__main__':
     parser.add_argument('--TA', type=str, help='target_accept for NUTS sampler',default=0.8)
     args = parser.parse_args()
 
+    samples=int(args.samples)
+    burnin=int(args.burnin)
     outdir=args.outdir
-    
+
     # make the output directory if it doesn't exist
     if not os.path.exists(outdir):
         os.makedirs(outdir)
@@ -175,6 +177,17 @@ if __name__ == '__main__':
         sampler="nuts_numpyro", # type of sampler to choose, 'nuts_numpyro'
         cores=1, # how many cores to use
         chains=3, # how many chains to run
-        draws=2000, # number of draws from the markov chain
-        tune=2000, # number of burn-in samples
+        draws=samples, # number of draws from the markov chain
+        tune=burnin, # number of burn-in samples
         idata_kwargs=dict(log_likelihood=True))
+    az.to_netcdf(samples_model_reg_v_ddm_hier1A,outdir+'sample_' + str(burnin) + '_' + str(samples) + '_ddm_frankmj.nc4')
+            
+    az.plot_trace(
+                samples_model_reg_v_ddm_hier1A,
+                var_names="~log_likelihood",  # we exclude the log_likelihood traces here
+            )
+    plt.savefig(outdir+'posterior_diagnostic_' + str(burnin) + '_' + str(samples) + '_ddm_frankmj.png')
+    #save summary
+    res_sum_true=az.summary(model_reg_v_ddm_hier1A.traces)
+    res_sum_true.to_csv(outdir+'summary_' + str(burnin) + '_' + str(samples) + '_ddm_frankmj.csv')
+        
