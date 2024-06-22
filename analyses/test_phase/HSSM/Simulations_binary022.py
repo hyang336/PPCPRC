@@ -51,10 +51,10 @@ if __name__ == '__main__':
     a_slope=0.3
     z_slope=0.1
     t_slope=0.2
-    v_intercept=0
+    v_intercept=0.5
     a_intercept=2
-    z_intercept=0
-    t_intercept=0.05
+    z_intercept=0.5
+    t_intercept=0.5
 
     n_subjects=30 #number of subjects
     n_trials=200 #number of trials per subject
@@ -124,6 +124,9 @@ if __name__ == '__main__':
     #make a single dataframe of subject-wise simulated data
     sim_data_concat=pd.concat(sim_data)
 
+    #save subject-wise parameters
+    param_df=pd.DataFrame(subject_params)
+    param_df.to_csv(outdir+'simulation_binary_022_subject_params.csv')
     ####################################################################################### Define models ################################################################################################
     match model:
         case 'true':            
@@ -135,23 +138,66 @@ if __name__ == '__main__':
                     {
                         "name": "v",                            
                         "formula": "v ~ 1 + x + (1 + x|subID)",
+                        "prior": {
+                            "Intercept": {"name": "Normal", "mu": 1, "sigma": 2, "initval": 1},
+                            "x": {"name": "Normal", "mu": 0, "sigma": 1, "initval": 0},
+                            "x|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                    "sigma": 0.5
+                                    }, "initval": 0.5
+                                },
+                            "1|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                    "sigma": 1
+                                    }, "initval": 0.5
+                                }
+                        },
                         "link": "identity"
                     },
                     {
                         "name": "a",                            
                         "formula": "a ~ 1 + x + (1 + x|subID)",
+                        "prior": {
+                            "Intercept": {"name": "Normal", "mu": 1, "sigma": 1.75, "initval": 1},
+                            "x": {"name": "Normal", "mu": 0, "sigma": 1, "initval": 0},
+                            "x|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                    "sigma": 0.5
+                                    }, "initval": 0.5
+                                },
+                            "1|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                    "sigma": 1
+                                    }, "initval": 0.3
+                                }
+                        },
                         "link": "identity"
                     },
                     {
                         "name": "z",                            
                         "formula": "z ~ 1 + x + (1 + x|subID)",
+                        "prior": {
+                            "Intercept": {"name": "HalfNormal", "sigma": 1, "initval": .5},
+                            "x": {"name": "Normal", "mu": 0, "sigma": 1, "initval": 0},
+                            "x|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                    "sigma": 0.5
+                                    }, "initval": 0.5
+                                },
+                            "1|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                    "sigma": 0.05
+                                    }, "initval": 0.01
+                                }
+                        },
                         "link": "identity"
                     },
-                    {
-                        "name": "t",                            
-                        "formula": "t ~ 1 + x + (1 + x|subID)",
-                        "link": "identity"
-                    }
                 ],
             )
             
@@ -184,7 +230,7 @@ if __name__ == '__main__':
                             "1|subID": {"name": "Normal",
                                 "mu": 0,
                                 "sigma": {"name": "HalfNormal",
-                                "sigma": 2
+                                "sigma": 1
                                 }, "initval": 0.5
                                 }
                         },
@@ -194,12 +240,12 @@ if __name__ == '__main__':
                         "name": "a",                            
                         "formula": "a ~ 1 + (1|subID)",
                         "prior": {
-                            "Intercept": {"name": "Gamma", "mu": 0.5, "sigma": 2, "initval": 1},
+                            "Intercept": {"name": "Gamma", "mu": 0.5, "sigma": 1.75, "initval": 1},
                             "1|subID": {"name": "Normal",
                                 "mu": 0,
                                 "sigma": {"name": "HalfNormal",
-                                "sigma": 2
-                                }, "initval": 0.5
+                                "sigma": 1
+                                }, "initval": 0.3
                                 }
                         },
                         "link": "identity"
@@ -208,30 +254,16 @@ if __name__ == '__main__':
                         "name": "z",                            
                         "formula": "z ~ 1 + (1|subID)",
                         "prior": {
-                            "Intercept": {"name": "Normal", "mu": 0, "sigma": 2, "initval": 0},
+                            "Intercept": {"name": "HalfNormal", "sigma": 1, "initval": .5},
                             "1|subID": {"name": "Normal",
                                 "mu": 0,
                                 "sigma": {"name": "HalfNormal",
-                                "sigma": 2
-                                }, "initval": 0.5
+                                "sigma": 0.05
+                                }, "initval": 0.01
                                 }
                         },
                         "link": "identity"
                     },
-                    {
-                        "name": "t",                            
-                        "formula": "t ~ 1 + (1|subID)",
-                        "prior": {
-                            "Intercept": {"name": "Normal", "mu": 0, "sigma": 2, "initval": 0.3},
-                            "1|subID": {"name": "Normal",
-                                "mu": 0,
-                                "sigma": {"name": "HalfNormal",
-                                "sigma": 2
-                                }, "initval": 0.5
-                                }
-                        },
-                        "link": "identity"
-                    }
                 ],
             )
             #infer_data_race4nba_v_null = model_race4nba_v_null.sample(step=pm.Slice(model=model_race4nba_v_null.pymc_model), sampler="mcmc", chains=4, cores=4, draws=5000, tune=10000,idata_kwargs = {'log_likelihood': True})
@@ -257,23 +289,66 @@ if __name__ == '__main__':
                     {
                         "name": "v",                            
                         "formula": "v ~ 1 + rand_x + (1 + rand_x|subID)",
+                        "prior": {
+                            "Intercept": {"name": "Normal", "mu": 1, "sigma": 2, "initval": 1},
+                            "rand_x": {"name": "Normal", "mu": 0, "sigma": 1, "initval": 0},
+                            "rand_x|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                    "sigma": 0.5
+                                    }, "initval": 0.5
+                                },
+                            "1|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                    "sigma": 1
+                                    }, "initval": 0.5
+                                }
+                        },
                         "link": "identity"
                     },
                     {
                         "name": "a",                            
                         "formula": "a ~ 1 + rand_x + (1 + rand_x|subID)",
+                        "prior": {
+                            "Intercept": {"name": "Normal", "mu": 1, "sigma": 1.75, "initval": 1},
+                            "rand_x": {"name": "Normal", "mu": 0, "sigma": 1, "initval": 0},
+                            "rand_x|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                    "sigma": 0.5
+                                    }, "initval": 0.5
+                                },
+                            "1|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                    "sigma": 1
+                                    }, "initval": 0.3
+                                }
+                        },
                         "link": "identity"
                     },
                     {
                         "name": "z",                            
                         "formula": "z ~ 1 + rand_x + (1 + rand_x|subID)",
+                        "prior": {
+                            "Intercept": {"name": "HalfNormal", "sigma": 1, "initval": .5},
+                            "rand_x": {"name": "Normal", "mu": 0, "sigma": 1, "initval": 0},
+                            "rand_x|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                    "sigma": 0.5
+                                    }, "initval": 0.5
+                                },
+                            "1|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                    "sigma": 0.05
+                                    }, "initval": 0.01
+                                }
+                        },
                         "link": "identity"
                     },
-                    {
-                        "name": "t",                            
-                        "formula": "t ~ 1 + rand_x + (1 + rand_x|subID)",
-                        "link": "identity"
-                    }
                 ],
             )
             
