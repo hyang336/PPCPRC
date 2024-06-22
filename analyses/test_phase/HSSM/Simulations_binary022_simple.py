@@ -168,7 +168,7 @@ if __name__ == '__main__':
                         "name": "z",                            
                         "formula": "z ~ 1 + (1|subID)",
                         "prior": {
-                            "Intercept": {"name": "Normal", "mu": 0, "sigma": 0.5, "initval": 0},
+                            "Intercept": {"name": "Normal", "mu": 0.5, "sigma": 0.5, "initval": 0.5},
                             "1|subID": {"name": "Normal",
                                 "mu": 0,
                                 "sigma": {"name": "HalfNormal",
@@ -333,7 +333,7 @@ if __name__ == '__main__':
                         "name": "z",                            
                         "formula": "z ~ 1 + (1|subID)",
                         "prior": {
-                            "Intercept": {"name": "Normal", "mu": 0, "sigma": 0.5, "initval": 0},
+                            "Intercept": {"name": "Normal", "mu": 0.5, "sigma": 0.5, "initval": 0.5},
                             "1|subID": {"name": "Normal",
                                 "mu": 0,
                                 "sigma": {"name": "HalfNormal",
