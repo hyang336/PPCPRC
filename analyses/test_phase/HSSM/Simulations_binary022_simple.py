@@ -48,7 +48,7 @@ if __name__ == '__main__':
 
     #--------------------------------------We can try several generative model--------------------------------###
     v_slope=0.45
-    v_intercept=0
+    v_intercept=1.25
     a_intercept=1.5
     z_intercept=0.5
     t_intercept=0.05
@@ -83,11 +83,11 @@ if __name__ == '__main__':
         z=np.random.normal(z_intercept, param_sv)
         t=np.random.normal(t_intercept, param_sv)
 
-        # clip parameters to stay within default bounds
-        v = np.clip(v, -3, 3)
-        a = np.clip(a, 0.3, 2.5)
-        z = np.clip(z, 0, 1)
-        t = np.clip(t, 0, 2)
+        # # clip parameters to stay within default bounds
+        # v = np.clip(v, -3, 3)
+        # a = np.clip(a, 0.3, 2.5)
+        # z = np.clip(z, 0, 1)
+        # t = np.clip(t, 0, 2)
 
         # save to subject_params
         subject_params["v"]=np.append(subject_params["v"],v)
