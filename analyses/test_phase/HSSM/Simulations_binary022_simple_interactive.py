@@ -49,74 +49,49 @@ if not os.path.exists(outdir):
 
 #--------------------------------------We can try several generative model--------------------------------###
 v_slope=0.45
-v_intercept=1
-a_intercept=2
-z_intercept=0
-t_intercept=0.05
+v_intercept=1.25
+a_intercept=1.5
+z_intercept=0.5
+t_intercept=0.5
 
 n_subjects=30 #number of subjects
 n_trials=200 #number of trials per subject
 param_sv=0.2 #standard deviation of the subject-level parameters
 
-# Save trial-level parameters for each subject
-subject_params={
-    "v": np.array([]),
-    "a": np.array([]),
-    "z": np.array([]),
-    "t": np.array([]),
-    "simneural": np.array([]),
-    "subID": np.array([])
-}
-
 # simulated data list
 sim_data=[]
-sim_data2=[]
+
 # Generate subject-level parameters
 for i in range(n_subjects):
     # set the seed for each subject deterministically so all models are based on the same data
     np.random.seed(i)
     # generate neural data, standard normal as the real data
     simneural=np.random.normal(size=n_trials)
-    # generate v0, v1, v2, v3
-    v=np.random.normal(v_intercept, param_sv) + np.random.normal(v_slope, param_sv)*simneural
-    a=np.random.normal(a_intercept, param_sv)
-    z=np.random.normal(z_intercept, param_sv)
-    t=np.random.normal(t_intercept, param_sv)
+    # generate v a z t
+    v_i=np.random.normal(v_intercept, param_sv,size=1)
+    v_x=np.random.normal(v_slope, param_sv,size=1)
+    v=v_i+v_x*simneural
+    a_i=np.random.normal(a_intercept, param_sv,size=1)
+    z_i=np.random.normal(z_intercept, param_sv,size=1)
+    t_i=np.random.normal(t_intercept, param_sv,size=1)
     # clip parameters to stay within default bounds
     v = np.clip(v, -3, 3)
-    a = np.clip(a, 0.3, 2.5)
-    z = np.clip(z, 0, 1)
-    t = np.clip(t, 0, 2)
-    # save to subject_params
-    subject_params["v"]=np.append(subject_params["v"],v)
-    subject_params["a"]=np.append(subject_params["a"],a)
-    subject_params["z"]=np.append(subject_params["z"],z)
-    subject_params["t"]=np.append(subject_params["t"],t)
-    subject_params["simneural"]=np.append(subject_params["simneural"],simneural)
-    subject_params["subID"]=np.append(subject_params["subID"],np.repeat(i,len(simneural)))
+    a = np.clip(a_i, 0.3, 2.5)
+    z = np.clip(z_i, 0, 1)
+    t = np.clip(t_i, 0, 2)
+    azt=np.repeat([[a,z,t]], axis=0, repeats=len(simneural))
+    azt=azt.squeeze()
     # simulate RT and choices
-    true_values = np.column_stack([v,np.repeat([[a,z,t]], axis=0, repeats=len(simneural))])
+    true_values = np.column_stack([v,azt])
     # Get mode simulations
-    ddm_all = simulator.simulator(true_values, model="ddm", n_samples=1)
-    ddm_all2 = hssm.simulate_data(model="ddm", theta=true_values, size=1)
+    ddm_all = hssm.simulate_data(model="ddm", theta=true_values, size=1)
     # Random regressor as control
-    rand_x = np.random.normal(size=len(simneural))
+    rand_x = np.random.normal(size=len(simneural))    
     sim_data.append(
         pd.DataFrame(
             {
-                "rt": ddm_all["rts"].flatten(),
-                "response": ddm_all["choices"].flatten(),
-                "x": simneural,                    
-                "rand_x": rand_x,                    
-                "subID": i
-            }
-        )
-    )
-    sim_data2.append(
-        pd.DataFrame(
-            {
-                "rt": ddm_all2["rt"],
-                "response": ddm_all2["response"],
+                "rt": ddm_all["rt"],
+                "response": ddm_all["response"],
                 "x": simneural,                    
                 "rand_x": rand_x,                    
                 "subID": i
@@ -126,7 +101,6 @@ for i in range(n_subjects):
 
 #make a single dataframe of subject-wise simulated data
 sim_data_concat=pd.concat(sim_data)
-sim_data_concat2=pd.concat(sim_data2)
 ####################################################################################### Define models ################################################################################################
 # True model
 model_ddm_true = hssm.HSSM(

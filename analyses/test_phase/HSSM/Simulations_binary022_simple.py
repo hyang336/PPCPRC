@@ -143,8 +143,8 @@ if __name__ == '__main__':
                             "1|subID": {"name": "Normal",
                                 "mu": 0,
                                 "sigma": {"name": "HalfNormal",
-                                    "sigma": 1
-                                    }, "initval": 0.3
+                                    "sigma": 1, "initval": 0.3
+                                    },
                                 }
                         },
                         "link": "identity"
@@ -153,12 +153,12 @@ if __name__ == '__main__':
                         "name": "z",                            
                         "formula": "z ~ 1 + (1|subID)",
                         "prior": {
-                            #"Intercept": {"name": "Normal", "mu": 0.5, "sigma": 0.5, "initval": 0.5},
+                            # "Intercept": {"name": "HalfNormal", "sigma": 1, "initval": .5},
                             "1|subID": {"name": "Normal",
                                 "mu": 0,
                                 "sigma": {"name": "HalfNormal",
-                                    "sigma": 0.05
-                                    }, "initval": 0.01
+                                    "sigma": 0.05,  "initval": 0.01
+                                    },
                                 }
                         },
                         "link": "identity"
@@ -167,12 +167,12 @@ if __name__ == '__main__':
                         "name": "t",                            
                         "formula": "t ~ 1 + (1|subID)",
                         "prior": {
-                            "Intercept": {"name": "Normal", "mu": 0, "sigma": 0.4, "initval": 0.3},
+                            "Intercept": {"name": "Normal", "mu": 0.5, "sigma": 0.4, "initval": 0.3},
                             "1|subID": {"name": "Normal",
                                 "mu": 0,
                                 "sigma": {"name": "HalfNormal",
-                                    "sigma": 0.5
-                                    }, "initval": 0.1
+                                    "sigma": 0.5,  "initval": 0.1
+                                    },
                                 }
                         },
                         "link": "identity"
