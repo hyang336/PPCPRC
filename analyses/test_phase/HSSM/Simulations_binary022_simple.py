@@ -83,11 +83,11 @@ if __name__ == '__main__':
         z=np.random.normal(z_intercept, param_sv)
         t=np.random.normal(t_intercept, param_sv)
 
-        # # clip parameters to stay within default bounds
-        # v = np.clip(v, -3, 3)
-        # a = np.clip(a, 0.3, 2.5)
-        # z = np.clip(z, 0, 1)
-        # t = np.clip(t, 0, 2)
+        # clip parameters to stay within default bounds
+        v = np.clip(v, -3, 3)
+        a = np.clip(a, 0.3, 2.5)
+        z = np.clip(z, 0, 1)
+        t = np.clip(t, 0, 2)
 
         # save to subject_params
         subject_params["v"]=np.append(subject_params["v"],v)
