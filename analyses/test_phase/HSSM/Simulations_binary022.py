@@ -90,7 +90,7 @@ if __name__ == '__main__':
         v = np.clip(v, -3, 3)
         a = np.clip(a, 0.3, 2.5)
         z = np.clip(z, 0, 1)
-        t = np.clip(t, 0, 2)
+        t = np.clip(t, 0.3, 2)
 
         # save to subject_params
         subject_params["v"]=np.append(subject_params["v"],v)
