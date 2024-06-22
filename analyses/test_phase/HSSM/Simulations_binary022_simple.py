@@ -77,9 +77,9 @@ if __name__ == '__main__':
 
         # clip parameters to stay within default bounds
         v = np.clip(v, -3, 3)
-        a = np.clip(a, 0.3, 2.5)
-        z = np.clip(z, 0, 1)
-        t = np.clip(t, 0, 2)
+        a = np.clip(a_i, 0.3, 2.5)
+        z = np.clip(z_i, 0, 1)
+        t = np.clip(t_i, 0, 2)
 
         # simulate RT and choices
         true_values = np.column_stack([v,np.repeat([[a,z,t]], axis=0, repeats=len(simneural))])
