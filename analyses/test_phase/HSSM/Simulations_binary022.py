@@ -79,19 +79,16 @@ if __name__ == '__main__':
         np.random.seed(i)
         # generate neural data, standard normal as the real data
         simneural=np.random.normal(size=n_trials)
-
         # generate v0, v1, v2, v3
         v=np.random.normal(v_intercept, param_sv) + np.random.normal(v_slope, param_sv)*simneural
         a=np.random.normal(a_intercept, param_sv) + np.random.normal(a_slope, param_sv)*simneural
         z=np.random.normal(z_intercept, param_sv) + np.random.normal(z_slope, param_sv)*simneural
         t=np.random.normal(t_intercept, param_sv) + np.random.normal(t_slope, param_sv)*simneural
-
         # clip parameters to stay within default bounds
         v = np.clip(v, -3, 3)
         a = np.clip(a, 0.3, 2.5)
         z = np.clip(z, 0, 1)
         t = np.clip(t, 0, 2)
-
         # save to subject_params
         subject_params["v"]=np.append(subject_params["v"],v)
         subject_params["a"]=np.append(subject_params["a"],a)
@@ -99,16 +96,12 @@ if __name__ == '__main__':
         subject_params["t"]=np.append(subject_params["t"],t)
         subject_params["simneural"]=np.append(subject_params["simneural"],simneural)
         subject_params["subID"]=np.append(subject_params["subID"],np.repeat(i,len(simneural)))
-
         # simulate RT and choices
         true_values = np.column_stack([v,a,z,t])
-
         # Get mode simulations
         ddm_all = simulator.simulator(true_values, model="ddm", n_samples=1)
-
         # Random regressor as control
-        rand_x = np.random.normal(size=len(simneural))
-        
+        rand_x = np.random.normal(size=len(simneural))        
         sim_data.append(
             pd.DataFrame(
                 {
@@ -200,7 +193,7 @@ if __name__ == '__main__':
                     },
                     {
                         "name": "t",                            
-                        "formula": "t ~ 1 + x (1 + x|subID)",
+                        "formula": "t ~ 1 + x + (1 + x|subID)",
                         "prior": {
                             "Intercept": {"name": "Normal", "mu": 0.5, "sigma": 0.4, "initval": 0.3},
                             "x": {"name": "Normal", "mu": 0, "sigma": 1, "initval": 0},
@@ -386,7 +379,7 @@ if __name__ == '__main__':
                     },
                     {
                         "name": "t",                            
-                        "formula": "t ~ 1 + rand_x (1 + rand_x|subID)",
+                        "formula": "t ~ 1 + rand_x + (1 + rand_x|subID)",
                         "prior": {
                             "Intercept": {"name": "Normal", "mu": 0.5, "sigma": 0.4, "initval": 0.3},
                             "rand_x": {"name": "Normal", "mu": 0, "sigma": 1, "initval": 0},

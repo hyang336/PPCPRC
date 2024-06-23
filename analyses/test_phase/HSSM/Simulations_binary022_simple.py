@@ -94,7 +94,7 @@ if __name__ == '__main__':
         sim_data.append(
             pd.DataFrame(
                 {
-                    "rt": ddm_all["rt"],
+                    "rt": ddm_all["rt"] + 0.3,
                     "response": ddm_all["response"],
                     "x": simneural,                    
                     "rand_x": rand_x,                    
@@ -184,16 +184,16 @@ if __name__ == '__main__':
             #infer_data_race4nba_v_true = model_race4nba_v_true.sample(step=pm.Slice(model=model_race4nba_v_true.pymc_model), sampler="mcmc", chains=4, cores=4, draws=5000, tune=10000,idata_kwargs = {'log_likelihood': True})
             infer_data_ddm_true = model_ddm_true.sample(sampler="nuts_numpyro", chains=4, cores=ncores, draws=samples, tune=burnin,idata_kwargs = {'log_likelihood': True}, target_accept=TA)            
             #save trace
-            az.to_netcdf(infer_data_ddm_true,outdir+'sample_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_ddm_simple_NutsNumpyro_true.nc4')
+            az.to_netcdf(infer_data_ddm_true,outdir+'sample_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_ddm_simple_NutsNumpyro_true_t-hack.nc4')
             #save trace plot
             az.plot_trace(
                 infer_data_ddm_true,
                 var_names="~log_likelihood",  # we exclude the log_likelihood traces here
             )
-            plt.savefig(outdir+'posterior_diagnostic_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_ddm_simple_NutsNumpyro_true.png')
+            plt.savefig(outdir+'posterior_diagnostic_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_ddm_simple_NutsNumpyro_true_t-hack.png')
             #save summary
             res_sum_true=az.summary(model_ddm_true.traces)
-            res_sum_true.to_csv(outdir+'summary_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_ddm_simple_NutsNumpyro_true.csv')
+            res_sum_true.to_csv(outdir+'summary_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_ddm_simple_NutsNumpyro_true_t-hack.csv')
         
         case 'true_no_t':            
             # True model
