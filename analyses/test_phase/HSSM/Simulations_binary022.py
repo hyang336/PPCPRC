@@ -44,7 +44,7 @@ if __name__ == '__main__':
     print('ncores:',ncores)
     print('TA:',TA)
     print('tstrat:',tstrat)
-    
+
     # make the output directory if it doesn't exist
     if not os.path.exists(outdir):
         os.makedirs(outdir,exist_ok=True)
@@ -95,6 +95,10 @@ if __name__ == '__main__':
             t = np.clip(t, 0.3, 2)
         else:
             t = np.clip(t, 0, 2)
+        
+        print('min t:',np.min(t))
+        print('max t:',np.max(t))
+        
         # save to subject_params
         subject_params["v"]=np.append(subject_params["v"],v)
         subject_params["a"]=np.append(subject_params["a"],a)
