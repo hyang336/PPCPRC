@@ -43,7 +43,8 @@ if __name__ == '__main__':
     print('burnin:',burnin)
     print('ncores:',ncores)
     print('TA:',TA)
-
+    print('tstrat:',tstrat)
+    
     # make the output directory if it doesn't exist
     if not os.path.exists(outdir):
         os.makedirs(outdir,exist_ok=True)
