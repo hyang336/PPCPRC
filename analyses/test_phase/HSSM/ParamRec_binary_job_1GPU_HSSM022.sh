@@ -18,6 +18,6 @@ if [ $1 == "simple" ]; then
 elif [ $1 == "frankmj" ]; then
     PYTENSOR_FLAGS='blas__ldflags=-lflexiblas -lgfortran' python /home/hyang336/PPCPRC/analyses/test_phase/HSSM/Simulations_binary022_frankmj.py --outdir '/scratch/hyang336/working_dir/HDDM_HSSM/simulations022/'
 else
-    PYTENSOR_FLAGS='blas__ldflags=-lflexiblas -lgfortran' python /home/hyang336/PPCPRC/analyses/test_phase/HSSM/Simulations_binary022.py --model $2 --outdir '/scratch/hyang336/working_dir/HDDM_HSSM/simulations022/'
+    PYTENSOR_FLAGS='blas__ldflags=-lflexiblas -lgfortran' python /home/hyang336/PPCPRC/analyses/test_phase/HSSM/Simulations_binary022.py --model $2 --tstrat $3
 fi
 
