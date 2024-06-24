@@ -261,7 +261,7 @@ if __name__ == '__main__':
         match modelname:
             case 'v':
                 # define model fomula
-                v_fomula= "v ~ 1 + x + (1 + x|subj_idx)"
+                v_fomula= "v ~ 1 + x + (1|subj_idx)"
                 a_fomula= "a ~ 1 + (1|subj_idx)"
                 z_fomula= "z ~ 1 + (1|subj_idx)"
                 t_fomula= "t ~ 1 + (1|subj_idx)"
@@ -272,7 +272,7 @@ if __name__ == '__main__':
             case 'a':
                 # define model fomula
                 v_fomula= "v ~ 1 + (1|subj_idx)"
-                a_fomula= "a ~ 1 + x + (1 + x|subj_idx)"
+                a_fomula= "a ~ 1 + x + (1|subj_idx)"
                 z_fomula= "z ~ 1 + (1|subj_idx)"
                 t_fomula= "t ~ 1 + (1|subj_idx)"
                 v_prior=v_intercept_prior
@@ -283,7 +283,7 @@ if __name__ == '__main__':
                 # define model fomula
                 v_fomula= "v ~ 1 + (1|subj_idx)"
                 a_fomula= "a ~ 1 + (1|subj_idx)"
-                z_fomula= "z ~ 1 + x + (1 + x|subj_idx)"
+                z_fomula= "z ~ 1 + x + (1|subj_idx)"
                 t_fomula= "t ~ 1 + (1|subj_idx)"
                 v_prior=v_intercept_prior
                 a_prior=a_intercept_prior
@@ -294,7 +294,7 @@ if __name__ == '__main__':
                 v_fomula= "v ~ 1 + (1|subj_idx)"
                 a_fomula= "a ~ 1 + (1|subj_idx)"
                 z_fomula= "z ~ 1 + (1|subj_idx)"
-                t_fomula= "t ~ 1 + x + (1 + x|subj_idx)"
+                t_fomula= "t ~ 1 + x + (1|subj_idx)"
                 v_prior=v_intercept_prior
                 a_prior=a_intercept_prior
                 z_prior=z_intercept_prior
@@ -448,16 +448,16 @@ if __name__ == '__main__':
         #sample from the model and save the results
         infer_data_race4nba_v = model.sample(sampler="nuts_numpyro", chains=4, cores=ncores, draws=samples, tune=burnin, idata_kwargs = {'log_likelihood': True}, target_accept=TA)
         #save trace
-        az.to_netcdf(infer_data_race4nba_v,outdir +'sample_' + str(burnin) + '_' + str(samples) + '_TA_' + str(TA) + '_trace_' + str(binscheme) + '-binarized_' + 't-strat_' + str(tstrat) + signalname + '_' + modelname + '_on_' + regressor + '.nc4')
+        az.to_netcdf(infer_data_race4nba_v,outdir +'sample_' + str(burnin) + '_' + str(samples) + '_TA_' + str(TA) + '_trace_' + str(binscheme) + '-binarized_' + 't-strat_' + str(tstrat) + '_' + signalname + '_' + modelname + '_on_' + regressor + '.nc4')
         #save trace plot
         az.plot_trace(
             infer_data_race4nba_v,
             var_names="~log_likelihood",  # we exclude the log_likelihood traces here
         )
-        plt.savefig(outdir+'posterior_diagnostic_' + str(burnin) + '_' + str(samples) + '_TA_' + str(TA) + '_trace_' + str(binscheme) + '-binarized_' + 't-strat_' + str(tstrat) + signalname + '_' + modelname + '_on_' + regressor + '.png')
+        plt.savefig(outdir+'posterior_diagnostic_' + str(burnin) + '_' + str(samples) + '_TA_' + str(TA) + '_trace_' + str(binscheme) + '-binarized_' + 't-strat_' + str(tstrat) + '_' + signalname + '_' + modelname + '_on_' + regressor + '.png')
         #save summary
         res_sum=az.summary(model.traces)
-        res_sum.to_csv(outdir+'summary_' + str(burnin) + '_' + str(samples) + '_TA_' + str(TA) + '_trace_' + str(binscheme) + '-binarized_' + 't-strat_' + str(tstrat) + signalname + '_' + modelname + '_on_' + regressor + '.csv')
+        res_sum.to_csv(outdir+'summary_' + str(burnin) + '_' + str(samples) + '_TA_' + str(TA) + '_trace_' + str(binscheme) + '-binarized_' + 't-strat_' + str(tstrat) + '_' + signalname + '_' + modelname + '_on_' + regressor + '.csv')
     else:
         #plot data distribution and prior predict
         print('not implemented yet')
