@@ -16,6 +16,7 @@ if __name__ == '__main__':
     parser.add_argument('--samples', type=str, help='how many samples to draw from MCMC chains',default=10000)
     parser.add_argument('--burnin', type=str, help='how many samples to burn in from MCMC chains',default=10000)
     parser.add_argument('--cores', type=str, help='how many CPU/GPU cores to use for sampling',default=4)
+    parser.add_argument('--binscheme', type=str, help='how responses were binned',default='median')
     parser.add_argument('--signal', type=str, help='which familiarity signal to model',default='recent')
     parser.add_argument('--regressor', type=str, help='which data as regressor',default='null')
     parser.add_argument('--model', type=str, help='which parameters to regress on',default='v')
@@ -28,6 +29,7 @@ if __name__ == '__main__':
     samples=int(args.samples)
     burnin=int(args.burnin)
     ncores=int(args.cores)
+    binscheme=args.binscheme
     signalname=args.signal
     regressor=args.regressor
     modelname=args.model #v, a, z, t #t cause convergence problem when it has random effect in HSSM 0.2.2
@@ -40,12 +42,29 @@ if __name__ == '__main__':
     if not os.path.exists(outdir):
         os.makedirs(outdir,exist_ok=True)
 ###################################################################    # load the data###################################################################
-    if signalname == 'recent':
-        # load the csv
-        fam_data = pd.read_csv('/scratch/hyang336/working_dir/HDDM_HSSM/HSSM_freq_bin_data.csv')
-    elif signalname == 'lifetime':
-        # load the csv
-        fam_data = pd.read_csv('/scratch/hyang336/working_dir/HDDM_HSSM/HSSM_life_bin_data.csv')
+    if binscheme == 'median':
+        if signalname == 'recent':
+            # load the csv
+            fam_data = pd.read_csv('/scratch/hyang336/working_dir/HDDM_HSSM/HSSM_freq_MedianBin_data.csv')
+        elif signalname == 'lifetime':
+            # load the csv
+            fam_data = pd.read_csv('/scratch/hyang336/working_dir/HDDM_HSSM/HSSM_life_MedianBin_data.csv')
+    elif binscheme == 'maxRT':
+        if signalname == 'recent':
+            # load the csv
+            fam_data = pd.read_csv('/scratch/hyang336/working_dir/HDDM_HSSM/HSSM_freq_bin_data.csv')
+        elif signalname == 'lifetime':
+            # load the csv
+            fam_data = pd.read_csv('/scratch/hyang336/working_dir/HDDM_HSSM/HSSM_life_bin_data.csv')
+    else:
+        raise ValueError('binscheme not recognized')
+    
+    # remove trials with < 0.2 sec RT
+    fast_trial_num = len(fam_data[fam_data['rt'] <= 0.2])
+    total_trial_num = len(fam_data)
+    fam_data = fam_data[fam_data['rt'] > 0.2]
+    # print out the proportion of trials removed
+    print('Proportion of trials removed:', fast_trial_num/total_trial_num)
 ########################################################################################################################################################   
     ##Priors following Dr. Frank's suggestion
     v_intercept_prior = {
