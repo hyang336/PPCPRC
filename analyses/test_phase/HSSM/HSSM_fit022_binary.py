@@ -460,4 +460,5 @@ if __name__ == '__main__':
         res_sum.to_csv(outdir+'summary_' + str(burnin) + '_' + str(samples) + '_TA_' + str(TA) + '_trace_' + str(binscheme) + '-binarized_' + 't-strat_' + str(tstrat) + signalname + '_' + modelname + '_on_' + regressor + '.csv')
     else:
         #plot data distribution and prior predict
+        print('not implemented yet')
         
