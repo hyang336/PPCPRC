@@ -23,7 +23,7 @@ if __name__ == '__main__':
     parser.add_argument('--outdir', type=str, help='outpu directory to save results',default='/scratch/hyang336/working_dir/HDDM_HSSM/resp_binarized/')
     parser.add_argument('--TA', type=str, help='target_accept for NUTS sampler',default=0.8)
     parser.add_argument('--run', type=str, help='whether to run the sampler or just plot data distribution and prior predict',default='sample')
-    parser.add_argument('--tstrat', type=str, help='how to handle issue on the t paramter',default='clip')
+    parser.add_argument('--tstrat', type=str, help='how to handle issue on the t paramter',default='prior')
     args = parser.parse_args()
 
     samples=int(args.samples)
@@ -448,16 +448,16 @@ if __name__ == '__main__':
         #sample from the model and save the results
         infer_data_race4nba_v = model.sample(sampler="nuts_numpyro", chains=4, cores=ncores, draws=samples, tune=burnin, idata_kwargs = {'log_likelihood': True}, target_accept=TA)
         #save trace
-        az.to_netcdf(infer_data_race4nba_v,outdir +'sample_' + str(burnin) + '_' + str(samples) + '_TA_' + str(TA) + '_trace_binarized_NoT_' + signalname + '_' + modelname + '_on_' + regressor + '.nc4')
+        az.to_netcdf(infer_data_race4nba_v,outdir +'sample_' + str(burnin) + '_' + str(samples) + '_TA_' + str(TA) + '_trace_' + str(binscheme) + '-binarized_' + 't-strat_' + str(tstrat) + signalname + '_' + modelname + '_on_' + regressor + '.nc4')
         #save trace plot
         az.plot_trace(
             infer_data_race4nba_v,
             var_names="~log_likelihood",  # we exclude the log_likelihood traces here
         )
-        plt.savefig(outdir+'posterior_diagnostic_' + str(burnin) + '_' + str(samples) + '_TA_' + str(TA) + '_trace_binarized_NoT_' + signalname + '_' + modelname + '_on_' + regressor + '.png')
+        plt.savefig(outdir+'posterior_diagnostic_' + str(burnin) + '_' + str(samples) + '_TA_' + str(TA) + '_trace_' + str(binscheme) + '-binarized_' + 't-strat_' + str(tstrat) + signalname + '_' + modelname + '_on_' + regressor + '.png')
         #save summary
         res_sum=az.summary(model.traces)
-        res_sum.to_csv(outdir+'summary_' + str(burnin) + '_' + str(samples) + '_TA_' + str(TA) + '_trace_binarized_NoT_' + signalname + '_' + modelname + '_on_' + regressor + '.csv')
+        res_sum.to_csv(outdir+'summary_' + str(burnin) + '_' + str(samples) + '_TA_' + str(TA) + '_trace_' + str(binscheme) + '-binarized_' + 't-strat_' + str(tstrat) + signalname + '_' + modelname + '_on_' + regressor + '.csv')
     else:
         #plot data distribution and prior predict
         
