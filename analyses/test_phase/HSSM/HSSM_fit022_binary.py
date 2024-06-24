@@ -21,6 +21,8 @@ if __name__ == '__main__':
     parser.add_argument('--model', type=str, help='which parameters to regress on',default='v')
     parser.add_argument('--outdir', type=str, help='outpu directory to save results',default='/scratch/hyang336/working_dir/HDDM_HSSM/resp_binarized/')
     parser.add_argument('--TA', type=str, help='target_accept for NUTS sampler',default=0.8)
+    parser.add_argument('--run', type=str, help='whether to run the sampler or just plot data distribution and prior predict',default='sample')
+    parser.add_argument('--tstrat', type=str, help='how to handle issue on the t paramter',default='clip')
     args = parser.parse_args()
 
     samples=int(args.samples)
@@ -28,9 +30,11 @@ if __name__ == '__main__':
     ncores=int(args.cores)
     signalname=args.signal
     regressor=args.regressor
-    modelname=args.model #v, a, z, va, vz, az, vaz, #t cause convergence problem when it has random effect in HSSM 0.2.2
+    modelname=args.model #v, a, z, t #t cause convergence problem when it has random effect in HSSM 0.2.2
     outdir=args.outdir
     TA=float(args.TA)
+    run=args.run
+    tstrat=args.tstrat
 
     # make the output directory if it doesn't exist
     if not os.path.exists(outdir):
@@ -122,31 +126,31 @@ if __name__ == '__main__':
             },
     }
 
-    # t_intercept_prior = {
-    #     "Intercept": {"name": "Normal", "mu": 0.5, "sigma": 0.4, "initval": 0.3},
-    #     "1|subj_idx": {"name": "Normal",
-    #         "mu": 0,
-    #         "sigma": {"name": "HalfNormal",
-    #             "sigma": 0.5, "initval": .1
-    #             },
-    #         },
-    # }
-    # t_slope_prior = {
-    #     "Intercept": {"name": "Normal", "mu": 0.5, "sigma": 0.4, "initval": 0.3},
-    #     "x": {"name": "Normal", "mu": 0, "sigma": 1, "initval": 0},
-    #     "x|subj_idx": {"name": "Normal",
-    #         "mu": 0,
-    #         "sigma": {"name": "HalfNormal",
-    #             "sigma": 0.5,
-    #             }, "initval": 0.5
-    #         },
-    #     "1|subj_idx": {"name": "Normal",
-    #         "mu": 0,
-    #         "sigma": {"name": "HalfNormal",
-    #             "sigma": 0.5, "initval": .1
-    #             },
-    #         },
-    # }
+    t_intercept_prior = {
+        "Intercept": {"name": "Gamma", "mu": 0.4, "sigma": 0.2, "initval": 0.3},
+        "1|subj_idx": {"name": "Normal",
+            "mu": 0,
+            "sigma": {"name": "HalfNormal",
+                "sigma": 0.03, "initval": .01
+                },
+            },
+    }
+    t_slope_prior = {
+        "Intercept": {"name": "Gamma", "mu": 0.4, "sigma": 0.2, "initval": 0.3},
+        "x": {"name": "Normal", "mu": 0, "sigma": 1, "initval": 0},
+        "x|subj_idx": {"name": "Normal",
+            "mu": 0,
+            "sigma": {"name": "HalfNormal",
+                "sigma": 0.03, "initval": 0.01
+                }
+            },
+        "1|subj_idx": {"name": "Normal",
+            "mu": 0,
+            "sigma": {"name": "HalfNormal",
+                "sigma": 0.03, "initval": .01
+                },
+            },
+    }
 #####################################################   # subset the dataframe ###################################################################    
     sim_data = fam_data[['subj_idx','rt','bin_rating','bin_scheme']]
     # rename the rating column to response
@@ -185,12 +189,12 @@ if __name__ == '__main__':
                     "prior": z_intercept_prior,
                     "link": "identity",
                 },
-                # {
-                #     "name": "t",
-                #     "formula": "t ~ 1 + (1|subj_idx)",
-                #     "prior": t_intercept_prior,
-                #     "link": "identity",
-                # }
+                {
+                    "name": "t",
+                    "formula": "t ~ 1 + (1|subj_idx)",
+                    "prior": t_intercept_prior,
+                    "link": "identity",
+                }
             ],
         )
     else:
@@ -241,61 +245,61 @@ if __name__ == '__main__':
                 v_fomula= "v ~ 1 + x + (1 + x|subj_idx)"
                 a_fomula= "a ~ 1 + (1|subj_idx)"
                 z_fomula= "z ~ 1 + (1|subj_idx)"
-                # t_fomula= "t ~ 1 + (1|subj_idx)"
+                t_fomula= "t ~ 1 + (1|subj_idx)"
                 v_prior=v_slope_prior
                 a_prior=a_intercept_prior
                 z_prior=z_intercept_prior
-                # t_prior=t_intercept_prior
+                t_prior=t_intercept_prior
             case 'a':
                 # define model fomula
                 v_fomula= "v ~ 1 + (1|subj_idx)"
                 a_fomula= "a ~ 1 + x + (1 + x|subj_idx)"
                 z_fomula= "z ~ 1 + (1|subj_idx)"
-                # t_fomula= "t ~ 1 + (1|subj_idx)"
+                t_fomula= "t ~ 1 + (1|subj_idx)"
                 v_prior=v_intercept_prior
                 a_prior=a_slope_prior
                 z_prior=z_intercept_prior
-                # t_prior=t_intercept_prior
+                t_prior=t_intercept_prior
             case 'z':
                 # define model fomula
                 v_fomula= "v ~ 1 + (1|subj_idx)"
                 a_fomula= "a ~ 1 + (1|subj_idx)"
                 z_fomula= "z ~ 1 + x + (1 + x|subj_idx)"
-                # t_fomula= "t ~ 1 + (1|subj_idx)"
+                t_fomula= "t ~ 1 + (1|subj_idx)"
                 v_prior=v_intercept_prior
                 a_prior=a_intercept_prior
                 z_prior=z_slope_prior
-                # t_prior=t_intercept_prior
-            # case 't':
-            #     # define model fomula
-            #     v_fomula= "v ~ 1 + (1|subj_idx)"
-            #     a_fomula= "a ~ 1 + (1|subj_idx)"
-            #     z_fomula= "z ~ 1 + (1|subj_idx)"
-            #     t_fomula= "t ~ 1 + x + (1 + x|subj_idx)"
-            #     v_prior=v_intercept_prior
-            #     a_prior=a_intercept_prior
-            #     z_prior=z_intercept_prior
-            #     t_prior=t_slope_prior
-            case 'va':
+                t_prior=t_intercept_prior
+            case 't':
                 # define model fomula
-                v_fomula= "v ~ 1 + x + (1 + x|subj_idx)"
-                a_fomula= "a ~ 1 + x + (1 + x|subj_idx)"
-                z_fomula= "z ~ 1 + (1|subj_idx)"
-                # t_fomula= "t ~ 1 + (1|subj_idx)"
-                v_prior=v_slope_prior
-                a_prior=a_slope_prior
-                z_prior=z_intercept_prior
-                # t_prior=t_intercept_prior
-            case 'vz':
-                # define model fomula
-                v_fomula= "v ~ 1 + x + (1 + x|subj_idx)"
+                v_fomula= "v ~ 1 + (1|subj_idx)"
                 a_fomula= "a ~ 1 + (1|subj_idx)"
-                z_fomula= "z ~ 1 + x + (1 + x|subj_idx)"
-                # t_fomula= "t ~ 1 + (1|subj_idx)"
-                v_prior=v_slope_prior
+                z_fomula= "z ~ 1 + (1|subj_idx)"
+                t_fomula= "t ~ 1 + x + (1 + x|subj_idx)"
+                v_prior=v_intercept_prior
                 a_prior=a_intercept_prior
-                z_prior=z_slope_prior
-                # t_prior=t_intercept_prior
+                z_prior=z_intercept_prior
+                t_prior=t_slope_prior
+            # case 'va':
+            #     # define model fomula
+            #     v_fomula= "v ~ 1 + x + (1 + x|subj_idx)"
+            #     a_fomula= "a ~ 1 + x + (1 + x|subj_idx)"
+            #     z_fomula= "z ~ 1 + (1|subj_idx)"
+            #     t_fomula= "t ~ 1 + (1|subj_idx)"
+            #     v_prior=v_slope_prior
+            #     a_prior=a_slope_prior
+            #     z_prior=z_intercept_prior
+            #     t_prior=t_intercept_prior
+            # case 'vz':
+            #     # define model fomula
+            #     v_fomula= "v ~ 1 + x + (1 + x|subj_idx)"
+            #     a_fomula= "a ~ 1 + (1|subj_idx)"
+            #     z_fomula= "z ~ 1 + x + (1 + x|subj_idx)"
+            #     t_fomula= "t ~ 1 + (1|subj_idx)"
+            #     v_prior=v_slope_prior
+            #     a_prior=a_intercept_prior
+            #     z_prior=z_slope_prior
+            #     t_prior=t_intercept_prior
             # case 'vt':
             #     # define model fomula
             #     v_fomula= "v ~ 1 + x + (1 + x|subj_idx)"
@@ -306,16 +310,16 @@ if __name__ == '__main__':
             #     a_prior=a_intercept_prior
             #     z_prior=z_intercept_prior
             #     t_prior=t_slope_prior
-            case 'az':
-                # define model fomula
-                v_fomula= "v ~ 1 + (1|subj_idx)"
-                a_fomula= "a ~ 1 + x + (1 + x|subj_idx)"
-                z_fomula= "z ~ 1 + x + (1 + x|subj_idx)"
-                # t_fomula= "t ~ 1 + (1|subj_idx)"
-                v_prior=v_intercept_prior
-                a_prior=a_slope_prior
-                z_prior=z_slope_prior
-                # t_prior=t_intercept_prior
+            # case 'az':
+            #     # define model fomula
+            #     v_fomula= "v ~ 1 + (1|subj_idx)"
+            #     a_fomula= "a ~ 1 + x + (1 + x|subj_idx)"
+            #     z_fomula= "z ~ 1 + x + (1 + x|subj_idx)"
+            #     t_fomula= "t ~ 1 + (1|subj_idx)"
+            #     v_prior=v_intercept_prior
+            #     a_prior=a_slope_prior
+            #     z_prior=z_slope_prior
+            #     t_prior=t_intercept_prior
             # case 'at':
             #     # define model fomula
             #     v_fomula= "v ~ 1 + (1|subj_idx)"
@@ -336,16 +340,16 @@ if __name__ == '__main__':
             #     a_prior=a_intercept_prior
             #     z_prior=z_slope_prior
             #     t_prior=t_slope_prior
-            case 'vaz':
-                # define model fomula
-                v_fomula= "v ~ 1 + x + (1 + x|subj_idx)"
-                a_fomula= "a ~ 1 + x + (1 + x|subj_idx)"
-                z_fomula= "z ~ 1 + x + (1 + x|subj_idx)"
-                # t_fomula= "t ~ 1 + (1|subj_idx)"
-                v_prior=v_slope_prior
-                a_prior=a_slope_prior
-                z_prior=z_slope_prior
-                # t_prior=t_intercept_prior
+            # case 'vaz':
+            #     # define model fomula
+            #     v_fomula= "v ~ 1 + x + (1 + x|subj_idx)"
+            #     a_fomula= "a ~ 1 + x + (1 + x|subj_idx)"
+            #     z_fomula= "z ~ 1 + x + (1 + x|subj_idx)"
+            #     t_fomula= "t ~ 1 + (1|subj_idx)"
+            #     v_prior=v_slope_prior
+            #     a_prior=a_slope_prior
+            #     z_prior=z_slope_prior
+            #     t_prior=t_intercept_prior
             # case 'vat':
             #     # define model fomula
             #     v_fomula= "v ~ 1 + x + (1 + x|subj_idx)"
@@ -410,28 +414,31 @@ if __name__ == '__main__':
                     "prior": z_prior,
                     "link": "identity",
                 },
-                # {
-                #     "name": "t",
-                #     "formula": t_fomula,
-                #     "prior": t_prior,
-                #     "link": "identity",
-                # }
+                {
+                    "name": "t",
+                    "formula": t_fomula,
+                    "prior": t_prior,
+                    "link": "identity",
+                }
             ],
         )   
             
 ########################################################################################################################################################
-    model
 
-    #sample from the model and save the results
-    infer_data_race4nba_v = model.sample(sampler="nuts_numpyro", chains=4, cores=ncores, draws=samples, tune=burnin, idata_kwargs = {'log_likelihood': True}, target_accept=TA)
-    #save trace
-    az.to_netcdf(infer_data_race4nba_v,outdir +'sample_' + str(burnin) + '_' + str(samples) + '_TA_' + str(TA) + '_trace_binarized_NoT_' + signalname + '_' + modelname + '_on_' + regressor + '.nc4')
-    #save trace plot
-    az.plot_trace(
-        infer_data_race4nba_v,
-        var_names="~log_likelihood",  # we exclude the log_likelihood traces here
-    )
-    plt.savefig(outdir+'posterior_diagnostic_' + str(burnin) + '_' + str(samples) + '_TA_' + str(TA) + '_trace_binarized_NoT_' + signalname + '_' + modelname + '_on_' + regressor + '.png')
-    #save summary
-    res_sum=az.summary(model.traces)
-    res_sum.to_csv(outdir+'summary_' + str(burnin) + '_' + str(samples) + '_TA_' + str(TA) + '_trace_binarized_NoT_' + signalname + '_' + modelname + '_on_' + regressor + '.csv')
+    if run == 'sample':
+        #sample from the model and save the results
+        infer_data_race4nba_v = model.sample(sampler="nuts_numpyro", chains=4, cores=ncores, draws=samples, tune=burnin, idata_kwargs = {'log_likelihood': True}, target_accept=TA)
+        #save trace
+        az.to_netcdf(infer_data_race4nba_v,outdir +'sample_' + str(burnin) + '_' + str(samples) + '_TA_' + str(TA) + '_trace_binarized_NoT_' + signalname + '_' + modelname + '_on_' + regressor + '.nc4')
+        #save trace plot
+        az.plot_trace(
+            infer_data_race4nba_v,
+            var_names="~log_likelihood",  # we exclude the log_likelihood traces here
+        )
+        plt.savefig(outdir+'posterior_diagnostic_' + str(burnin) + '_' + str(samples) + '_TA_' + str(TA) + '_trace_binarized_NoT_' + signalname + '_' + modelname + '_on_' + regressor + '.png')
+        #save summary
+        res_sum=az.summary(model.traces)
+        res_sum.to_csv(outdir+'summary_' + str(burnin) + '_' + str(samples) + '_TA_' + str(TA) + '_trace_binarized_NoT_' + signalname + '_' + modelname + '_on_' + regressor + '.csv')
+    else:
+        #plot data distribution and prior predict
+        

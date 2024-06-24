@@ -1,3 +1,15 @@
+#quick test on how SNR affect slope estimate
+x=runif(400)
+y1=2*x + rnorm(400,sd=1)
+y2=2*x + rnorm(400,sd=8)
+
+m1=lm(y1~x)
+m2=lm(y2~x)
+
+summary(m1)
+summary(m2)
+
+
 #proof of concept simulation to make sure either beta or spline regression work without the sequential sampling model part
 library(ggplot2)
 

@@ -1,4 +1,4 @@
-#generate data using race_4 model, there are separate v and z for each accumulator, but a and t are shared
+#generate data using ddm model
 from ssms.basic_simulators import simulator
 import numpy as np
 import pandas as pd
@@ -98,7 +98,7 @@ if __name__ == '__main__':
         
         print('min t:',np.min(t))
         print('max t:',np.max(t))
-        
+
         # save to subject_params
         subject_params["v"]=np.append(subject_params["v"],v)
         subject_params["a"]=np.append(subject_params["a"],a)
@@ -294,8 +294,8 @@ if __name__ == '__main__':
                                 "x|subID": {"name": "Normal",
                                     "mu": 0,
                                     "sigma": {"name": "HalfNormal",
-                                        "sigma": 0.5
-                                        }, "initval": 0.5
+                                        "sigma": 0.5,  "initval": 0.5
+                                        },
                                     },
                                 "1|subID": {"name": "Normal",
                                     "mu": 0,
