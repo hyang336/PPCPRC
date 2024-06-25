@@ -261,7 +261,7 @@ if __name__ == '__main__':
         match modelname:
             case 'v':
                 # define model fomula
-                v_fomula= "v ~ 1 + x + (1|subj_idx)"
+                v_fomula= "v ~ 1 + x + (1 + x|subj_idx)"
                 a_fomula= "a ~ 1 + (1|subj_idx)"
                 z_fomula= "z ~ 1 + (1|subj_idx)"
                 t_fomula= "t ~ 1 + (1|subj_idx)"
@@ -411,36 +411,62 @@ if __name__ == '__main__':
             #     t_prior=t_slope_prior
 
         # define the model
-        model= hssm.HSSM(
-            data=data,
-            prior_settings="safe",
-            include=[
-                {
-                    "name": "v",
-                    "formula": v_fomula,
-                    "prior": v_prior,
-                    "link": "identity",
-                },
-                {
-                    "name": "a",
-                    "formula": a_fomula,
-                    "prior": a_prior,
-                    "link": "identity",
-                },
-                {
-                    "name": "z",
-                    "formula": z_fomula,
-                    "prior": z_prior,
-                    "link": "identity",
-                },
-                {
-                    "name": "t",
-                    "formula": t_fomula,
-                    "prior": t_prior,
-                    "link": "identity",
-                }
-            ],
-        )   
+        if tstrat=='norandom':
+            model= hssm.HSSM(
+                data=data,
+                prior_settings="safe",
+                include=[
+                    {
+                        "name": "v",
+                        "formula": v_fomula,
+                        "prior": v_prior,
+                        "link": "identity",
+                    },
+                    {
+                        "name": "a",
+                        "formula": a_fomula,
+                        "prior": a_prior,
+                        "link": "identity",
+                    },
+                    {
+                        "name": "z",
+                        "formula": z_fomula,
+                        "prior": z_prior,
+                        "link": "identity",
+                    }
+                ],
+            ) 
+        else:
+            model= hssm.HSSM(
+                data=data,
+                prior_settings="safe",
+                include=[
+                    {
+                        "name": "v",
+                        "formula": v_fomula,
+                        "prior": v_prior,
+                        "link": "identity",
+                    },
+                    {
+                        "name": "a",
+                        "formula": a_fomula,
+                        "prior": a_prior,
+                        "link": "identity",
+                    },
+                    {
+                        "name": "z",
+                        "formula": z_fomula,
+                        "prior": z_prior,
+                        "link": "identity",
+                    },
+                    {
+                        "name": "t",
+                        "formula": t_fomula,
+                        "prior": t_prior,
+                        "link": "identity",
+                    }
+                ],
+            )   
             
 ########################################################################################################################################################
 
