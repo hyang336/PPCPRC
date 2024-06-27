@@ -13,8 +13,8 @@ if __name__ == '__main__':
 
     #parse arguments
     parser = argparse.ArgumentParser(description='fit HSSM model with real data')
-    parser.add_argument('--samples', type=str, help='how many samples to draw from MCMC chains',default=20000)
-    parser.add_argument('--burnin', type=str, help='how many samples to burn in from MCMC chains',default=20000)
+    parser.add_argument('--samples', type=str, help='how many samples to draw from MCMC chains',default=10000)
+    parser.add_argument('--burnin', type=str, help='how many samples to burn in from MCMC chains',default=10000)
     parser.add_argument('--cores', type=str, help='how many CPU/GPU cores to use for sampling',default=4)
     parser.add_argument('--binscheme', type=str, help='how responses were binned',default='median')
     parser.add_argument('--signal', type=str, help='which familiarity signal to model',default='recent')
