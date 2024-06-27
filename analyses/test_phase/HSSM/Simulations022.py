@@ -24,8 +24,9 @@ if __name__ == '__main__':
     parser.add_argument('--cores', type=str, help='how many CPU/GPU cores to use for sampling',default=4)
     parser.add_argument('--SubSlope', type=str, help='whether to include subject-specific slope in the generated data',default=False) #Having subject slopes make the model very difficult to converge. With the constraints on computational resources, we cannnot afford to sample too long of a chain.
     parser.add_argument('--model', type=str, help='which model to run')
-    parser.add_argument('--outdir', type=str, help='outpu directory to save results',default='/scratch/hyang336/working_dir/HDDM_HSSM/simulations/')
+    parser.add_argument('--outdir', type=str, help='outpu directory to save results',default='/scratch/hyang336/working_dir/HDDM_HSSM/simulations022/')
     parser.add_argument('--TA', type=str, help='target_accept for NUTS sampler',default=0.8)
+    parser.add_argument('--singleSS', type=str, help='whether to run single subject simulation',default=False)
     args = parser.parse_args()
 
     model=args.model
@@ -35,6 +36,7 @@ if __name__ == '__main__':
     ncores=int(args.cores)
     SubSlope=args.SubSlope
     TA=float(args.TA)
+    singleSS=args.singleSS
 
     # print out the arguments for debugging
     print('model:',model)
@@ -78,10 +80,13 @@ if __name__ == '__main__':
     #intercept3=np.log(1/beta(a3,b3))
     intercept3=0.85
 
-    n_subjects=30 #number of subjects
-    n_trials=200 #number of trials per subject
-    param_sv=0.1 #standard deviation of the subject-level parameters
-    epsilon=1e-10 #small number to avoid log(0) in the log transformation
+    if singleSS:
+        n_trials=90
+    else:
+        n_subjects=30 #number of subjects
+        n_trials=200 #number of trials per subject
+        param_sv=0.1 #standard deviation of the subject-level parameters
+        epsilon=1e-10 #small number to avoid log(0) in the log transformation
 
     # Save trial-level parameters for each subject
     subject_params={
@@ -96,10 +101,7 @@ if __name__ == '__main__':
     # simulated data list
     sim_data=[]
 
-    # Generate subject-level parameters
-    for i in range(n_subjects):
-        # set the seed for each subject deterministically so all models are based on the same data
-        np.random.seed(i)
+    if singleSS:
         # generate neural data, standard normal as the real data
         simneural=np.random.normal(size=n_trials)
         # rescale to 0-1
@@ -107,22 +109,13 @@ if __name__ == '__main__':
         # make sure there no exact 0 or 1 otherwise the log becomes undefined
         simneural=np.clip(simneural,epsilon,1-epsilon)
 
-        # Whether to include subject-specific slope, default is False
-        if SubSlope:
-            # generate v0, v1, v2, v3
-            v0=np.exp(np.random.normal(intercept0, param_sv) + np.random.normal((a0-1), param_sv)*np.log(simneural) + np.random.normal((b0-1), param_sv)*np.log(1-simneural))
-            v1=np.exp(np.random.normal(intercept1, param_sv) + np.random.normal((a1-1), param_sv)*np.log(simneural) + np.random.normal((b1-1), param_sv)*np.log(1-simneural))
-            v2=np.exp(np.random.normal(intercept2, param_sv) + np.random.normal((a2-1), param_sv)*np.log(simneural) + np.random.normal((b2-1), param_sv)*np.log(1-simneural))
-            v3=np.exp(np.random.normal(intercept3, param_sv) + np.random.normal((a3-1), param_sv)*np.log(simneural) + np.random.normal((b3-1), param_sv)*np.log(1-simneural))
-        else:
-            # generate v0, v1, v2, v3
-            v0=np.exp(np.random.normal(intercept0, param_sv) + (a0-1)*np.log(simneural) + (b0-1)*np.log(1-simneural))
-            v1=np.exp(np.random.normal(intercept1, param_sv) + (a1-1)*np.log(simneural) + (b1-1)*np.log(1-simneural))
-            v2=np.exp(np.random.normal(intercept2, param_sv) + (a2-1)*np.log(simneural) + (b2-1)*np.log(1-simneural))
-            v3=np.exp(np.random.normal(intercept3, param_sv) + (a3-1)*np.log(simneural) + (b3-1)*np.log(1-simneural))
+        # generate parameters
+        v0=np.exp(intercept0 + (a0-1)*np.log(simneural) + (b0-1)*np.log(1-simneural))
+        v1=np.exp(intercept1 + (a1-1)*np.log(simneural) + (b1-1)*np.log(1-simneural))
+        v2=np.exp(intercept2 + (a2-1)*np.log(simneural) + (b2-1)*np.log(1-simneural))
+        v3=np.exp(intercept3 + (a3-1)*np.log(simneural) + (b3-1)*np.log(1-simneural))
 
-        ###IMPORTANT: for interpretable param rec test, make sure generate params within training bounds of LAN###
-        # instead of removing out-of-bound elements, we can replace the out-of-bound elements with the boundary values to avoid discontinuity
+        # clip out of bound elements
         v0 = np.clip(v0, 0, 2.5)
         v1 = np.clip(v1, 0, 2.5)
         v2 = np.clip(v2, 0, 2.5)
@@ -134,13 +127,13 @@ if __name__ == '__main__':
         subject_params["v2"]=np.append(subject_params["v2"],v2)
         subject_params["v3"]=np.append(subject_params["v3"],v3)
         subject_params["simneural"]=np.append(subject_params["simneural"],simneural)
-        subject_params["subID"]=np.append(subject_params["subID"],np.repeat(i,len(simneural)))
 
         # simulate RT and choices
         true_values = np.column_stack(
         [v0,v1,v2,v3, np.repeat([[2.0, 0.5, 1e-3,0.0]], axis=0, repeats=len(simneural))]
         )
-        # Get mode simulations
+
+        # Get model simulations
         race4nba_v = simulator.simulator(true_values, model="race_no_bias_angle_4", n_samples=1)
 
         # Random regressor as control
@@ -156,14 +149,82 @@ if __name__ == '__main__':
                     "x": np.log(simneural),
                     "y": np.log(1-simneural),
                     "rand_x": np.log(rand_x),
-                    "rand_y": np.log(1-rand_x),
-                    "subID": i
+                    "rand_y": np.log(1-rand_x)
                 }
             )
         )
 
-    #make a single dataframe of subject-wise simulated data
-    sim_data_concat=pd.concat(sim_data)
+        sim_data_concat=pd.concat(sim_data)
+
+    else:
+        # Generate subject-level parameters
+        for i in range(n_subjects):
+            # set the seed for each subject deterministically so all models are based on the same data
+            np.random.seed(i)
+            # generate neural data, standard normal as the real data
+            simneural=np.random.normal(size=n_trials)
+            # rescale to 0-1
+            simneural=(simneural - np.min(simneural))/(np.max(simneural) - np.min(simneural))
+            # make sure there no exact 0 or 1 otherwise the log becomes undefined
+            simneural=np.clip(simneural,epsilon,1-epsilon)
+
+            # Whether to include subject-specific slope, default is False
+            if SubSlope:
+                # generate v0, v1, v2, v3
+                v0=np.exp(np.random.normal(intercept0, param_sv) + np.random.normal((a0-1), param_sv)*np.log(simneural) + np.random.normal((b0-1), param_sv)*np.log(1-simneural))
+                v1=np.exp(np.random.normal(intercept1, param_sv) + np.random.normal((a1-1), param_sv)*np.log(simneural) + np.random.normal((b1-1), param_sv)*np.log(1-simneural))
+                v2=np.exp(np.random.normal(intercept2, param_sv) + np.random.normal((a2-1), param_sv)*np.log(simneural) + np.random.normal((b2-1), param_sv)*np.log(1-simneural))
+                v3=np.exp(np.random.normal(intercept3, param_sv) + np.random.normal((a3-1), param_sv)*np.log(simneural) + np.random.normal((b3-1), param_sv)*np.log(1-simneural))
+            else:
+                # generate v0, v1, v2, v3
+                v0=np.exp(np.random.normal(intercept0, param_sv) + (a0-1)*np.log(simneural) + (b0-1)*np.log(1-simneural))
+                v1=np.exp(np.random.normal(intercept1, param_sv) + (a1-1)*np.log(simneural) + (b1-1)*np.log(1-simneural))
+                v2=np.exp(np.random.normal(intercept2, param_sv) + (a2-1)*np.log(simneural) + (b2-1)*np.log(1-simneural))
+                v3=np.exp(np.random.normal(intercept3, param_sv) + (a3-1)*np.log(simneural) + (b3-1)*np.log(1-simneural))
+
+            ###IMPORTANT: for interpretable param rec test, make sure generate params within training bounds of LAN###
+            # instead of removing out-of-bound elements, we can replace the out-of-bound elements with the boundary values to avoid discontinuity
+            v0 = np.clip(v0, 0, 2.5)
+            v1 = np.clip(v1, 0, 2.5)
+            v2 = np.clip(v2, 0, 2.5)
+            v3 = np.clip(v3, 0, 2.5)
+
+            # save to subject_params
+            subject_params["v0"]=np.append(subject_params["v0"],v0)
+            subject_params["v1"]=np.append(subject_params["v1"],v1)
+            subject_params["v2"]=np.append(subject_params["v2"],v2)
+            subject_params["v3"]=np.append(subject_params["v3"],v3)
+            subject_params["simneural"]=np.append(subject_params["simneural"],simneural)
+            subject_params["subID"]=np.append(subject_params["subID"],np.repeat(i,len(simneural)))
+
+            # simulate RT and choices
+            true_values = np.column_stack(
+            [v0,v1,v2,v3, np.repeat([[2.0, 0.5, 1e-3,0.0]], axis=0, repeats=len(simneural))]
+            )
+            # Get mode simulations
+            race4nba_v = simulator.simulator(true_values, model="race_no_bias_angle_4", n_samples=1)
+
+            # Random regressor as control
+            rand_x = np.random.normal(size=len(simneural))
+            rand_x = (rand_x - np.min(rand_x))/(np.max(rand_x) - np.min(rand_x))
+            rand_x = np.clip(rand_x,epsilon,1-epsilon)
+            
+            sim_data.append(
+                pd.DataFrame(
+                    {
+                        "rt": race4nba_v["rts"].flatten(),
+                        "response": race4nba_v["choices"].flatten(),
+                        "x": np.log(simneural),
+                        "y": np.log(1-simneural),
+                        "rand_x": np.log(rand_x),
+                        "rand_y": np.log(1-rand_x),
+                        "subID": i
+                    }
+                )
+            )
+
+        #make a single dataframe of subject-wise simulated data
+        sim_data_concat=pd.concat(sim_data)
 
     ################################################################################################ Define priors ################################################################################################
     # Define priors for the true model
@@ -213,258 +274,392 @@ if __name__ == '__main__':
     # intercept_prior_rand = pm.Normal("intercept_prior_rand", mu=0, sigma=1)
 
     ####################################################################################### Define models ################################################################################################
-    match model:
-        case 'true':
-            if SubSlope:
-                # True model
-                model_race4nba_v_true = hssm.HSSM(
-                    data=sim_data_concat,
-                    model='race_no_bias_angle_4',
-                    choices=4,
-                    prior_settings="safe",
-                    a=2.0,
-                    z=0.5,
-                    include=[
-                        {
-                            "name": "v0",                            
-                            "formula": "v0 ~ 1 + x + y + (1 + x + y|subID)",
-                            # "prior":slope_prior_true,
-                            "link": "log",
-                            "bounds": (0, 2.5)
-                        },
-                        {
-                            "name": "v1",                            
-                            "formula": "v1 ~ 1 + x + y + (1 + x + y|subID)",
-                            # "prior":slope_prior_true,
-                            "link": "log",
-                            "bounds": (0, 2.5)
-                        },
-                        {
-                            "name": "v2",                            
-                            "formula": "v2 ~ 1 + x + y + (1 + x + y|subID)",
-                            # "prior":slope_prior_true,
-                            "link": "log",
-                            "bounds": (0, 2.5)
-                        },
-                        {
-                            "name": "v3",                            
-                            "formula": "v3 ~ 1 + x + y + (1 + x + y|subID)",
-                            # "prior":slope_prior_true,
-                            "link": "log",
-                            "bounds": (0, 2.5)
-                        }
-                    ],
-                )
-            else:
-                # True model
-                model_race4nba_v_true = hssm.HSSM(
-                    data=sim_data_concat,
-                    model='race_no_bias_angle_4',
-                    choices=4,
-                    noncentered=True,
-                    prior_settings="safe",
-                    a=2.0,
-                    z=0.5,
-                    include=[
-                        {
-                            "name": "v0",                            
-                            "formula": "v0 ~ 1 + x + y + (1|subID)",
-                            "prior":v_intercept_prior,
-                            "link": "log",
-                            "bounds": (0, 2.5)
-                        },
-                        {
-                            "name": "v1",                            
-                            "formula": "v1 ~ 1 + x + y + (1|subID)",
-                            "prior":v_intercept_prior,
-                            "link": "log",
-                            "bounds": (0, 2.5)
-                        },
-                        {
-                            "name": "v2",                            
-                            "formula": "v2 ~ 1 + x + y + (1|subID)",
-                            "prior":v_intercept_prior,
-                            "link": "log",
-                            "bounds": (0, 2.5)
-                        },
-                        {
-                            "name": "v3",                            
-                            "formula": "v3 ~ 1 + x + y + (1|subID)",
-                            "prior":v_intercept_prior,
-                            "link": "log",
-                            "bounds": (0, 2.5)
-                        }
-                    ],
-                )
-            #sample from the model
-            #infer_data_race4nba_v_true = model_race4nba_v_true.sample(step=pm.Slice(model=model_race4nba_v_true.pymc_model), sampler="mcmc", chains=4, cores=4, draws=5000, tune=10000,idata_kwargs = {'log_likelihood': True})
-            infer_data_race4nba_v_true = model_race4nba_v_true.sample(sampler="nuts_numpyro", chains=4, cores=ncores, draws=samples, tune=burnin,idata_kwargs = {'log_likelihood': True}, target_accept=TA)            
-            #save trace
-            #az.to_netcdf(infer_data_race4nba_v_true,outdir+'sample_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_true.nc4')
-            az.to_netcdf(infer_data_race4nba_v_true,outdir+'sample_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_Fixed_az_NutsNumpyro_true.nc4')
-            #save trace plot
-            az.plot_trace(
-                infer_data_race4nba_v_true,
-                var_names="~log_likelihood",  # we exclude the log_likelihood traces here
-            )
-            #plt.savefig(outdir+'posterior_diagnostic_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_true.png')
-            plt.savefig(outdir+'posterior_diagnostic_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_Fixed_az_NutsNumpyro_true.png')
-            #save summary
-            res_sum_true=az.summary(model_race4nba_v_true.traces)
-            #res_sum_true.to_csv(outdir+'summary_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_true.csv')
-            res_sum_true.to_csv(outdir+'summary_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_Fixed_az_NutsNumpyro_true.csv')
+    if singleSS:
+        match model:
+            case 'true':
+                model_race4nba_v = hssm.HSSM(
+                        data=sim_data_concat,
+                        model='race_no_bias_angle_4',
+                        choices=4,
+                        prior_settings="safe",
+                        a=2.0,
+                        z=0.5,
+                        include=[
+                            {
+                                "name": "v0",                            
+                                "formula": "v0 ~ 1 + x + y",
+                                # "prior":slope_prior_true,
+                                "link": "log",
+                                "bounds": (0, 2.5)
+                            },
+                            {
+                                "name": "v1",                            
+                                "formula": "v1 ~ 1 + x + y",
+                                # "prior":slope_prior_true,
+                                "link": "log",
+                                "bounds": (0, 2.5)
+                            },
+                            {
+                                "name": "v2",                            
+                                "formula": "v2 ~ 1 + x + y",
+                                # "prior":slope_prior_true,
+                                "link": "log",
+                                "bounds": (0, 2.5)
+                            },
+                            {
+                                "name": "v3",                            
+                                "formula": "v3 ~ 1 + x + y",
+                                # "prior":slope_prior_true,
+                                "link": "log",
+                                "bounds": (0, 2.5)
+                            }
+                        ],
+                    )
+            case 'null':
+                model_race4nba_v = hssm.HSSM(
+                        data=sim_data_concat,
+                        model='race_no_bias_angle_4',
+                        choices=4,
+                        prior_settings="safe",
+                        a=2.0,
+                        z=0.5,
+                        include=[
+                            {
+                                "name": "v0",                            
+                                #"formula": "v0 ~ 1 + x + y",
+                                # "prior":slope_prior_true,
+                                #"link": "log",
+                                "bounds": (0, 2.5)
+                            },
+                            {
+                                "name": "v1",                            
+                                #"formula": "v1 ~ 1 + x + y",
+                                # "prior":slope_prior_true,
+                                #"link": "log",
+                                "bounds": (0, 2.5)
+                            },
+                            {
+                                "name": "v2",                            
+                                #"formula": "v2 ~ 1 + x + y",
+                                # "prior":slope_prior_true,
+                                #"link": "log",
+                                "bounds": (0, 2.5)
+                            },
+                            {
+                                "name": "v3",                            
+                                #"formula": "v3 ~ 1 + x + y",
+                                # "prior":slope_prior_true,
+                                #"link": "log",
+                                "bounds": (0, 2.5)
+                            }
+                        ],
+                    )
+            case 'rand':
+                model_race4nba_v = hssm.HSSM(
+                        data=sim_data_concat,
+                        model='race_no_bias_angle_4',
+                        choices=4,
+                        prior_settings="safe",
+                        a=2.0,
+                        z=0.5,
+                        include=[
+                            {
+                                "name": "v0",                            
+                                "formula": "v0 ~ 1 + rand_x + rand_y",
+                                # "prior":slope_prior_true,
+                                "link": "log",
+                                "bounds": (0, 2.5)
+                            },
+                            {
+                                "name": "v1",                            
+                                "formula": "v1 ~ 1 + rand_x + rand_y",
+                                # "prior":slope_prior_true,
+                                "link": "log",
+                                "bounds": (0, 2.5)
+                            },
+                            {
+                                "name": "v2",                            
+                                "formula": "v2 ~ 1 + rand_x + rand_y",
+                                # "prior":slope_prior_true,
+                                "link": "log",
+                                "bounds": (0, 2.5)
+                            },
+                            {
+                                "name": "v3",                            
+                                "formula": "v3 ~ 1 + rand_x + rand_y",
+                                # "prior":slope_prior_true,
+                                "link": "log",
+                                "bounds": (0, 2.5)
+                            }
+                        ],
+                    )
+        #sample from the model
+        infer_data_race4nba_v = model_race4nba_v.sample(sampler="nuts_numpyro", chains=4, cores=ncores, draws=samples, tune=burnin,idata_kwargs = {'log_likelihood': True}, target_accept=TA)            
+        #save trace
+        az.to_netcdf(infer_data_race4nba_v,outdir+'sample_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_Fixed_az_singleSs_NutsNumpyro_' + str(model) + '.nc4')
+        #save trace plot
+        az.plot_trace(
+            infer_data_race4nba_v,
+            var_names="~log_likelihood",  # we exclude the log_likelihood traces here
+        )
+        plt.savefig(outdir+'posterior_diagnostic_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_Fixed_az_singleSs_NutsNumpyro_' + str(model) + '.png')
+        #save summary
+        res_sum_true=az.summary(model_race4nba_v.traces)
+        res_sum_true.to_csv(outdir+'summary_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_Fixed_az_singleSs_NutsNumpyro_' + str(model) + '.csv')
         
-        case 'null':
-            # model with no relationship between v and neural data
-            model_race4nba_v_null = hssm.HSSM(
-                data=sim_data_concat,
-                model='race_no_bias_angle_4',
-                choices=4,
-                noncentered=True,
-                prior_settings="safe",
-                a=2.0,
-                z=0.5,
-                include=[
-                    {
-                        "name": "v0",                        
-                        "formula": "v0 ~ 1 + (1|subID)",
-                        #"prior":null_prior,
-                        "link": "log",
-                        "bounds": (0, 2.5)
-                    },
-                    {
-                        "name": "v1",                        
-                        "formula": "v1 ~ 1 + (1|subID)",
-                        #"prior":null_prior,
-                        "link": "log",
-                        "bounds": (0, 2.5)
-                    },
-                    {
-                        "name": "v2",                        
-                        "formula": "v2 ~ 1 + (1|subID)",
-                        #"prior":null_prior,
-                        "link": "log",
-                        "bounds": (0, 2.5)
-                    },
-                    {
-                        "name": "v3",                        
-                        "formula": "v3 ~ 1 + (1|subID)",
-                        #"prior":null_prior,
-                        "link": "log",
-                        "bounds": (0, 2.5)
-                    }
-                ],
-            )
-            #infer_data_race4nba_v_null = model_race4nba_v_null.sample(step=pm.Slice(model=model_race4nba_v_null.pymc_model), sampler="mcmc", chains=4, cores=4, draws=5000, tune=10000,idata_kwargs = {'log_likelihood': True})
-            infer_data_race4nba_v_null = model_race4nba_v_null.sample(sampler="nuts_numpyro", chains=4, cores=ncores, draws=samples, tune=burnin,idata_kwargs = {'log_likelihood': True}, target_accept=TA)
-            # az.to_netcdf(infer_data_race4nba_v_null,outdir+'sample_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_null.nc4')
-            az.to_netcdf(infer_data_race4nba_v_null,outdir+'sample_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_Fixed_az_NutsNumpyro_null.nc4')
-            az.plot_trace(
-                infer_data_race4nba_v_null,
-                var_names="~log_likelihood",  # we exclude the log_likelihood traces here
-            )
-            # plt.savefig(outdir+'posterior_diagnostic_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_null.png')
-            plt.savefig(outdir+'posterior_diagnostic_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_Fixed_az_NutsNumpyro_null.png')
-            res_sum_null=az.summary(model_race4nba_v_null.traces)
-            # res_sum_null.to_csv(outdir+'summary_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_null.csv')
-            res_sum_null.to_csv(outdir+'summary_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_Fixed_az_NutsNumpyro_null.csv')
+    else:
+        match model:
+            case 'true':
+                if SubSlope:
+                    # True model
+                    model_race4nba_v_true = hssm.HSSM(
+                        data=sim_data_concat,
+                        model='race_no_bias_angle_4',
+                        choices=4,
+                        prior_settings="safe",
+                        a=2.0,
+                        z=0.5,
+                        include=[
+                            {
+                                "name": "v0",                            
+                                "formula": "v0 ~ 1 + x + y + (1 + x + y|subID)",
+                                # "prior":slope_prior_true,
+                                "link": "log",
+                                "bounds": (0, 2.5)
+                            },
+                            {
+                                "name": "v1",                            
+                                "formula": "v1 ~ 1 + x + y + (1 + x + y|subID)",
+                                # "prior":slope_prior_true,
+                                "link": "log",
+                                "bounds": (0, 2.5)
+                            },
+                            {
+                                "name": "v2",                            
+                                "formula": "v2 ~ 1 + x + y + (1 + x + y|subID)",
+                                # "prior":slope_prior_true,
+                                "link": "log",
+                                "bounds": (0, 2.5)
+                            },
+                            {
+                                "name": "v3",                            
+                                "formula": "v3 ~ 1 + x + y + (1 + x + y|subID)",
+                                # "prior":slope_prior_true,
+                                "link": "log",
+                                "bounds": (0, 2.5)
+                            }
+                        ],
+                    )
+                else:
+                    # True model
+                    model_race4nba_v_true = hssm.HSSM(
+                        data=sim_data_concat,
+                        model='race_no_bias_angle_4',
+                        choices=4,
+                        noncentered=True,
+                        prior_settings="safe",
+                        a=2.0,
+                        z=0.5,
+                        include=[
+                            {
+                                "name": "v0",                            
+                                "formula": "v0 ~ 1 + x + y + (1|subID)",
+                                "prior":v_intercept_prior,
+                                "link": "log",
+                                "bounds": (0, 2.5)
+                            },
+                            {
+                                "name": "v1",                            
+                                "formula": "v1 ~ 1 + x + y + (1|subID)",
+                                "prior":v_intercept_prior,
+                                "link": "log",
+                                "bounds": (0, 2.5)
+                            },
+                            {
+                                "name": "v2",                            
+                                "formula": "v2 ~ 1 + x + y + (1|subID)",
+                                "prior":v_intercept_prior,
+                                "link": "log",
+                                "bounds": (0, 2.5)
+                            },
+                            {
+                                "name": "v3",                            
+                                "formula": "v3 ~ 1 + x + y + (1|subID)",
+                                "prior":v_intercept_prior,
+                                "link": "log",
+                                "bounds": (0, 2.5)
+                            }
+                        ],
+                    )
+                #sample from the model
+                #infer_data_race4nba_v_true = model_race4nba_v_true.sample(step=pm.Slice(model=model_race4nba_v_true.pymc_model), sampler="mcmc", chains=4, cores=4, draws=5000, tune=10000,idata_kwargs = {'log_likelihood': True})
+                infer_data_race4nba_v_true = model_race4nba_v_true.sample(sampler="nuts_numpyro", chains=4, cores=ncores, draws=samples, tune=burnin,idata_kwargs = {'log_likelihood': True}, target_accept=TA)            
+                #save trace
+                #az.to_netcdf(infer_data_race4nba_v_true,outdir+'sample_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_true.nc4')
+                az.to_netcdf(infer_data_race4nba_v_true,outdir+'sample_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_Fixed_az_NutsNumpyro_true.nc4')
+                #save trace plot
+                az.plot_trace(
+                    infer_data_race4nba_v_true,
+                    var_names="~log_likelihood",  # we exclude the log_likelihood traces here
+                )
+                #plt.savefig(outdir+'posterior_diagnostic_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_true.png')
+                plt.savefig(outdir+'posterior_diagnostic_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_Fixed_az_NutsNumpyro_true.png')
+                #save summary
+                res_sum_true=az.summary(model_race4nba_v_true.traces)
+                #res_sum_true.to_csv(outdir+'summary_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_true.csv')
+                res_sum_true.to_csv(outdir+'summary_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_Fixed_az_NutsNumpyro_true.csv')
+            
+            case 'null':
+                # model with no relationship between v and neural data
+                model_race4nba_v_null = hssm.HSSM(
+                    data=sim_data_concat,
+                    model='race_no_bias_angle_4',
+                    choices=4,
+                    noncentered=True,
+                    prior_settings="safe",
+                    a=2.0,
+                    z=0.5,
+                    include=[
+                        {
+                            "name": "v0",                        
+                            "formula": "v0 ~ 1 + (1|subID)",
+                            #"prior":null_prior,
+                            "link": "log",
+                            "bounds": (0, 2.5)
+                        },
+                        {
+                            "name": "v1",                        
+                            "formula": "v1 ~ 1 + (1|subID)",
+                            #"prior":null_prior,
+                            "link": "log",
+                            "bounds": (0, 2.5)
+                        },
+                        {
+                            "name": "v2",                        
+                            "formula": "v2 ~ 1 + (1|subID)",
+                            #"prior":null_prior,
+                            "link": "log",
+                            "bounds": (0, 2.5)
+                        },
+                        {
+                            "name": "v3",                        
+                            "formula": "v3 ~ 1 + (1|subID)",
+                            #"prior":null_prior,
+                            "link": "log",
+                            "bounds": (0, 2.5)
+                        }
+                    ],
+                )
+                #infer_data_race4nba_v_null = model_race4nba_v_null.sample(step=pm.Slice(model=model_race4nba_v_null.pymc_model), sampler="mcmc", chains=4, cores=4, draws=5000, tune=10000,idata_kwargs = {'log_likelihood': True})
+                infer_data_race4nba_v_null = model_race4nba_v_null.sample(sampler="nuts_numpyro", chains=4, cores=ncores, draws=samples, tune=burnin,idata_kwargs = {'log_likelihood': True}, target_accept=TA)
+                # az.to_netcdf(infer_data_race4nba_v_null,outdir+'sample_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_null.nc4')
+                az.to_netcdf(infer_data_race4nba_v_null,outdir+'sample_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_Fixed_az_NutsNumpyro_null.nc4')
+                az.plot_trace(
+                    infer_data_race4nba_v_null,
+                    var_names="~log_likelihood",  # we exclude the log_likelihood traces here
+                )
+                # plt.savefig(outdir+'posterior_diagnostic_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_null.png')
+                plt.savefig(outdir+'posterior_diagnostic_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_Fixed_az_NutsNumpyro_null.png')
+                res_sum_null=az.summary(model_race4nba_v_null.traces)
+                # res_sum_null.to_csv(outdir+'summary_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_null.csv')
+                res_sum_null.to_csv(outdir+'summary_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_Fixed_az_NutsNumpyro_null.csv')
 
-        case 'rand':
-            if SubSlope:                
-                # model with regression on random vectors (i.e. fake neural data that has the same distribution but was not involved in generating the parameters)
-                model_race4nba_v_rand = hssm.HSSM(
-                    data=sim_data_concat,
-                    model='race_no_bias_angle_4',
-                    choices=4,
-                    noncentered=True,
-                    prior_settings="safe",
-                    a=2.0,
-                    z=0.0,
-                    include=[
-                        {
-                            "name": "v0",                            
-                            "formula": "v0 ~ 1 + rand_x + rand_y + (1 + rand_x + rand_y|subID)",
-                            #"prior":slope_prior_rand,
-                            "link": "log",
-                            "bounds": (0, 2.5)
-                        },
-                        {
-                            "name": "v1",                            
-                            "formula": "v1 ~ 1 + rand_x + rand_y + (1 + rand_x + rand_y|subID)",
-                            #"prior":slope_prior_rand,
-                            "link": "log",
-                            "bounds": (0, 2.5)
-                        },
-                        {
-                            "name": "v2",                            
-                            "formula": "v2 ~ 1 + rand_x + rand_y + (1 + rand_x + rand_y|subID)",
-                            #"prior":slope_prior_rand,
-                            "link": "log",
-                            "bounds": (0, 2.5)
-                        },
-                        {
-                            "name": "v3",                            
-                            "formula": "v3 ~ 1 + rand_x + rand_y + (1 + rand_x + rand_y|subID)",
-                            #"prior":slope_prior_rand,
-                            "link": "log",
-                            "bounds": (0, 2.5)
-                        }
-                    ],
+            case 'rand':
+                if SubSlope:                
+                    # model with regression on random vectors (i.e. fake neural data that has the same distribution but was not involved in generating the parameters)
+                    model_race4nba_v_rand = hssm.HSSM(
+                        data=sim_data_concat,
+                        model='race_no_bias_angle_4',
+                        choices=4,
+                        noncentered=True,
+                        prior_settings="safe",
+                        a=2.0,
+                        z=0.0,
+                        include=[
+                            {
+                                "name": "v0",                            
+                                "formula": "v0 ~ 1 + rand_x + rand_y + (1 + rand_x + rand_y|subID)",
+                                #"prior":slope_prior_rand,
+                                "link": "log",
+                                "bounds": (0, 2.5)
+                            },
+                            {
+                                "name": "v1",                            
+                                "formula": "v1 ~ 1 + rand_x + rand_y + (1 + rand_x + rand_y|subID)",
+                                #"prior":slope_prior_rand,
+                                "link": "log",
+                                "bounds": (0, 2.5)
+                            },
+                            {
+                                "name": "v2",                            
+                                "formula": "v2 ~ 1 + rand_x + rand_y + (1 + rand_x + rand_y|subID)",
+                                #"prior":slope_prior_rand,
+                                "link": "log",
+                                "bounds": (0, 2.5)
+                            },
+                            {
+                                "name": "v3",                            
+                                "formula": "v3 ~ 1 + rand_x + rand_y + (1 + rand_x + rand_y|subID)",
+                                #"prior":slope_prior_rand,
+                                "link": "log",
+                                "bounds": (0, 2.5)
+                            }
+                        ],
+                    )
+                else:
+                    # model with regression on random vectors (i.e. fake neural data that has the same distribution but was not involved in generating the parameters)
+                    model_race4nba_v_rand = hssm.HSSM(
+                        data=sim_data_concat,
+                        model='race_no_bias_angle_4',
+                        choices=4,
+                        noncentered=True,
+                        prior_settings="safe",
+                        a=2.0,
+                        z=0.0,
+                        include=[
+                            {
+                                "name": "v0",                            
+                                "formula": "v0 ~ 1 + rand_x + rand_y + (1|subID)",
+                                # "prior":intercept_prior_rand,
+                                "link": "log",
+                                "bounds": (0, 2.5)
+                            },
+                            {
+                                "name": "v1",                            
+                                "formula": "v1 ~ 1 + rand_x + rand_y + (1|subID)",
+                                # "prior":intercept_prior_rand,
+                                "link": "log",
+                                "bounds": (0, 2.5)
+                            },
+                            {
+                                "name": "v2",                            
+                                "formula": "v2 ~ 1 + rand_x + rand_y + (1|subID)",
+                                # "prior":intercept_prior_rand,
+                                "link": "log",
+                                "bounds": (0, 2.5)
+                            },
+                            {
+                                "name": "v3",                            
+                                "formula": "v3 ~ 1 + rand_x + rand_y + (1|subID)",
+                                # "prior":intercept_prior_rand,
+                                "link": "log",
+                                "bounds": (0, 2.5)
+                            }
+                        ],
+                    )
+                # infer_data_race4nba_v_rand = model_race4nba_v_rand.sample(step=pm.Slice(model=model_race4nba_v_rand.pymc_model), sampler="mcmc", chains=4, cores=4, draws=5000, tune=10000,idata_kwargs = {'log_likelihood': True})
+                infer_data_race4nba_v_rand = model_race4nba_v_rand.sample(sampler="nuts_numpyro", chains=4, cores=ncores, draws=samples, tune=burnin,idata_kwargs = {'log_likelihood': True}, target_accept=TA)
+                # az.to_netcdf(infer_data_race4nba_v_rand,outdir+'sample_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_rand.nc4')
+                az.to_netcdf(infer_data_race4nba_v_rand,outdir+'sample_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_Fixed_az_NutsNumpyro_rand.nc4')
+                az.plot_trace(
+                    infer_data_race4nba_v_rand,
+                    var_names="~log_likelihood",  # we exclude the log_likelihood traces here
                 )
-            else:
-                # model with regression on random vectors (i.e. fake neural data that has the same distribution but was not involved in generating the parameters)
-                model_race4nba_v_rand = hssm.HSSM(
-                    data=sim_data_concat,
-                    model='race_no_bias_angle_4',
-                    choices=4,
-                    noncentered=True,
-                    prior_settings="safe",
-                    a=2.0,
-                    z=0.0,
-                    include=[
-                        {
-                            "name": "v0",                            
-                            "formula": "v0 ~ 1 + rand_x + rand_y + (1|subID)",
-                            # "prior":intercept_prior_rand,
-                            "link": "log",
-                            "bounds": (0, 2.5)
-                        },
-                        {
-                            "name": "v1",                            
-                            "formula": "v1 ~ 1 + rand_x + rand_y + (1|subID)",
-                            # "prior":intercept_prior_rand,
-                            "link": "log",
-                            "bounds": (0, 2.5)
-                        },
-                        {
-                            "name": "v2",                            
-                            "formula": "v2 ~ 1 + rand_x + rand_y + (1|subID)",
-                            # "prior":intercept_prior_rand,
-                            "link": "log",
-                            "bounds": (0, 2.5)
-                        },
-                        {
-                            "name": "v3",                            
-                            "formula": "v3 ~ 1 + rand_x + rand_y + (1|subID)",
-                            # "prior":intercept_prior_rand,
-                            "link": "log",
-                            "bounds": (0, 2.5)
-                        }
-                    ],
-                )
-            # infer_data_race4nba_v_rand = model_race4nba_v_rand.sample(step=pm.Slice(model=model_race4nba_v_rand.pymc_model), sampler="mcmc", chains=4, cores=4, draws=5000, tune=10000,idata_kwargs = {'log_likelihood': True})
-            infer_data_race4nba_v_rand = model_race4nba_v_rand.sample(sampler="nuts_numpyro", chains=4, cores=ncores, draws=samples, tune=burnin,idata_kwargs = {'log_likelihood': True}, target_accept=TA)
-            # az.to_netcdf(infer_data_race4nba_v_rand,outdir+'sample_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_rand.nc4')
-            az.to_netcdf(infer_data_race4nba_v_rand,outdir+'sample_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_Fixed_az_NutsNumpyro_rand.nc4')
-            az.plot_trace(
-                infer_data_race4nba_v_rand,
-                var_names="~log_likelihood",  # we exclude the log_likelihood traces here
-            )
-            # plt.savefig(outdir+'posterior_diagnostic_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_rand.png')
-            plt.savefig(outdir+'posterior_diagnostic_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_Fixed_az_NutsNumpyro_rand.png')
-            res_sum_rand=az.summary(model_race4nba_v_rand.traces)
-            # res_sum_rand.to_csv(outdir+'summary_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_rand.csv')
-            res_sum_rand.to_csv(outdir+'summary_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_Fixed_az_NutsNumpyro_rand.csv')
+                # plt.savefig(outdir+'posterior_diagnostic_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_rand.png')
+                plt.savefig(outdir+'posterior_diagnostic_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_Fixed_az_NutsNumpyro_rand.png')
+                res_sum_rand=az.summary(model_race4nba_v_rand.traces)
+                # res_sum_rand.to_csv(outdir+'summary_5000_10000_trace_ParamInbound_Fixed_az_SliceSampler_rand.csv')
+                res_sum_rand.to_csv(outdir+'summary_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_Fixed_az_NutsNumpyro_rand.csv')
 
 
 
