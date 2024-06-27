@@ -80,13 +80,14 @@ if __name__ == '__main__':
     #intercept3=np.log(1/beta(a3,b3))
     intercept3=0.85
 
+    epsilon=1e-10 #small number to avoid log(0) in the log transformation
     if singleSS:
         n_trials=90
     else:
         n_subjects=30 #number of subjects
         n_trials=200 #number of trials per subject
         param_sv=0.1 #standard deviation of the subject-level parameters
-        epsilon=1e-10 #small number to avoid log(0) in the log transformation
+        
 
     # Save trial-level parameters for each subject
     subject_params={
