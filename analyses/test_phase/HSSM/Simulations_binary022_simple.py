@@ -53,7 +53,7 @@ if __name__ == '__main__':
 
     # make the output directory if it doesn't exist
     if not os.path.exists(outdir):
-        os.makedirs(outdir)
+        os.makedirs(outdir, exist_ok=True)
 
     #--------------------------------------Generate parameters and simulate data--------------------------------###
     # v in [-3, 3]
