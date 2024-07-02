@@ -41,7 +41,7 @@ if __name__ == '__main__':
     run=args.run # 'sample' or 'prior_predict'
 
     # print out the arguments for debugging
-    print('model:',model)
+    print('model:',model_type)
     print('outdir:',outdir)
     print('samples:',samples)
     print('burnin:',burnin)
