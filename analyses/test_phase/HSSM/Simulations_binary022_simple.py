@@ -17,7 +17,7 @@ if __name__ == '__main__':
     mp.freeze_support()    
     mp.set_start_method('spawn', force=True)
 
-    #parse arguments
+    ##----------------------------------------------parse arguments -----------------------------------##
     parser = argparse.ArgumentParser(description='Simulate data and fit HSSM model')
     parser.add_argument('--samples', type=str, help='how many samples to draw from MCMC chains',default=5000)
     parser.add_argument('--burnin', type=str, help='how many samples to burn in from MCMC chains',default=5000)
@@ -38,7 +38,7 @@ if __name__ == '__main__':
     ncores=int(args.cores)
     TA=float(args.TA)
     tstrat=args.tstrat # 'clip' or 'RThack' or 'norandom' or 'clipnorandom' or 'RThacknorandom'
-    run=args.run
+    run=args.run # 'sample' or 'prior_predict'
 
     # print out the arguments for debugging
     print('model:',model)
@@ -55,7 +55,7 @@ if __name__ == '__main__':
     if not os.path.exists(outdir):
         os.makedirs(outdir)
 
-    #--------------------------------------We can try several generative model--------------------------------###
+    #--------------------------------------Generate parameters and simulate data--------------------------------###
     # v in [-3, 3]
     v_intercept_mu=1.25 #normal
     v_slope_mu=0.3 #normal
@@ -80,7 +80,7 @@ if __name__ == '__main__':
     t_slope_sigma=0.1
 
     n_subjects=30 #number of subjects
-    n_trials=200 #number of trials per subject
+    n_trials=100 #number of trials per subject
 
     # Save trial-level parameters for each subject
     subject_params={
@@ -108,24 +108,40 @@ if __name__ == '__main__':
             a_intercept=np.random.gamma(shape=a_intercept_a, scale=1/a_intercept_b, size=1) #numpy use scale parameterization
             z_intercept=np.random.beta(a=z_intercept_a, b=z_intercept_b, size=1)
             t_intercept=np.random.gamma(shape=t_intercept_a, scale=1/t_intercept_b, size=1)
+            v=v_intercept+v_slope*simneural
+            a=np.repeat(a_intercept, n_trials)
+            z=np.repeat(z_intercept, n_trials)
+            t=np.repeat(t_intercept, n_trials)
         elif regressor=='a':
             v_intercept=np.random.normal(loc=v_intercept_mu, scale=v_sigma, size=1)
             a_intercept=np.random.gamma(shape=a_intercept_a, scale=1/a_intercept_b, size=1)
             a_slope=np.random.normal(loc=a_slope_mu, scale=a_slope_sigma, size=1)
             z_intercept=np.random.beta(a=z_intercept_a, b=z_intercept_b, size=1)
             t_intercept=np.random.gamma(shape=t_intercept_a, scale=1/t_intercept_b, size=1)
+            v=np.repeat(v_intercept, n_trials)
+            a=a_intercept+a_slope*simneural
+            z=np.repeat(z_intercept, n_trials)
+            t=np.repeat(t_intercept, n_trials)
         elif regressor=='z':
             v_intercept=np.random.normal(loc=v_intercept_mu, scale=v_sigma, size=1)
             a_intercept=np.random.gamma(shape=a_intercept_a, scale=1/a_intercept_b, size=1)
             z_intercept=np.random.beta(a=z_intercept_a, b=z_intercept_b, size=1)
             z_slope=np.random.normal(loc=z_slope_mu, scale=z_slope_sigma, size=1)
             t_intercept=np.random.gamma(shape=t_intercept_a, scale=1/t_intercept_b, size=1)
+            v=np.repeat(v_intercept, n_trials)
+            a=np.repeat(a_intercept, n_trials)
+            z=z_intercept+z_slope*simneural
+            t=np.repeat(t_intercept, n_trials)
         elif regressor=='t':
             v_intercept=np.random.normal(loc=v_intercept_mu, scale=v_sigma, size=1)
             a_intercept=np.random.gamma(shape=a_intercept_a, scale=1/a_intercept_b, size=1)
             z_intercept=np.random.beta(a=z_intercept_a, b=z_intercept_b, size=1)
             t_intercept=np.random.gamma(shape=t_intercept_a, scale=1/t_intercept_b, size=1)
             t_slope=np.random.normal(loc=t_slope_mu, scale=t_slope_sigma, size=1)
+            v=np.repeat(v_intercept, n_trials)
+            a=np.repeat(a_intercept, n_trials)
+            z=np.repeat(z_intercept, n_trials)
+            t=t_intercept+t_slope*simneural
 
         # no clipping, adjust generating parameters to avoid extreme values
         # v = np.clip(v, -3, 3)
@@ -133,12 +149,10 @@ if __name__ == '__main__':
         # z = np.clip(z_i, 0, 1)
 
         if tstrat=='clip' or tstrat=='clipnorandom':
-            t = np.clip(t_i, 0.3, 2)
+            t = np.clip(t, 0.3, 2)
 
-        azt=np.repeat([[a,z,t]], axis=0, repeats=len(simneural))
-        azt=azt.squeeze()
         # simulate RT and choices
-        true_values = np.column_stack([v,azt])
+        true_values = np.column_stack([v,a,z,t])
 
         # save to subject_params
         subject_params["v"]=np.append(subject_params["v"],v)
@@ -148,7 +162,7 @@ if __name__ == '__main__':
         subject_params["simneural"]=np.append(subject_params["simneural"],simneural)
         subject_params["subID"]=np.append(subject_params["subID"],np.repeat(i,len(simneural)))
 
-        # Get mode simulations
+        # Get model simulations
         ddm_all = hssm.simulate_data(model="ddm", theta=true_values, size=1)        
         
         if tstrat=='RThack' or tstrat=='RThacknorandom':
@@ -180,185 +194,354 @@ if __name__ == '__main__':
     #save subject-wise parameters
     param_df=pd.DataFrame(subject_params)
     param_df.to_csv(outdir+'simulation_binary022_simple' + '_regressor_' + str(regressor) + '_t-strat_' + str(tstrat) + '_subject_params.csv')
-    ####################################################################################### Define models ################################################################################################
-    # Specify formula and prior based on model and regressor
-    match model:
-        case 'true':
-            match regressor:
-                case 'v':
-                    
+    
+    #Plot the RT distributions in the simulated data for each subject
+    fig, ax = plt.subplots(1, 1, figsize=(12, 6))
+    for i in range(n_subjects):
+        sim_data_concat[sim_data_concat["subID"]==i]["rt"].hist(bins=100, alpha=0.5, ax=ax)
+    ax.set_title("RT distribution")
+    ax.set_xlabel("RT")
+    ax.set_ylabel("Frequency")
+    plt.tight_layout()
+    plt.savefig(outdir+'RT_distribution_' + 'regressor_' + str(regressor) + '_t-strat_' + str(tstrat) + '.png')
+    plt.close()
 
-    if tstrat=='norandom':
+    #plot the distribution of the parameters and the regressor
+    fig, ax = plt.subplots(1, 4, figsize=(12, 6))
+    ax[0].hist(subject_params["v"], bins=100)
+    ax[0].set_title("v distribution")
+    ax[1].hist(subject_params["a"], bins=100)
+    ax[1].set_title("a distribution")
+    ax[2].hist(subject_params["z"], bins=100)
+    ax[2].set_title("z distribution")
+    ax[3].hist(subject_params["t"], bins=100)
+    ax[3].set_title("t distribution")
+    plt.tight_layout()
+    plt.savefig(outdir+'param_distribution_' + 'regressor_' + str(regressor) + '_t-strat_' + str(tstrat) + '.png')
+    plt.close()
 
-    match model:
-        case 'true':            
-            # True model
-            model = hssm.HSSM(
-                data=sim_data_concat,                
-                prior_settings="safe",
-                include=[
-                    {
-                        "name": "v",                            
-                        "formula": "v ~ 1 + x + (1 + x|subID)",
-                        "prior": {
+    ##------------------------- Specify formula and prior based on model and regressor -------------------##
+    if model=='true':
+        reg_key="x"
+    elif model=='null':
+        reg_key=None
+    
+    if reg_key is not None:
+        match regressor:
+            case 'v':
+                v_form= f"v ~ 1 + {reg_key} + (1 + {reg_key}|subID)"
+                a_form= "a ~ 1 + (1|subID)"
+                z_form= "z ~ 1 + (1|subID)"
+                t_form= "t ~ 1 + (1|subID)"
+                v_prior={
                             "Intercept": {"name": "Normal", "mu": 1, "sigma": 2, "initval": 1},
-                            "x": {"name": "Normal", "mu": 0, "sigma": 1, "initval": 0},
+                            f"{reg_key}": {"name": "Normal", "mu": 0, "sigma": 1, "initval": 0},
+                            f"{reg_key}|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                    "sigma": 0.5
+                                    }, "initval": 0.5
+                                },
                             "1|subID": {"name": "Normal",
                                 "mu": 0,
                                 "sigma": {"name": "HalfNormal",
                                     "sigma": 1
                                     }, "initval": 0.5
+                                }
+                        }
+                a_prior={
+                            "Intercept": {"name": "Gamma", "mu": 0.5, "sigma": 1.75, "initval": 1},                                
+                            "1|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                    "sigma": 1
+                                    }, "initval": 0.3
+                                }
+                        }
+                z_prior={
+                            "Intercept": {"name": "HalfNormal", "sigma": 1, "initval": .5},
+                            "1|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                    "sigma": 0.05
+                                    }, "initval": 0.01
+                                }
+                        }
+                t_prior={
+                            "Intercept": {"name": "Gamma", "mu": 0.4, "sigma": 0.2, "initval": 0.3},
+                            "1|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                    "sigma": 0.03, "initval": .01
+                                    },
                                 },
-                            "x|subID": {"name": "Normal",
+                        }
+                link_func="identity"
+            case 'a':
+                v_form= "v ~ 1 + (1|subID)"
+                a_form= f"a ~ 1 + {reg_key} + (1 + {reg_key}|subID)"
+                z_form= "z ~ 1 + (1|subID)"
+                t_form= "t ~ 1 + (1|subID)"
+                v_prior={
+                            "Intercept": {"name": "Normal", "mu": 1, "sigma": 2, "initval": 1},
+                            "1|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                    "sigma": 1
+                                    }, "initval": 0.5
+                                }
+                        }
+                a_prior={
+                            "Intercept": {"name": "Gamma", "mu": 0.5, "sigma": 1.75, "initval": 1},                                
+                            f"{reg_key}": {"name": "Normal", "mu": 0, "sigma": 1, "initval": 0},
+                            f"{reg_key}|subID": {"name": "Normal",
                                 "mu": 0,
                                 "sigma": {"name": "HalfNormal",
                                     "sigma": 0.5
                                     }, "initval": 0.5
+                                },                                
+                            "1|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                    "sigma": 1
+                                    }, "initval": 0.3
                                 }
+                        }
+                z_prior={
+                            "Intercept": {"name": "HalfNormal", "sigma": 1, "initval": .5},
+                            "1|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                    "sigma": 0.05
+                                    }, "initval": 0.01
+                                }
+                        }
+                t_prior={
+                            "Intercept": {"name": "Gamma", "mu": 0.4, "sigma": 0.2, "initval": 0.3},
+                            "1|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                    "sigma": 0.03, "initval": .01
+                                    },
+                                },
+                        }
+                link_func="identity" 
+            case 'z':
+                v_form= "v ~ 1 + (1|subID)"
+                a_form= "a ~ 1 + (1|subID)"
+                z_form= f"z ~ 1 + {reg_key} + (1 + {reg_key}|subID)"
+                t_form= "t ~ 1 + (1|subID)"
+                v_prior={
+                            "Intercept": {"name": "Normal", "mu": 1, "sigma": 2, "initval": 1},
+                            "1|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                    "sigma": 1
+                                    }, "initval": 0.5
+                                }
+                        }
+                a_prior={
+                            "Intercept": {"name": "Gamma", "mu": 0.5, "sigma": 1.75, "initval": 1},                               
+                            "1|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                    "sigma": 1
+                                    }, "initval": 0.3
+                                }
+                        }
+                z_prior={
+                            "Intercept": {"name": "HalfNormal", "sigma": 1, "initval": .5},                                
+                            f"{reg_key}": {"name": "Normal", "mu": 0, "sigma": 1, "initval": 0},
+                            f"{reg_key}|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                    "sigma": 0.5
+                                    }, "initval": 0.5
+                                }, 
+                            "1|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                    "sigma": 0.05
+                                    }, "initval": 0.01
+                                }
+                        }
+                t_prior={
+                            "Intercept": {"name": "Gamma", "mu": 0.4, "sigma": 0.2, "initval": 0.3},
+                            "1|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                    "sigma": 0.03, "initval": .01
+                                    },
+                                },
+                        }
+                link_func="identity"
+            case 't':
+                v_form= "v ~ 1 + (1|subID)"
+                a_form= "a ~ 1 + (1|subID)"
+                z_form= "z ~ 1 + (1|subID)"
+                t_form= f"t ~ 1 + {reg_key} + (1 + {reg_key}|subID)"
+                v_prior={
+                            "Intercept": {"name": "Normal", "mu": 1, "sigma": 2, "initval": 1},
+                            "1|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                    "sigma": 1
+                                    }, "initval": 0.5
+                                }
+                        }
+                a_prior={
+                            "Intercept": {"name": "Gamma", "mu": 0.5, "sigma": 1.75, "initval": 1},                               
+                            "1|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                    "sigma": 1
+                                    }, "initval": 0.3
+                                }
+                        }
+                z_prior={
+                            "Intercept": {"name": "HalfNormal", "sigma": 1, "initval": .5},
+                            "1|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                    "sigma": 0.05
+                                    }, "initval": 0.01
+                                }
+                        }
+                t_prior={
+                            "Intercept": {"name": "Gamma", "mu": 0.4, "sigma": 0.2, "initval": 0.3},                                
+                            f"{reg_key}": {"name": "Normal", "mu": 0, "sigma": 1, "initval": 0},
+                            f"{reg_key}|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                    "sigma": 0.5
+                                    }, "initval": 0.5
+                                }, 
+                            "1|subID": {"name": "Normal",
+                                "mu": 0,
+                                "sigma": {"name": "HalfNormal",
+                                    "sigma": 0.03, "initval": .01
+                                    },
+                                },
+                        }
+                link_func="identity"
+    else:
+        v_form= "v ~ 1 + (1|subID)"
+        a_form= "a ~ 1 + (1|subID)"
+        z_form= "z ~ 1 + (1|subID)"
+        t_form= "t ~ 1 + (1|subID)"
+        v_prior={
+                    "Intercept": {"name": "Normal", "mu": 1, "sigma": 2, "initval": 1},
+                    "1|subID": {"name": "Normal",
+                        "mu": 0,
+                        "sigma": {"name": "HalfNormal",
+                            "sigma": 1
+                            }, "initval": 0.5
+                        }
+                }
+        a_prior={
+                    "Intercept": {"name": "Gamma", "mu": 0.5, "sigma": 1.75, "initval": 1},                               
+                    "1|subID": {"name": "Normal",
+                        "mu": 0,
+                        "sigma": {"name": "HalfNormal",
+                            "sigma": 1
+                            }, "initval": 0.3
+                        }
+                }
+        z_prior={
+                    "Intercept": {"name": "HalfNormal", "sigma": 1, "initval": .5},
+                    "1|subID": {"name": "Normal",
+                        "mu": 0,
+                        "sigma": {"name": "HalfNormal",
+                            "sigma": 0.05
+                            }, "initval": 0.01
+                        }
+                }
+        t_prior={
+                    "Intercept": {"name": "Gamma", "mu": 0.4, "sigma": 0.2, "initval": 0.3},
+                    "1|subID": {"name": "Normal",
+                        "mu": 0,
+                        "sigma": {"name": "HalfNormal",
+                            "sigma": 0.03, "initval": .01
                             },
-                        "link": "identity"
-                    },
-                    {
-                        "name": "a",                            
-                        "formula": "a ~ 1 + (1|subID)",
-                        "prior": {
-                            "Intercept": {"name": "Gamma", "mu": 0.5, "sigma": 1.75, "initval": 1},
-                            "1|subID": {"name": "Normal",
-                                "mu": 0,
-                                "sigma": {"name": "HalfNormal",
-                                    "sigma": 1, "initval": 0.3
-                                    },
-                                }
                         },
-                        "link": "identity"
-                    },
-                    {
-                        "name": "z",                            
-                        "formula": "z ~ 1 + (1|subID)",
-                        "prior": {
-                            # "Intercept": {"name": "HalfNormal", "sigma": 1, "initval": .5},
-                            "1|subID": {"name": "Normal",
-                                "mu": 0,
-                                "sigma": {"name": "HalfNormal",
-                                    "sigma": 0.05,  "initval": 0.01
-                                    },
-                                }
-                        },
-                        "link": "identity"
-                    },
-                    {
-                        "name": "t",                            
-                        "formula": "t ~ 1 + (1|subID)",
-                        "prior": {
-                            "Intercept": {"name": "Normal", "mu": 0.5, "sigma": 0.4, "initval": 0.3},
-                            "1|subID": {"name": "Normal",
-                                "mu": 0,
-                                "sigma": {"name": "HalfNormal",
-                                    "sigma": 0.5,  "initval": 0.1
-                                    },
-                                }
-                        },
-                        "link": "identity"
-                    }
-                ],
-            )
-   
-        case 'null':
-            # model with no relationship between v and neural data
-            model = hssm.HSSM(
-                data=sim_data_concat,                
-                prior_settings="safe",
-                include=[
-                    {
-                        "name": "v",                            
-                        "formula": "v ~ 1 + (1|subID)",
-                        "prior": {
-                            "Intercept": {"name": "Normal", "mu": 1, "sigma": 1, "initval": 1},
-                            "1|subID": {"name": "Normal",
-                                "mu": 0,
-                                "sigma": {"name": "HalfNormal",
-                                "sigma": 1
-                                }, "initval": 0.5
-                                }
-                        },
-                        "link": "identity"
-                    },
-                    {
-                        "name": "a",                            
-                        "formula": "a ~ 1 + (1|subID)",
-                        "prior": {
-                            "Intercept": {"name": "Gamma", "mu": 0.5, "sigma": 1, "initval": 1},
-                            "1|subID": {"name": "Normal",
-                                "mu": 0,
-                                "sigma": {"name": "HalfNormal",
-                                "sigma": 1
-                                }, "initval": 0.5
-                                }
-                        },
-                        "link": "identity"
-                    },
-                    {
-                        "name": "z",                            
-                        "formula": "z ~ 1 + (1|subID)",
-                        "prior": {
-                            "Intercept": {"name": "Normal", "mu": 0.5, "sigma": 0.5, "initval": 0.5},
-                            "1|subID": {"name": "Normal",
-                                "mu": 0,
-                                "sigma": {"name": "HalfNormal",
-                                "sigma": 0.05
-                                }, "initval": 0.05
-                                }
-                        },
-                        "link": "identity"
-                    },
-                    {
-                        "name": "t",                            
-                        "formula": "t ~ 1 + (1|subID)",
-                        "prior": {
-                            "Intercept": {"name": "Normal", "mu": 0, "sigma": 1, "initval": 0.3},
-                            "1|subID": {"name": "Normal",
-                                "mu": 0,
-                                "sigma": {"name": "HalfNormal",
-                                "sigma": 0.5
-                                }, "initval": 0.5
-                                }
-                        },
-                        "link": "identity"
-                    }
-                ],
-            )
-            
+                }
+        link_func="identity"
+    
+    ##-------------------------------- Define the models --------------------------------###
+    if tstrat=='norandom' or tstrat=='clipnorandom' or tstrat=='RThacknorandom':
+        model = hssm.HSSM(
+            data=sim_data_concat,                
+            prior_settings="safe",
+            include=[
+                {
+                    "name": "v",                            
+                    "formula": v_form,
+                    "prior": v_prior,
+                    "link": link_func
+                },
+                {
+                    "name": "a",                            
+                    "formula": a_form,
+                    "prior": a_prior,
+                    "link": link_func
+                },
+                {
+                    "name": "z",                            
+                    "formula": z_form,
+                    "prior": z_prior,
+                    "link": link_func
+                }
+            ],
+        )
+    else:
+        model = hssm.HSSM(
+            data=sim_data_concat,                
+            prior_settings="safe",
+            include=[
+                {
+                    "name": "v",                            
+                    "formula": v_form,
+                    "prior": v_prior,
+                    "link": link_func
+                },
+                {
+                    "name": "a",                            
+                    "formula": a_form,
+                    "prior": a_prior,
+                    "link": link_func
+                },
+                {
+                    "name": "z",                            
+                    "formula": z_form,
+                    "prior": z_prior,
+                    "link": link_func
+                },
+                {
+                    "name": "t",                            
+                    "formula": t_form,
+                    "prior": t_prior,
+                    "link": link_func
+                }
+            ],
+        )
+    
+    #--------------------------------------Fit the model--------------------------------###
+                
     if run=='sample':
         #fit the model    
         infer_data_ddm = model.sample(sampler="nuts_numpyro", chains=4, cores=ncores, draws=samples, tune=burnin,idata_kwargs = {'log_likelihood': True}, target_accept=TA)
         
-        az.to_netcdf(infer_data_ddm,outdir+'sample_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_ddm_simple_NutsNumpyro_' + str(model) + '_t-strat_' + '.nc4')
+        az.to_netcdf(infer_data_ddm,outdir+'sample_' + str(burnin) + '_' + str(samples) + 'TA_' + str(TA) + '_trace_ParamInbound_ddm_simple_NutsNumpyro_' + str(model) + 'regress_' + str(regressor) + '_t-strat_' + str(tstrat) + '.nc4')
         az.plot_trace(
             infer_data_ddm,
             var_names="~log_likelihood",  # we exclude the log_likelihood traces here
         )
-        plt.savefig(outdir+'posterior_diagnostic_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_ddm_simple_NutsNumpyro_' + str(model) + '_t-strat_' + '.png')
+        plt.savefig(outdir+'posterior_diagnostic_' + str(burnin) + '_' + str(samples) + 'TA_' + str(TA) + '_trace_ParamInbound_ddm_simple_NutsNumpyro_' + str(model) + 'regress_' + str(regressor) + '_t-strat_' + str(tstrat) + '.png')
         res_sum=az.summary(model.traces)
-        res_sum.to_csv(outdir+'summary_' + str(burnin) + '_' + str(samples) + '_trace_ParamInbound_ddm_simple_NutsNumpyro_' + str(model) + '_t-strat_' + '.csv')
-    else:
-        #plot data distribution and prior predict
-        fig, ax = plt.subplots(1, 2, figsize=(12, 6))
-        # plot the data distribution
-        sim_data_concat["rt"].hist(bins=100, ax=ax[0])
-        ax[0].set_title("RT distribution")
-        ax[0].set_xlabel("RT")
-        ax[0].set_ylabel("Frequency")
-        # plot the prior predictive
-        for i in range(5):
-            prior_predict = model.prior_predictive(
-                data=sim_data_concat, n_posterior_predictive=1
-            )
-            prior_predict["rt"].hist(bins=100, alpha=0.5, ax=ax[1])
-        ax[1].set_title("Prior predictive distribution")
-        ax[1].set_xlabel("RT")
-        ax[1].set_ylabel("Frequency")
-        plt.tight_layout()
-        plt.savefig(outdir+'data_distribution_prior_predict_' + '.png')
-        plt.close()
+        res_sum.to_csv(outdir+'summary_' + str(burnin) + '_' + str(samples) + 'TA_' + str(TA) + '_trace_ParamInbound_ddm_simple_NutsNumpyro_' + str(model) + 'regress_' + str(regressor) + '_t-strat_' + str(tstrat) + '.csv')
+    elif run=='prior_predict':
+        #HSSM prior predict method
+        prior_predict=model.sample_prior_predictive(draws=1000,omit_offsets=False)
+        az.to_netcdf(prior_predict,outdir+'prior_predict_ddm_simple_' + str(model) + 'regress_' + str(regressor) + '_t-strat_' + str(tstrat) + '.nc4')
 
 
