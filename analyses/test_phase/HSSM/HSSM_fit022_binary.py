@@ -94,7 +94,7 @@ if __name__ == '__main__':
     }
 
     a_intercept_prior = {
-        "Intercept": {"name": "Gamma", "mu": 0.5, "sigma": 1.75, "initval": 1},
+        "Intercept": {"name": "Gamma", "mu": 1.5, "sigma": 0.75, "initval": 1},
         "1|subj_idx": {"name": "Normal",
             "mu": 0,
             "sigma": {"name": "HalfNormal",
@@ -103,7 +103,7 @@ if __name__ == '__main__':
             },
     }
     a_slope_prior = {
-        "Intercept": {"name": "Gamma", "mu": 0.5, "sigma": 1.75, "initval": 1},
+        "Intercept": {"name": "Gamma", "mu": 1.5, "sigma": 0.75, "initval": 1},
         "x": {"name": "Normal", "mu": 0, "sigma": 1, "initval": 0},
         "x|subj_idx": {"name": "Normal",
             "mu": 0,
@@ -120,7 +120,7 @@ if __name__ == '__main__':
     }
 
     z_intercept_prior = {
-        "Intercept": {"name": "HalfNormal", "sigma": 1, "initval": .5},
+        "Intercept": {"name": "Beta", "alpha": 5, "beta": 5, "initval": .5},
         "1|subj_idx": {"name": "Normal",
             "mu": 0,
             "sigma": {"name": "HalfNormal",
@@ -129,7 +129,7 @@ if __name__ == '__main__':
             },
     }
     z_slope_prior = {
-        "Intercept": {"name": "HalfNormal", "sigma": 1, "initval": .5},
+        "Intercept": {"name": "Beta", "alpha": 5, "beta": 5, "initval": .5},
         "x": {"name": "Normal", "mu": 0, "sigma": 1, "initval": 0},
         "x|subj_idx": {"name": "Normal",
             "mu": 0,

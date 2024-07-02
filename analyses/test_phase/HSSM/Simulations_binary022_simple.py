@@ -24,7 +24,7 @@ if __name__ == '__main__':
     parser.add_argument('--cores', type=str, help='how many CPU/GPU cores to use for sampling',default=4)
     parser.add_argument('--model', type=str, help='which model to run')
     parser.add_argument('--regressor', type=str, help='which parameter to regress on',default='v')
-    parser.add_argument('--outdir', type=str, help='outpu directory to save results',default='/scratch/hyang336/working_dir/HDDM_HSSM/DDM_simulations/')
+    parser.add_argument('--outdir', type=str, help='outpu directory to save results',default='/scratch/hyang336/working_dir/HDDM_HSSM/DDM_simulations20240702/')
     parser.add_argument('--TA', type=str, help='target_accept for NUTS sampler',default=0.8)
     parser.add_argument('--run', type=str, help='whether to run the sampler or just plot data distribution and prior predict',default='sample')
     parser.add_argument('--tstrat', type=str, help='how to handle issue on the t paramter',default='clip')
@@ -57,13 +57,13 @@ if __name__ == '__main__':
 
     #--------------------------------------Generate parameters and simulate data--------------------------------###
     # v in [-3, 3]
-    v_intercept_mu=1.25 #normal
+    v_intercept_mu=0 #normal
     v_slope_mu=0.3 #normal
     v_sigma=0.2 
 
     # a in [0.3, 2.5]
-    a_intercept_a=1.5 #gamma with mean at 1.5
-    a_intercept_b=1
+    a_intercept_a=10 #numpy gamma uses scale parameterization
+    a_intercept_b=0.2
     a_slope_mu=0.3 #normal
     a_slope_sigma=0.2
 
@@ -249,7 +249,7 @@ if __name__ == '__main__':
                                 }
                         }
                 a_prior={
-                            "Intercept": {"name": "Gamma", "mu": 0.5, "sigma": 1.75, "initval": 1},                                
+                            "Intercept": {"name": "Gamma", "mu": 1.5, "sigma": 0.75, "initval": 1},                                
                             "1|subID": {"name": "Normal",
                                 "mu": 0,
                                 "sigma": {"name": "HalfNormal",
@@ -258,7 +258,7 @@ if __name__ == '__main__':
                                 }
                         }
                 z_prior={
-                            "Intercept": {"name": "HalfNormal", "sigma": 1, "initval": .5},
+                            "Intercept": {"name": "Beta", "alpha": 5, "beta": 5, "initval": .5},
                             "1|subID": {"name": "Normal",
                                 "mu": 0,
                                 "sigma": {"name": "HalfNormal",
@@ -291,7 +291,7 @@ if __name__ == '__main__':
                                 }
                         }
                 a_prior={
-                            "Intercept": {"name": "Gamma", "mu": 0.5, "sigma": 1.75, "initval": 1},                                
+                            "Intercept": {"name": "Gamma", "mu": 1.5, "sigma": 0.75, "initval": 1},                                
                             f"{reg_key}": {"name": "Normal", "mu": 0, "sigma": 1, "initval": 0},
                             f"{reg_key}|subID": {"name": "Normal",
                                 "mu": 0,
@@ -307,7 +307,7 @@ if __name__ == '__main__':
                                 }
                         }
                 z_prior={
-                            "Intercept": {"name": "HalfNormal", "sigma": 1, "initval": .5},
+                            "Intercept": {"name": "Beta", "alpha": 5, "beta": 5, "initval": .5},
                             "1|subID": {"name": "Normal",
                                 "mu": 0,
                                 "sigma": {"name": "HalfNormal",
@@ -340,7 +340,7 @@ if __name__ == '__main__':
                                 }
                         }
                 a_prior={
-                            "Intercept": {"name": "Gamma", "mu": 0.5, "sigma": 1.75, "initval": 1},                               
+                            "Intercept": {"name": "Gamma", "mu": 1.5, "sigma": 0.75, "initval": 1},                               
                             "1|subID": {"name": "Normal",
                                 "mu": 0,
                                 "sigma": {"name": "HalfNormal",
@@ -349,7 +349,7 @@ if __name__ == '__main__':
                                 }
                         }
                 z_prior={
-                            "Intercept": {"name": "HalfNormal", "sigma": 1, "initval": .5},                                
+                            "Intercept": {"name": "Beta", "alpha": 5, "beta": 5, "initval": .5},                                
                             f"{reg_key}": {"name": "Normal", "mu": 0, "sigma": 1, "initval": 0},
                             f"{reg_key}|subID": {"name": "Normal",
                                 "mu": 0,
@@ -389,7 +389,7 @@ if __name__ == '__main__':
                                 }
                         }
                 a_prior={
-                            "Intercept": {"name": "Gamma", "mu": 0.5, "sigma": 1.75, "initval": 1},                               
+                            "Intercept": {"name": "Gamma", "mu": 1.5, "sigma": 0.75, "initval": 1},                               
                             "1|subID": {"name": "Normal",
                                 "mu": 0,
                                 "sigma": {"name": "HalfNormal",
@@ -398,7 +398,7 @@ if __name__ == '__main__':
                                 }
                         }
                 z_prior={
-                            "Intercept": {"name": "HalfNormal", "sigma": 1, "initval": .5},
+                            "Intercept": {"name": "Beta", "alpha": 5, "beta": 5, "initval": .5},
                             "1|subID": {"name": "Normal",
                                 "mu": 0,
                                 "sigma": {"name": "HalfNormal",
@@ -438,7 +438,7 @@ if __name__ == '__main__':
                         }
                 }
         a_prior={
-                    "Intercept": {"name": "Gamma", "mu": 0.5, "sigma": 1.75, "initval": 1},                               
+                    "Intercept": {"name": "Gamma", "mu": 1.5, "sigma": 0.75, "initval": 1},                               
                     "1|subID": {"name": "Normal",
                         "mu": 0,
                         "sigma": {"name": "HalfNormal",
@@ -447,7 +447,7 @@ if __name__ == '__main__':
                         }
                 }
         z_prior={
-                    "Intercept": {"name": "HalfNormal", "sigma": 1, "initval": .5},
+                    "Intercept": {"name": "Beta", "alpha": 5, "beta": 5, "initval": .5},
                     "1|subID": {"name": "Normal",
                         "mu": 0,
                         "sigma": {"name": "HalfNormal",
@@ -535,12 +535,56 @@ if __name__ == '__main__':
             infer_data_ddm,
             var_names="~log_likelihood",  # we exclude the log_likelihood traces here
         )
-        plt.savefig(outdir+'posterior_diagnostic_' + str(burnin) + '_' + str(samples) + 'TA_' + str(TA) + '_trace_ParamInbound_ddm_simple_NutsNumpyro_' + str(model) + 'regress_' + str(regressor) + '_t-strat_' + str(tstrat) + '.png')
+        plt.savefig(outdir+'posterior_diagnostic_' + str(burnin) + '_' + str(samples) + '_TA_' + str(TA) + '_trace_ParamInbound_ddm_simple_NutsNumpyro_' + str(model_type) + 'regress_' + str(regressor) + '_t-strat_' + str(tstrat) + '.png')
         res_sum=az.summary(model.traces)
         res_sum.to_csv(outdir+'summary_' + str(burnin) + '_' + str(samples) + 'TA_' + str(TA) + '_trace_ParamInbound_ddm_simple_NutsNumpyro_' + str(model_type) + 'regress_' + str(regressor) + '_t-strat_' + str(tstrat) + '.csv')
     elif run=='prior_predict':
         #HSSM prior predict method
         prior_predict=model.sample_prior_predictive(draws=1000,omit_offsets=False)
         az.to_netcdf(prior_predict,outdir+'prior_predict_ddm_simple_' + str(model_type) + 'regress_' + str(regressor) + '_t-strat_' + str(tstrat) + '.nc4')
+
+        #plots
+        # extract the prior xarray and plot histogram
+        prior_resp=prior_predict.prior_predictive['rt,response'].values
+        prior_resp=prior_resp.squeeze()
+        prior_resp=prior_resp.reshape(-1,2)
+        prior_RT_resp_1=prior_resp[prior_resp[:,1]==1][:,0]
+        prior_RT_resp_2=prior_resp[prior_resp[:,1]==-1][:,0]
+
+        plt.close()
+        fig, ax = plt.subplots(1, 2, figsize=(12, 6))
+        ax[0].hist(prior_RT_resp_1, bins=100, alpha=0.5, label="RT for response 1")
+        ax[0].legend()
+        ax[1].hist(prior_RT_resp_2, bins=100, alpha=0.5, label="RT for response -1")
+        ax[1].legend()
+        plt.tight_layout()
+        fig.suptitle("prior predictive RT distribution")
+        plt.savefig(outdir+'prior_predict_RT_distribution_' + str(model_type) + 'regress_' + str(regressor) + '_t-strat_' + str(tstrat) + '.png')
+
+        # prior parameters
+        prior_vs=prior_predict.prior['v'].values
+        priro_vs=prior_vs.squeeze()
+        prior_as=prior_predict.prior['a'].values
+        prior_as=prior_as.squeeze()
+        prior_zs=prior_predict.prior['z'].values
+        prior_zs=prior_zs.squeeze()
+        prior_ts=prior_predict.prior['t'].values
+        prior_ts=prior_ts.squeeze()
+
+        plt.close()
+        fig, ax = plt.subplots(1, 4, figsize=(12, 6))
+        ax[0].hist(prior_vs.flatten(), bins=100, alpha=0.5, label="prior v")
+        ax[0].legend()
+        ax[1].hist(prior_as.flatten(), bins=100, alpha=0.5, label="prior a")
+        ax[1].legend()
+        ax[2].hist(prior_zs.flatten(), bins=100, alpha=0.5, label="prior z")
+        ax[2].legend()
+        ax[3].hist(prior_ts.flatten(), bins=100, alpha=0.5, label="prior t")
+        ax[3].legend()
+
+        plt.tight_layout()
+        fig.suptitle("prior predictive parameter distribution")
+        plt.savefig(outdir+'prior_predict_param_distribution_' + str(model_type) + 'regress_' + str(regressor) + '_t-strat_' + str(tstrat) + '.png')
+
 
 
