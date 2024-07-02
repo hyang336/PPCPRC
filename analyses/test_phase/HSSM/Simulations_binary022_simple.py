@@ -195,16 +195,15 @@ if __name__ == '__main__':
     param_df=pd.DataFrame(subject_params)
     param_df.to_csv(outdir+'simulation_binary022_simple' + '_regressor_' + str(regressor) + '_t-strat_' + str(tstrat) + '_subject_params.csv')
     
-    #Plot the RT distributions in the simulated data for each subject
-    fig, ax = plt.subplots(1, 1, figsize=(12, 6))
-    for i in range(n_subjects):
-        sim_data_concat[sim_data_concat["subID"]==i]["rt"].hist(bins=100, alpha=0.5, ax=ax)
-    ax.set_title("RT distribution")
-    ax.set_xlabel("RT")
-    ax.set_ylabel("Frequency")
+    #Plot the RT distributions in the simulated data for each type of response
+    fig, ax = plt.subplots(1, 2, figsize=(12, 6))
+    ax[0].hist(sim_data_concat.query("response==-1")["rt"], bins=100, alpha=0.5, label="response -1")
+    ax[0].legend()
+    ax[1].hist(sim_data_concat.query("response==1")["rt"], bins=100, alpha=0.5, label="response 1")    
+    ax[1].legend()
     plt.tight_layout()
+    fig.suptitle("RT distribution")
     plt.savefig(outdir+'RT_distribution_' + 'regressor_' + str(regressor) + '_t-strat_' + str(tstrat) + '.png')
-    plt.close()
 
     #plot the distribution of the parameters and the regressor
     fig, ax = plt.subplots(1, 4, figsize=(12, 6))
