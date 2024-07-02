@@ -62,8 +62,8 @@ if __name__ == '__main__':
     v_sigma=0.2 
 
     # a in [0.3, 2.5]
-    a_intercept_a=10 #numpy gamma uses scale parameterization
-    a_intercept_b=0.2
+    a_intercept_a=10 #numpy gamma uses doc says it uses scale parameterization
+    a_intercept_b=5 #gamma rate
     a_slope_mu=0.3 #normal
     a_slope_sigma=0.2
 
@@ -75,7 +75,7 @@ if __name__ == '__main__':
 
     # t in [0, 2]
     t_intercept_a=60 #gamma with mean at 0.5, variance at 0.0042
-    t_intercept_b=120
+    t_intercept_b=120 #gamma rate
     t_slope_mu=0.3 #normal
     t_slope_sigma=0.1
 
