@@ -530,14 +530,14 @@ if __name__ == '__main__':
         #fit the model    
         infer_data_ddm = model.sample(sampler="nuts_numpyro", chains=4, cores=ncores, draws=samples, tune=burnin,idata_kwargs = {'log_likelihood': True}, target_accept=TA)
         
-        az.to_netcdf(infer_data_ddm,outdir+'sample_' + str(burnin) + '_' + str(samples) + 'TA_' + str(TA) + '_trace_ParamInbound_ddm_simple_NutsNumpyro_' + str(model_type) + 'regress_' + str(regressor) + '_t-strat_' + str(tstrat) + '.nc4')
+        az.to_netcdf(infer_data_ddm,outdir+'sample_' + str(burnin) + '_' + str(samples) + '_TA_' + str(TA) + '_trace_ParamInbound_ddm_simple_NutsNumpyro_' + str(model_type) + 'regress_' + str(regressor) + '_t-strat_' + str(tstrat) + '.nc4')
         az.plot_trace(
             infer_data_ddm,
             var_names="~log_likelihood",  # we exclude the log_likelihood traces here
         )
         plt.savefig(outdir+'posterior_diagnostic_' + str(burnin) + '_' + str(samples) + '_TA_' + str(TA) + '_trace_ParamInbound_ddm_simple_NutsNumpyro_' + str(model_type) + 'regress_' + str(regressor) + '_t-strat_' + str(tstrat) + '.png')
         res_sum=az.summary(model.traces)
-        res_sum.to_csv(outdir+'summary_' + str(burnin) + '_' + str(samples) + 'TA_' + str(TA) + '_trace_ParamInbound_ddm_simple_NutsNumpyro_' + str(model_type) + 'regress_' + str(regressor) + '_t-strat_' + str(tstrat) + '.csv')
+        res_sum.to_csv(outdir+'summary_' + str(burnin) + '_' + str(samples) + '_TA_' + str(TA) + '_trace_ParamInbound_ddm_simple_NutsNumpyro_' + str(model_type) + 'regress_' + str(regressor) + '_t-strat_' + str(tstrat) + '.csv')
     elif run=='prior_predict':
         #HSSM prior predict method
         prior_predict=model.sample_prior_predictive(draws=1000,omit_offsets=False)
