@@ -160,7 +160,7 @@ if __name__ == '__main__':
         "x|subj_idx": {"name": "Normal",
             "mu": 0,
             "sigma": {"name": "HalfNormal",
-                "sigma": 0.03, "initval": 0.01
+                "sigma": 0.5, "initval": 0.5
                 }
             },
         "1|subj_idx": {"name": "Normal",
@@ -174,6 +174,16 @@ if __name__ == '__main__':
     sim_data = fam_data[['subj_idx','rt','bin_rating','bin_scheme']]
     # rename the rating column to response
     sim_data = sim_data.rename(columns={'bin_rating':'response'})
+
+    # plot RT distribution for each of the two response categories separately
+    fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+    ax[0].hist(sim_data[sim_data['response'] == 1]['rt'], bins=100, color='blue', alpha=0.5, label='resp 1')
+    ax[0].legend()
+    ax[1].hist(sim_data[sim_data['response'] == -1]['rt'], bins=100, color='red', alpha=0.5, label='resp -1')
+    ax[1].legend()
+
+    plt.savefig(outdir+'RT_distribution_' + str(binscheme) + '-binarized.png')
+
 ########################################################################################################################################################
     
 ################    ## Define model, null model is a special case since it doesn't have regressor###################################################################
