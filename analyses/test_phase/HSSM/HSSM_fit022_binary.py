@@ -196,36 +196,62 @@ if __name__ == '__main__':
         })
         
         # define the model
-        model= hssm.HSSM(
-            data=data,
-            prior_settings="safe",
-            include=[
-                {
-                    "name": "v",
-                    "formula": "v ~ 1 + (1|subj_idx)",
-                    "prior": v_intercept_prior,
-                    "link": "identity",
-                },
-                {
-                    "name": "a",
-                    "formula": "a ~ 1 + (1|subj_idx)",
-                    "prior": a_intercept_prior,
-                    "link": "identity",
-                },
-                {
-                    "name": "z",
-                    "formula": "z ~ 1 + (1|subj_idx)",
-                    "prior": z_intercept_prior,
-                    "link": "identity",
-                },
-                {
-                    "name": "t",
-                    "formula": "t ~ 1 + (1|subj_idx)",
-                    "prior": t_intercept_prior,
-                    "link": "identity",
-                }
-            ],
-        )
+        if tstrat=='norandom':
+            model= hssm.HSSM(
+                data=data,
+                prior_settings="safe",
+                include=[
+                    {
+                        "name": "v",
+                        "formula": "v ~ 1 + (1|subj_idx)",
+                        "prior": v_intercept_prior,
+                        "link": "identity",
+                    },
+                    {
+                        "name": "a",
+                        "formula": "a ~ 1 + (1|subj_idx)",
+                        "prior": a_intercept_prior,
+                        "link": "identity",
+                    },
+                    {
+                        "name": "z",
+                        "formula": "z ~ 1 + (1|subj_idx)",
+                        "prior": z_intercept_prior,
+                        "link": "identity",
+                    }
+                ],
+            )
+        else:
+            model= hssm.HSSM(
+                data=data,
+                prior_settings="safe",
+                include=[
+                    {
+                        "name": "v",
+                        "formula": "v ~ 1 + (1|subj_idx)",
+                        "prior": v_intercept_prior,
+                        "link": "identity",
+                    },
+                    {
+                        "name": "a",
+                        "formula": "a ~ 1 + (1|subj_idx)",
+                        "prior": a_intercept_prior,
+                        "link": "identity",
+                    },
+                    {
+                        "name": "z",
+                        "formula": "z ~ 1 + (1|subj_idx)",
+                        "prior": z_intercept_prior,
+                        "link": "identity",
+                    },
+                    {
+                        "name": "t",
+                        "formula": "t ~ 1 + (1|subj_idx)",
+                        "prior": t_intercept_prior,
+                        "link": "identity",
+                    }
+                ],
+            )
     else:
         match regressor: #select the regressor based on model name
             case 'rand':# control model with regression on randomly generated data
