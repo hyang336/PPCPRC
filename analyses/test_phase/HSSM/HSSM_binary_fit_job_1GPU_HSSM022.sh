@@ -3,7 +3,7 @@
 #SBATCH --account=ctb-akhanf
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=3
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:v100:1
 #SBATCH --mem=64G
 #SBATCH --job-name=HSSM_binary_fit
 #SBATCH --output=/home/hyang336/jobs/HSSM_binary_fit%j.out
