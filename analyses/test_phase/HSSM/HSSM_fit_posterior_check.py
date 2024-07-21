@@ -31,6 +31,11 @@ fam_data = pd.read_csv('/scratch/hyang336/working_dir/HDDM_HSSM/HSSM_freq_Median
 sim_data = fam_data[['subj_idx','rt','bin_rating','bin_scheme']]
 # rename the rating column to response
 sim_data = sim_data.rename(columns={'bin_rating':'response'})
+data = pd.DataFrame({
+            'rt':sim_data['rt'],
+            'response':sim_data['response'],
+            'subj_idx':sim_data['subj_idx']
+        })
 ##Priors following Dr. Frank's suggestion
 v_intercept_prior = {
     "Intercept": {"name": "Normal", "mu": 1, "sigma": 2, "initval": 1},
@@ -165,7 +170,20 @@ model= hssm.HSSM(
 model._inference_obj=inf_data
 model.sample_posterior_predictive()
 
+# pull out posterior predictive samples
+pps=inf_data.posterior_predictive['rt,response'].values
 
+#reshape to combine different chains
+pps=pps.reshape(-1,pps.shape[3])
+
+#plot pps RT as subplot histograms for response option -1 and 1
+plt.close()
+fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+ax[0].hist(pps[pps[:,1] == 1,0], bins=100, color='blue', alpha=0.5, label='resp 1')
+ax[0].legend()
+ax[1].hist(pps[pps[:,1] == -1,0], bins=100, color='red', alpha=0.5, label='resp -1')
+ax[1].legend()
+plt.savefig('/scratch/hyang336/working_dir/HDDM_HSSM/RT_distribution_PPS_median-binarized_t-strat_norandom_recent_v_on_null.png')
 # import arviz as az
 # import matplotlib.pyplot as plt
 
