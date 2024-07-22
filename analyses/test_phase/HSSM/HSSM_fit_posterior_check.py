@@ -183,7 +183,7 @@ ax[0].hist(pps[pps[:,1] == 1,0], bins=100, color='blue', alpha=0.5, label='resp 
 ax[0].legend()
 ax[1].hist(pps[pps[:,1] == -1,0], bins=100, color='red', alpha=0.5, label='resp -1')
 ax[1].legend()
-plt.savefig('/scratch/hyang336/working_dir/HDDM_HSSM/RT_distribution_PPS_median-binarized_t-strat_norandom_recent_v_on_null.png')
+plt.savefig('/scratch/hyang336/working_dir/HDDM_HSSM/resp_binarized/RT_distribution_PPS_median-binarized_t-strat_norandom_recent_v_on_null.png')
 # import arviz as az
 # import matplotlib.pyplot as plt
 
