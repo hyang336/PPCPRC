@@ -198,6 +198,7 @@ if __name__ == '__main__':
         # define the model
         if tstrat=='norandom':
             model= hssm.HSSM(
+                loglik_kind = "approx_differentiable",
                 data=data,
                 prior_settings="safe",
                 include=[
@@ -223,6 +224,7 @@ if __name__ == '__main__':
             )
         else:
             model= hssm.HSSM(
+                loglik_kind = "approx_differentiable",
                 data=data,
                 prior_settings="safe",
                 include=[
@@ -449,6 +451,7 @@ if __name__ == '__main__':
         # define the model
         if tstrat=='norandom':
             model= hssm.HSSM(
+                loglik_kind = "approx_differentiable",
                 data=data,
                 prior_settings="safe",
                 include=[
@@ -474,6 +477,7 @@ if __name__ == '__main__':
             ) 
         else:
             model= hssm.HSSM(
+                loglik_kind = "approx_differentiable",
                 data=data,
                 prior_settings="safe",
                 include=[
