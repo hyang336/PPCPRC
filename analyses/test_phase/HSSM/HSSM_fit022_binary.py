@@ -41,6 +41,9 @@ if __name__ == '__main__':
     # make the output directory if it doesn't exist
     if not os.path.exists(outdir):
         os.makedirs(outdir,exist_ok=True)
+
+    # path to onnx file for apporx_differentiable loglik
+    onnx_file = '/home/hyang336/PPCPRC/analyses/test_phase/HSSM/ddm.onnx'
 ###################################################################    # load the data###################################################################
     if binscheme == 'median':
         if signalname == 'recent':
@@ -198,6 +201,7 @@ if __name__ == '__main__':
         # define the model
         if tstrat=='norandom':
             model= hssm.HSSM(
+                loglik=onnx_file,
                 loglik_kind = "approx_differentiable",
                 data=data,
                 prior_settings="safe",
@@ -224,6 +228,7 @@ if __name__ == '__main__':
             )
         else:
             model= hssm.HSSM(
+                loglik=onnx_file,
                 loglik_kind = "approx_differentiable",
                 data=data,
                 prior_settings="safe",
@@ -451,6 +456,7 @@ if __name__ == '__main__':
         # define the model
         if tstrat=='norandom':
             model= hssm.HSSM(
+                loglik=onnx_file,
                 loglik_kind = "approx_differentiable",
                 data=data,
                 prior_settings="safe",
@@ -477,6 +483,7 @@ if __name__ == '__main__':
             ) 
         else:
             model= hssm.HSSM(
+                loglik=onnx_file,
                 loglik_kind = "approx_differentiable",
                 data=data,
                 prior_settings="safe",
